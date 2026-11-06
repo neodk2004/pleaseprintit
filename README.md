@@ -27,6 +27,7 @@
 <p align="center">
   <a href="#so-läufts-ab">So läuft's ab</a> ·
   <a href="#funktionen">Funktionen</a> ·
+  <a href="#passt-pleaseprintit-zu-dir">Passt es?</a> ·
   <a href="#starten">Starten</a> ·
   <a href="#alternative-mit-dockhand">Dockhand</a> ·
   <a href="#daten-und-sicherung">Sicherung</a> ·
@@ -77,6 +78,12 @@ flowchart LR
 - 📄 **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
 - 💾 **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
 - 🔒 **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System.
+
+## Passt PleasePrintit zu dir?
+
+PleasePrintit ist bewusst klein: **ein Drucker, ein Admin, ein privater Freundeskreis.** Konten entstehen nur über Einladungslinks, es gibt keine Telemetrie, und die App besteht aus wenigen Python-Dateien mit SQLite, die man an einem Abend durchgelesen hat.
+
+Wer **mehrere Drucker oder eine kleine Druckfarm** verwaltet und Funktionen wie automatische Druckerzuteilung, faire Warteschlange über mehrere Einreicher, SSO oder Cloud-Speicher braucht, ist mit [STL Quest](https://github.com/richardsolomou/stl.quest) besser bedient.
 
 ## Starten
 
@@ -174,6 +181,7 @@ Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probes
 
 - 🐞 **Fehler gefunden oder eine Idee?** Einfach ein [Issue](https://github.com/neodk2004/pleaseprintit/issues) aufmachen, gern auf Deutsch oder Englisch.
 - 🔐 **Sicherheitslücke?** Bitte nicht öffentlich, sondern wie in [SECURITY.md](SECURITY.md) beschrieben melden.
+- 🤖 **Mit KI-Agenten am Code arbeiten?** Aufbau, Befehle und Regeln stehen in [AGENTS.md](AGENTS.md).
 - ⭐ **Gefällt dir das Projekt?** Ein Stern hilft anderen, es zu finden. Wer mag, gibt auf [Ko-fi](https://ko-fi.com/E8R028M0YO) einen Kaffee aus.
 
 ## Lizenz

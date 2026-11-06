@@ -27,6 +27,7 @@
 <p align="center">
   <a href="#how-it-works">How it works</a> ·
   <a href="#features">Features</a> ·
+  <a href="#is-pleaseprintit-right-for-you">Right for you?</a> ·
   <a href="#getting-started">Getting started</a> ·
   <a href="#alternative-with-dockhand">Dockhand</a> ·
   <a href="#data-and-backups">Backups</a> ·
@@ -77,6 +78,12 @@ flowchart LR
 - 📄 **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
 - 💾 **Daily backups** with a verification tool, the last 14 are kept.
 - 🔒 **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system.
+
+## Is PleasePrintit right for you?
+
+PleasePrintit is deliberately small: **one printer, one admin, one private circle of friends.** Accounts are created only through invite links, there is no telemetry, and the app is a handful of Python files with SQLite that you can read in an evening.
+
+If you run **several printers or a small print farm** and need things like automatic printer assignment, fair queueing across requesters, SSO or cloud storage, [STL Quest](https://github.com/richardsolomou/stl.quest) is the better fit.
 
 ## Getting started
 
@@ -202,6 +209,7 @@ Every push runs the tests, validates the compose files and test-starts the Docke
 
 - 🐞 **Found a bug or have an idea?** Just open an [issue](https://github.com/neodk2004/pleaseprintit/issues), in English or German.
 - 🔐 **Security issue?** Please don’t report it publicly, follow [SECURITY.md](SECURITY.md) instead.
+- 🤖 **Working on the code with an AI agent?** Layout, commands and conventions are in [AGENTS.md](AGENTS.md).
 - ⭐ **Like the project?** A star helps others find it. If you want, buy me a coffee on [Ko-fi](https://ko-fi.com/E8R028M0YO).
 
 ## License
