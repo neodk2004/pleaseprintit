@@ -24,6 +24,15 @@
   <a href="https://ko-fi.com/E8R028M0YO"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Unterstütze mich auf Ko-fi"></a>
 </p>
 
+<p align="center">
+  <a href="#so-läufts-ab">So läuft's ab</a> ·
+  <a href="#funktionen">Funktionen</a> ·
+  <a href="#starten">Starten</a> ·
+  <a href="#alternative-mit-dockhand">Dockhand</a> ·
+  <a href="#daten-und-sicherung">Sicherung</a> ·
+  <a href="#aktivität">Aktivität</a> ·
+  <a href="#mitmachen">Mitmachen</a>
+</p>
 
 ---
 
@@ -39,18 +48,35 @@ Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst ge
 
 > **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) and deploys with Docker Compose or Dockhand. The user interface is in German. **→ [Full English guide](README.en.md)**
 
+## So läuft's ab
+
+```mermaid
+flowchart LR
+    A["✉️ Einladungslink<br>vom Admin"] --> B["📝 Freund reicht<br>Druckwunsch ein"]
+    B --> C["📥 Eingereicht"]
+    C --> D["🗓️ Geplant"]
+    D --> E["✅ Gedruckt"]
+    C -.-> F["❌ Abgelehnt<br>mit Grund"]
+```
+
+| | Für deine Freunde | Für dich |
+|---|---|---|
+| **1** | Einladungslink öffnen, Name und Passwort wählen | Unter **Freunde** einen Einladungslink erzeugen und verschicken |
+| **2** | **Neuer Auftrag:** Link einfügen oder STL/3MF hochladen, Filament, Farbe und Stückzahl wählen | Die Warteschlange mit Vorschau, Gewicht und Kosten ansehen |
+| **3** | Status verfolgen, auf Wunsch per E-Mail | Auftrag planen, drucken, abhaken |
+
 ## Funktionen
 
-- **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-/3MF-Datei.
-- **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt.
-- **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
-- **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
-- **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
-- **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
-- **Handy-tauglich:** als App auf dem Startbildschirm installierbar (PWA), mit hellem und dunklem Design.
-- **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
-- **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
-- **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System.
+- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-/3MF-Datei.
+- 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt.
+- 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
+- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
+- 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
+- ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
+- 📱 **Handy-tauglich:** als App auf dem Startbildschirm installierbar (PWA), mit hellem und dunklem Design.
+- 📄 **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
+- 💾 **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
+- 🔒 **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System.
 
 ## Starten
 
@@ -117,12 +143,38 @@ docker compose up -d --build
 
 ## Tests
 
+<details>
+<summary>Tests lokal ausführen</summary>
+
 ```sh
 pip install -r requirements.txt
 python test_app.py && python test_models.py && python test_preview.py
 ```
 
+</details>
+
 Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probestart des Docker-Images automatisch über GitHub Actions. Dependabot meldet einmal pro Woche veraltete Abhängigkeiten.
+
+## Aktivität
+
+<p align="center">
+  <a href="https://github.com/neodk2004/pleaseprintit/commits/main"><img src="https://img.shields.io/github/last-commit/neodk2004/pleaseprintit?label=letzter%20Commit&color=e8620f" alt="Letzter Commit"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/graphs/commit-activity"><img src="https://img.shields.io/github/commit-activity/m/neodk2004/pleaseprintit?label=Commits%20pro%20Monat&color=e8620f" alt="Commits pro Monat"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/issues"><img src="https://img.shields.io/github/issues/neodk2004/pleaseprintit?label=offene%20Issues" alt="Offene Issues"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/pulls"><img src="https://img.shields.io/github/issues-pr/neodk2004/pleaseprintit?label=offene%20PRs" alt="Offene Pull Requests"></a>
+  <img src="https://img.shields.io/github/repo-size/neodk2004/pleaseprintit?label=Gr%C3%B6%C3%9Fe" alt="Größe des Repos">
+</p>
+<p align="center">
+  <a href="https://github.com/neodk2004/pleaseprintit/stargazers"><img src="https://img.shields.io/github/stars/neodk2004/pleaseprintit?style=social" alt="GitHub-Sterne"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/watchers"><img src="https://img.shields.io/github/watchers/neodk2004/pleaseprintit?style=social" alt="Beobachter"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/forks"><img src="https://img.shields.io/github/forks/neodk2004/pleaseprintit?style=social" alt="Forks"></a>
+</p>
+
+## Mitmachen
+
+- 🐞 **Fehler gefunden oder eine Idee?** Einfach ein [Issue](https://github.com/neodk2004/pleaseprintit/issues) aufmachen, gern auf Deutsch oder Englisch.
+- 🔐 **Sicherheitslücke?** Bitte nicht öffentlich, sondern wie in [SECURITY.md](SECURITY.md) beschrieben melden.
+- ⭐ **Gefällt dir das Projekt?** Ein Stern hilft anderen, es zu finden. Wer mag, gibt auf [Ko-fi](https://ko-fi.com/E8R028M0YO) einen Kaffee aus.
 
 ## Lizenz
 

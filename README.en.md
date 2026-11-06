@@ -24,6 +24,15 @@
   <a href="https://ko-fi.com/E8R028M0YO"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi"></a>
 </p>
 
+<p align="center">
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#alternative-with-dockhand">Dockhand</a> ·
+  <a href="#data-and-backups">Backups</a> ·
+  <a href="#activity">Activity</a> ·
+  <a href="#contributing">Contributing</a>
+</p>
 
 ---
 
@@ -39,18 +48,35 @@ Built for a private circle of a handful up to about 50 people, self-hosted with 
 </p>
 <p align="center"><sub>Left: the print queue. Right: a request with 3D preview in dark mode. All names and models are demo data.</sub></p>
 
+## How it works
+
+```mermaid
+flowchart LR
+    A["✉️ Invite link<br>from the admin"] --> B["📝 Friend submits<br>a print request"]
+    B --> C["📥 Submitted"]
+    C --> D["🗓️ Planned"]
+    D --> E["✅ Printed"]
+    C -.-> F["❌ Rejected<br>with a reason"]
+```
+
+| | For your friends | For you |
+|---|---|---|
+| **1** | Open the invite link, choose a name and password | Create an invite link under **Freunde** (friends) and send it |
+| **2** | **Neuer Auftrag** (new request): paste a link or upload STL/3MF, pick filament, color and quantity | Review the queue with preview, weight and cost |
+| **3** | Follow the status, optionally by e-mail | Plan, print, mark as done |
+
 ## Features
 
-- **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL/3MF file.
-- **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate.
-- **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
-- **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
-- **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
-- **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
-- **Mobile friendly:** installable on the home screen (PWA), with light and dark theme.
-- **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
-- **Daily backups** with a verification tool, the last 14 are kept.
-- **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system.
+- 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL/3MF file.
+- 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate.
+- 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
+- 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
+- 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
+- ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
+- 📱 **Mobile friendly:** installable on the home screen (PWA), with light and dark theme.
+- 📄 **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
+- 💾 **Daily backups** with a verification tool, the last 14 are kept.
+- 🔒 **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system.
 
 ## Getting started
 
@@ -145,12 +171,38 @@ docker compose up -d --build
 
 ## Tests
 
+<details>
+<summary>Run the tests locally</summary>
+
 ```sh
 pip install -r requirements.txt
 python test_app.py && python test_models.py && python test_preview.py
 ```
 
+</details>
+
 Every push runs the tests, validates the compose files and test-starts the Docker image via GitHub Actions. Dependabot checks for outdated dependencies once a week.
+
+## Activity
+
+<p align="center">
+  <a href="https://github.com/neodk2004/pleaseprintit/commits/main"><img src="https://img.shields.io/github/last-commit/neodk2004/pleaseprintit?color=e8620f" alt="Last commit"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/graphs/commit-activity"><img src="https://img.shields.io/github/commit-activity/m/neodk2004/pleaseprintit?color=e8620f" alt="Commits per month"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/issues"><img src="https://img.shields.io/github/issues/neodk2004/pleaseprintit" alt="Open issues"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/pulls"><img src="https://img.shields.io/github/issues-pr/neodk2004/pleaseprintit" alt="Open pull requests"></a>
+  <img src="https://img.shields.io/github/repo-size/neodk2004/pleaseprintit" alt="Repository size">
+</p>
+<p align="center">
+  <a href="https://github.com/neodk2004/pleaseprintit/stargazers"><img src="https://img.shields.io/github/stars/neodk2004/pleaseprintit?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/watchers"><img src="https://img.shields.io/github/watchers/neodk2004/pleaseprintit?style=social" alt="Watchers"></a>
+  <a href="https://github.com/neodk2004/pleaseprintit/forks"><img src="https://img.shields.io/github/forks/neodk2004/pleaseprintit?style=social" alt="Forks"></a>
+</p>
+
+## Contributing
+
+- 🐞 **Found a bug or have an idea?** Just open an [issue](https://github.com/neodk2004/pleaseprintit/issues), in English or German.
+- 🔐 **Security issue?** Please don’t report it publicly, follow [SECURITY.md](SECURITY.md) instead.
+- ⭐ **Like the project?** A star helps others find it. If you want, buy me a coffee on [Ko-fi](https://ko-fi.com/E8R028M0YO).
 
 ## License
 
