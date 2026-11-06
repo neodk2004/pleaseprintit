@@ -20,6 +20,10 @@
   <img src="https://img.shields.io/badge/UI-German-e8620f" alt="UI language: German">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT"></a>
 </p>
+<p align="center">
+  <a href="https://ko-fi.com/E8R028M0YO"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi"></a>
+</p>
+
 
 ---
 

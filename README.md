@@ -20,6 +20,10 @@
   <img src="https://img.shields.io/badge/Sprache-Deutsch-e8620f" alt="Deutsch">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-MIT-green" alt="Lizenz: MIT"></a>
 </p>
+<p align="center">
+  <a href="https://ko-fi.com/E8R028M0YO"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Unterstütze mich auf Ko-fi"></a>
+</p>
+
 
 ---
 
