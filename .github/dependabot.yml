@@ -1,0 +1,12 @@
+# Meldet veraltete oder unsichere Abhängigkeiten als Pull Request (einmal pro Woche).
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: docker
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}

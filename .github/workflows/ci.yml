@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python test_app.py
+      - run: python test_models.py
+      - run: python test_preview.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compose-Dateien prüfen
+        env:
+          ADMIN_PASSWORD: ci
+          SECRET_KEY: ci
+        run: |
+          cp .env.example .env
+          docker compose -f compose.yaml config -q
+          docker compose -f compose.dockhand.yaml config -q
+      - name: Image bauen und starten
+        run: |
+          docker build -t pleaseprintit-app .
+          docker run -d --name app -p 8080:8000 -e ADMIN_PASSWORD=ci -e SECRET_KEY=ci pleaseprintit-app
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:8080/ && exit 0; sleep 1; done
+          docker logs app; exit 1

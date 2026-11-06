@@ -1,13 +1,48 @@
-# PleasePrintit
+<p align="center">
+  <img src="static/logo.svg" alt="PleasePrintit-Logo" width="112">
+</p>
 
-Kleine Druck-Werkstatt für den eigenen 3D-Drucker: Freunde reichen Druckwünsche ein (Link zu Printables, MakerWorld, Thingiverse oder eine STL-/3MF-Datei), du siehst eine Vorschau und arbeitest die Aufträge sortiert ab.
+<h1 align="center">PleasePrintit</h1>
+
+<p align="center">
+  <b>Die kleine Druck-Werkstatt für deinen 3D-Drucker.</b><br>
+  Freunde reichen Druckwünsche ein, du arbeitest sie sortiert ab. Schluss mit Links im Chat-Verlauf.
+</p>
+
+<p align="center">
+  <a href="https://github.com/neodk2004/pleaseprintit/actions/workflows/ci.yml"><img src="https://github.com/neodk2004/pleaseprintit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white" alt="Python 3.13">
+  <img src="https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white" alt="Flask 3.1">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
+  <img src="https://img.shields.io/badge/Dockhand-bereit-e8620f" alt="Dockhand bereit">
+  <img src="https://img.shields.io/badge/Sprache-Deutsch-e8620f" alt="Deutsch">
+</p>
+
+---
+
+Wer einen 3D-Drucker hat, kennt das: „Kannst du mir das mal drucken?“, dazu ein Link, irgendwo zwischen Urlaubsfotos und Sprachnachrichten. **PleasePrintit** sammelt diese Wünsche an einem Ort. Freunde melden sich über einen persönlichen Einladungslink an, reichen Modelle mit Filament, Farbe und Stückzahl ein und sehen jederzeit, wie weit ihr Auftrag ist. Du bekommst eine aufgeräumte Liste mit Vorschau und arbeitest sie in Ruhe ab.
+
+Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst gehostet mit Docker, ohne Cloud und ohne Tracking.
+
+## Funktionen
+
+- **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-/3MF-Datei.
+- **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt.
+- **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
+- **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
+- **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
+- **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
+- **Handy-tauglich:** als App auf dem Startbildschirm installierbar (PWA), mit hellem und dunklem Design.
+- **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
+- **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
+- **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System.
 
 ## Starten
 
 Du brauchst Docker mit Compose.
 
 ```sh
-git clone <repo-url> pleaseprintit
+git clone https://github.com/neodk2004/pleaseprintit.git
 cd pleaseprintit
 cp .env.example .env        # dann ADMIN_PASSWORD und SECRET_KEY ändern
 mkdir -p data backups
@@ -21,7 +56,7 @@ Danach läuft die App unter `http://<dein-rechner>:8080`. Melde dich mit dem Nam
 
 Ist [Dockhand](https://dockhand.pro) im Einsatz, braucht es kein Terminal:
 
-1. **Zugang für GitHub:** Auf GitHub unter *Settings → Developer settings → Fine-grained tokens* einen Token anlegen. Nur dieses Repo freigeben, Recht *Contents: Read-only*. In Dockhand beim Repo unter *Zugangsdaten* hinterlegen (Benutzer = GitHub-Name, Passwort = Token).
+1. **Zugang für GitHub (nur bei privatem Repo):** Auf GitHub unter *Settings → Developer settings → Fine-grained tokens* einen Token anlegen. Nur dieses Repo freigeben, Recht *Contents: Read-only*. In Dockhand beim Repo unter *Zugangsdaten* hinterlegen (Benutzer = GitHub-Name, Passwort = Token).
 2. **Stack anlegen:** *Stacks → Aus Git*, Repo-Adresse eintragen, Branch `main`, Compose-Datei `compose.dockhand.yaml`, **„Images beim Bereitstellen bauen“ einschalten** (englisch: *Build on deploy*).
 3. **Stack-Variablen:**
 
@@ -68,3 +103,5 @@ docker compose up -d --build
 pip install -r requirements.txt
 python test_app.py && python test_models.py && python test_preview.py
 ```
+
+Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probestart des Docker-Images automatisch über GitHub Actions. Dependabot meldet einmal pro Woche veraltete Abhängigkeiten.
