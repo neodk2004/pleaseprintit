@@ -1,0 +1,50 @@
+name: 💡 Neue Funktion vorschlagen / Feature request
+description: Eine Idee, die PleasePrintit besser machen würde. / An idea to make PleasePrintit better.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Schön, dass du eine Idee hast! Gern auf Deutsch oder Englisch. / Great that you have an idea! German or English is fine.
+        PleasePrintit soll klein und einfach bleiben, für den privaten Kreis bis etwa 50 Leute. / PleasePrintit aims to stay small and simple, for private circles of up to about 50 people.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem löst es? / What problem does it solve?
+      description: Was nervt heute oder fehlt dir? / What bothers you today or what's missing?
+      placeholder: z. B. „Meine Freunde fragen trotzdem im Chat nach, wann ihr Druck fertig ist.“
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Deine Idee / Your idea
+      description: Wie könnte es aussehen? / How could it work?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: who
+    attributes:
+      label: Für wen? / Who is it for?
+      options:
+        - Admin (wer druckt / the one printing)
+        - Freunde (wer Wünsche einreicht / people submitting requests)
+        - Beide / Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen / Alternatives (optional)
+      description: Wie behilfst du dich bisher? Andere Lösungen, die du dir überlegt hast? / How do you work around it today? Other options you considered?
+
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Mithelfen / Contributing
+      options:
+        - label: Ich würde beim Umsetzen oder Testen helfen. / I'd help build or test it.

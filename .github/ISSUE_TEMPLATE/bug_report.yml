@@ -1,0 +1,66 @@
+name: 🐞 Fehler melden / Bug report
+description: Etwas funktioniert nicht wie erwartet. / Something doesn't work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Melden! Gern auf Deutsch oder Englisch. / Thanks for reporting! German or English is fine.
+        **Bitte keine Passwörter, Tokens oder privaten Adressen posten.** / **Please don't post passwords, tokens or private addresses.**
+        Sicherheitslücken bitte nicht hier, sondern wie in [SECURITY.md](https://github.com/neodk2004/pleaseprintit/blob/main/SECURITY.md) melden. / Report security issues via SECURITY.md, not here.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Was ist passiert? / What happened?
+      description: Kurz beschreiben, was nicht klappt. / Briefly describe the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Wie kann man es nachstellen? / Steps to reproduce
+      placeholder: |
+        1. Als Freund anmelden / Log in as a friend
+        2. „Neuer Auftrag“ öffnen / Open "Neuer Auftrag"
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Was hast du erwartet? / What did you expect?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation
+      options:
+        - Docker Compose
+        - Dockhand
+        - Andere / Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / Commit
+      description: z. B. Datum des letzten `git pull` oder Commit-Hash. / e.g. date of last `git pull` or commit hash.
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser und Gerät / Browser and device
+      placeholder: z. B. Firefox 140 auf Windows, Safari auf iPhone
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (optional)
+      description: Ausgabe von `docker compose logs app --tail 50`. Vorher Geheimnisse entfernen! / Output of `docker compose logs app --tail 50`. Remove secrets first!
+      render: text

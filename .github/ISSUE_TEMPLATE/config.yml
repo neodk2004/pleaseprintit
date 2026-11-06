@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🔐 Sicherheitslücke melden / Report a security issue
+    url: https://github.com/neodk2004/pleaseprintit/security/advisories/new
+    about: Bitte vertraulich melden, nicht als öffentliches Issue. / Please report privately, not as a public issue.
