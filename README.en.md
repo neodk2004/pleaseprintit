@@ -1,0 +1,150 @@
+<p align="center">
+  <img src="static/logo.svg" alt="PleasePrintit logo" width="112">
+</p>
+
+<h1 align="center">PleasePrintit</h1>
+
+<p align="center"><a href="README.md">Deutsch</a> · <b>English</b></p>
+
+<p align="center">
+  <b>The little print shop for your 3D printer.</b><br>
+  Friends submit print requests, you work through them in order. No more links buried in chat history.
+</p>
+
+<p align="center">
+  <a href="https://github.com/neodk2004/pleaseprintit/actions/workflows/ci.yml"><img src="https://github.com/neodk2004/pleaseprintit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white" alt="Python 3.13">
+  <img src="https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white" alt="Flask 3.1">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
+  <img src="https://img.shields.io/badge/Dockhand-ready-e8620f" alt="Dockhand ready">
+  <img src="https://img.shields.io/badge/UI-German-e8620f" alt="UI language: German">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT"></a>
+</p>
+
+---
+
+If you own a 3D printer, you know the drill: “Could you print this for me?”, plus a link, somewhere between holiday photos and voice messages. **PleasePrintit** collects those requests in one place. Friends sign up through a personal invite link, submit models with filament, color and quantity, and can check the progress of their request at any time. You get a tidy queue with previews and work through it at your own pace.
+
+Built for a private circle of a handful up to about 50 people, self-hosted with Docker, no cloud, no tracking.
+
+> **Note:** The app’s user interface is currently **German only**. Menu names in this guide are given in German with the English meaning in brackets.
+
+<p align="center">
+  <img src="docs/auftraege.png" alt="Print queue with status, filament, weight and material cost" width="49%">
+  <img src="docs/auftrag-3d.png" alt="Print request with rotatable 3D preview, progress and cost estimate in dark mode" width="49%">
+</p>
+<p align="center"><sub>Left: the print queue. Right: a request with 3D preview in dark mode. All names and models are demo data.</sub></p>
+
+## Features
+
+- **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL/3MF file.
+- **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate.
+- **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
+- **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
+- **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
+- **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
+- **Mobile friendly:** installable on the home screen (PWA), with light and dark theme.
+- **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
+- **Daily backups** with a verification tool, the last 14 are kept.
+- **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system.
+
+## Getting started
+
+You need Docker with Compose.
+
+```sh
+git clone https://github.com/neodk2004/pleaseprintit.git
+cd pleaseprintit
+cp .env.example .env        # then change ADMIN_PASSWORD and SECRET_KEY
+mkdir -p data backups
+sudo chown 1000:1000 data backups   # Linux only: the app runs as user 1000 inside the container
+docker compose up -d --build
+```
+
+The app is then available at `http://<your-host>:8080` (different port: set `PORT` in `.env`). Log in with the name **admin** and your `ADMIN_PASSWORD`.
+
+Generate random values for the secrets with:
+
+```sh
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+### Configuration (`.env`)
+
+| Variable | Required | Description |
+|---|---|---|
+| `ADMIN_PASSWORD` | yes | password for the `admin` account |
+| `SECRET_KEY` | yes | long random string used to sign sessions |
+| `PORT` | no | port on the host, default `8080` |
+| `PUBLIC_URL` | no | public HTTPS address behind a reverse proxy (for invite links and secure cookies) |
+| `TZ` | no | time zone, default `Europe/Berlin` |
+| `SMTP_HOST` | no | mail server; leave empty to disable e-mails |
+| `SMTP_PORT` | no | default `587` (or `465` with `ssl`) |
+| `SMTP_SECURITY` | no | `starttls` (default), `ssl` or `none` |
+| `SMTP_USER`, `SMTP_PASSWORD` | no | login for the mail server (use an app password) |
+| `SMTP_FROM` | no | sender, e.g. `PleasePrintit <print@example.org>` |
+
+## Alternative: with Dockhand
+
+If you use [Dockhand](https://dockhand.pro), no terminal is needed:
+
+1. **GitHub access (private repo only):** on GitHub go to *Settings → Developer settings → Fine-grained tokens* and create a token for this repository only, with *Contents: Read-only*. In Dockhand, add it as the repository’s *Credential* (username = GitHub name, password = token).
+2. **Create the stack:** *Stacks → From Git*, enter the repository URL, branch `main`, compose file `compose.dockhand.yaml`, and **enable “Build images on deploy”**.
+3. **Stack variables:**
+
+   | Variable | Required | Note |
+   |---|---|---|
+   | `ADMIN_PASSWORD` | yes | mark as *secret* |
+   | `SECRET_KEY` | yes | long random string, mark as *secret* |
+   | `PORT` | no | default `8080` |
+   | `PUBLIC_URL` | no | only behind an HTTPS proxy |
+   | `TZ` | no | default `Europe/Berlin` |
+   | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | no | for status e-mails, mark the password as *secret* |
+
+4. **Deploy.** The app is then available at `http://<your-host>:8080` or on the `PORT` you chose.
+
+With this variant, data and backups live in Docker volumes (`<stack>_data`, `<stack>_backups`) instead of folders, so no `chown` is needed. Dockhand pulls updates via sync or webhook. **Do not delete the volumes when removing the stack**, or your data is gone.
+
+## First steps as admin
+
+1. Under **Einstellungen** (settings), enter your build plate size, your filaments and colors, and the legal notice.
+2. Under **Freunde** (friends), click **Einladungslink erzeugen** (create invite link) for each friend and send them the link. A link is valid for 7 days and can be used once.
+
+## How it works for your friends
+
+1. Open the personal invite link and choose a name and a password (at least 8 characters).
+2. Click **Neuer Auftrag** (new request), paste a model link **or** upload an STL/3MF file, choose filament and color (“Random” = you decide), set the quantity, done.
+3. Follow the status: **Eingereicht** (submitted) → **Geplant** (planned) → **Gedruckt** (printed), or **Abgelehnt** (rejected) with a reason.
+4. Optional: add an e-mail address under **Profil** (profile) to get status updates and to be able to reset a forgotten password.
+
+## Making it reachable from the internet
+
+Put the app behind a reverse proxy with HTTPS, e.g. Nginx Proxy Manager, Caddy or Traefik, and set the address as `PUBLIC_URL` in `.env`. Once the proxy is in place, you can restrict the port in `compose.yaml` to `127.0.0.1:${PORT:-8080}:8000`.
+
+## Data and backups
+
+- All data lives in `./data` (database, preview images, 3D files).
+- The `backup` container writes a daily backup to `./backups`, the last 14 are kept.
+- Back up now: `docker compose run --rm backup python backup.py --once`
+- Verify a backup: `docker compose run --rm backup python backup.py --check /backups/<file>.tar.gz`
+- Restore: stop the app, extract the archive into `./data`, start the app.
+
+## Updating
+
+```sh
+git pull
+docker compose up -d --build
+```
+
+## Tests
+
+```sh
+pip install -r requirements.txt
+python test_app.py && python test_models.py && python test_preview.py
+```
+
+Every push runs the tests, validates the compose files and test-starts the Docker image via GitHub Actions. Dependabot checks for outdated dependencies once a week.
+
+## License
+
+[MIT](LICENSE): free to use, modify and share, as long as the license notice is kept.

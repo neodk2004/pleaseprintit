@@ -4,6 +4,8 @@
 
 <h1 align="center">PleasePrintit</h1>
 
+<p align="center"><b>Deutsch</b> · <a href="README.en.md">English</a></p>
+
 <p align="center">
   <b>Die kleine Druck-Werkstatt für deinen 3D-Drucker.</b><br>
   Freunde reichen Druckwünsche ein, du arbeitest sie sortiert ab. Schluss mit Links im Chat-Verlauf.
@@ -31,7 +33,7 @@ Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst ge
 </p>
 <p align="center"><sub>Links: die Warteschlange der Werkstatt. Rechts: ein Auftrag mit 3D-Vorschau im dunklen Design. Alle Namen und Modelle sind Demodaten.</sub></p>
 
-> **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) and deploys with Docker Compose or Dockhand. The user interface is in German.
+> **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) and deploys with Docker Compose or Dockhand. The user interface is in German. **→ [Full English guide](README.en.md)**
 
 ## Funktionen
 
@@ -66,7 +68,7 @@ Danach läuft die App unter `http://<dein-rechner>:8080` (anderer Port: `PORT` i
 Ist [Dockhand](https://dockhand.pro) im Einsatz, braucht es kein Terminal:
 
 1. **Zugang für GitHub (nur bei privatem Repo):** Auf GitHub unter *Settings → Developer settings → Fine-grained tokens* einen Token anlegen. Nur dieses Repo freigeben, Recht *Contents: Read-only*. In Dockhand beim Repo unter *Zugangsdaten* hinterlegen (Benutzer = GitHub-Name, Passwort = Token).
-2. **Stack anlegen:** *Stacks → Aus Git*, Repo-Adresse eintragen, Branch `main`, Compose-Datei `compose.dockhand.yaml`, **„Images beim Bereitstellen bauen“ einschalten** (englisch: *Build on deploy*).
+2. **Stack anlegen:** *Stacks → Aus Git*, Repo-Adresse eintragen, Branch `main`, Compose-Datei `compose.dockhand.yaml`, **„Images beim Bereitstellen bauen“ einschalten**.
 3. **Stack-Variablen:**
 
    | Variable | Pflicht | Hinweis |
@@ -85,7 +87,7 @@ Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>
 ## Erste Schritte als Admin
 
 1. Unter **Einstellungen** dein Druckbett, deine Filamente und das Impressum eintragen.
-2. Unter **Nutzer** für jeden Freund eine **Einladung** erstellen und ihm den Link schicken. Ein Link gilt 7 Tage und nur einmal.
+2. Unter **Freunde** für jeden Freund auf **Einladungslink erzeugen** klicken und ihm den Link schicken. Ein Link gilt 7 Tage und nur einmal.
 
 ## Von außen erreichbar machen
 
