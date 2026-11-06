@@ -15,7 +15,7 @@ services:
     build: .
     image: pleaseprintit-app
     ports:
-      - "8080:8000"               # nur lokal: "127.0.0.1:8080:8000"
+      - "${PORT:-8080}:8000"      # nur lokal: "127.0.0.1:${PORT:-8080}:8000"
     env_file: .env
     environment:
       TZ: ${TZ:-Europe/Berlin}

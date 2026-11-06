@@ -59,7 +59,7 @@ sudo chown 1000:1000 data backups   # nur Linux: die App läuft im Container als
 docker compose up -d --build
 ```
 
-Danach läuft die App unter `http://<dein-rechner>:8080`. Melde dich mit dem Namen **admin** und deinem `ADMIN_PASSWORD` an.
+Danach läuft die App unter `http://<dein-rechner>:8080` (anderer Port: `PORT` in der `.env`). Melde dich mit dem Namen **admin** und deinem `ADMIN_PASSWORD` an.
 
 ## Alternative: mit Dockhand
 
@@ -78,7 +78,7 @@ Ist [Dockhand](https://dockhand.pro) im Einsatz, braucht es kein Terminal:
    | `TZ` | nein | Standard `Europe/Berlin` |
    | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | nein | für Status-Mails, Passwort als *Secret* |
 
-4. **Deploy.** Die App läuft dann unter `http://<dein-rechner>:8080`.
+4. **Deploy.** Die App läuft dann unter `http://<dein-rechner>:8080` bzw. unter dem gewählten `PORT`.
 
 Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>_data`, `<stack>_backups`) statt in Ordnern, `chown` ist nicht nötig. Updates holt Dockhand per Sync oder Webhook. **Volumes beim Löschen des Stacks nicht mitlöschen**, sonst sind die Daten weg.
 
@@ -89,7 +89,7 @@ Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>
 
 ## Von außen erreichbar machen
 
-Stell die App hinter einen Reverse Proxy mit HTTPS, z. B. Nginx Proxy Manager, Caddy oder Traefik, und trag die Adresse als `PUBLIC_URL` in die `.env` ein. Ist der Proxy da, kann der Port in `compose.yaml` auf `127.0.0.1:8080:8000` beschränkt werden.
+Stell die App hinter einen Reverse Proxy mit HTTPS, z. B. Nginx Proxy Manager, Caddy oder Traefik, und trag die Adresse als `PUBLIC_URL` in die `.env` ein. Ist der Proxy da, kann der Port in `compose.yaml` auf `127.0.0.1:${PORT:-8080}:8000` beschränkt werden.
 
 ## Daten und Sicherung
 
