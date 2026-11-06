@@ -86,7 +86,10 @@ Ist [Dockhand](https://dockhand.pro) im Einsatz, braucht es kein Terminal:
 
 4. **Deploy.** Die App läuft dann unter `http://<dein-rechner>:8080` bzw. unter dem gewählten `PORT`.
 
-Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>_data`, `<stack>_backups`) statt in Ordnern, `chown` ist nicht nötig. Updates holt Dockhand per Sync oder Webhook. **Volumes beim Löschen des Stacks nicht mitlöschen**, sonst sind die Daten weg.
+Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>_data`, `<stack>_backups`) statt in Ordnern, `chown` ist nicht nötig. Updates holt Dockhand per Sync oder Webhook.
+
+> [!CAUTION]
+> **Volumes beim Löschen des Stacks nicht mitlöschen, sonst sind die Daten weg.**
 
 ## Erste Schritte als Admin
 

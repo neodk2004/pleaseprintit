@@ -107,7 +107,10 @@ If you use [Dockhand](https://dockhand.pro), no terminal is needed:
 
 4. **Deploy.** The app is then available at `http://<your-host>:8080` or on the `PORT` you chose.
 
-With this variant, data and backups live in Docker volumes (`<stack>_data`, `<stack>_backups`) instead of folders, so no `chown` is needed. Dockhand pulls updates via sync or webhook. **Do not delete the volumes when removing the stack**, or your data is gone.
+With this variant, data and backups live in Docker volumes (`<stack>_data`, `<stack>_backups`) instead of folders, so no `chown` is needed. Dockhand pulls updates via sync or webhook.
+
+> [!CAUTION]
+> **Do not delete the volumes when removing the stack, or your data is gone.**
 
 ## First steps as admin
 
