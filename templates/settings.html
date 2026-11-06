@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}Einstellungen · {% endblock %}
+{% block body %}
+<div class="pagehead rise"><div><p class="eyebrow">Werkstatt · Einstellungen</p><h1>Drucker &amp; Material</h1></div></div>
+
+<div class="settings-grid">
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('ruler') }} Druckbereich</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">Größtes Modell, das dein Drucker schafft. Freunde können größere Dateien nicht einreichen (Drehen wird berücksichtigt). Leer = keine Grenze.</p>
+  <form class="row" method="post" action="{{ url_for('save_bed') }}">
+    {% for axis, v in [('x', bed[0]), ('y', bed[1]), ('z', bed[2])] %}
+    <label>{{ axis|upper }} <span class="unit"><input type="number" name="bed_{{ axis }}" min="0" max="10000" step="0.1"
+      value="{{ (v|round(1)|string).removesuffix('.0') if v else '' }}" inputmode="decimal" placeholder="–"> mm</span></label>
+    {% endfor %}
+    <button class="btn btn-primary">Speichern</button>
+  </form>
+</section>
+
+<section class="card rise" style="--i:2">
+  <h3>{{ icon('coin') }} Kostenschätzung</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">Gewicht = Modellvolumen × Dichte × Materialanteil. Ein Druck ist nicht massiv: Wände + Füllung ergeben meist 30–60 % eines Vollkörpers. Vergleiche ab und zu mit deinem Slicer und stell den Wert nach.</p>
+  <form class="row" method="post" action="{{ url_for('save_bed') }}">
+    <label style="max-width:14rem">Materialanteil <span class="unit"><input type="number" name="fill" min="1" max="100" step="1"
+      value="{{ fill|round|int }}" inputmode="numeric"> %</span></label>
+    <button class="btn btn-primary">Speichern</button>
+  </form>
+</section>
+
+<section class="card rise" style="--i:3">
+  <h3>{{ icon('spool') }} Filamente und Farben</h3>
+  <p class="hint">Freunde wählen daraus beim Einreichen. Jedes Filament hat automatisch „{{ random }}“: Dann entscheidest du die Farbe.</p>
+
+  {% for f, colors in options %}
+  <div class="filament">
+    <div class="filament-head">
+      <b>{{ f.name }}</b>
+      <form method="post" action="{{ url_for('delete_filament', fid=f.id) }}"><button class="btn-link danger" aria-label="Filament {{ f.name }} löschen">{{ icon('trash') }} Filament löschen</button></form>
+    </div>
+    <form class="row" method="post" action="{{ url_for('save_filament_price', fid=f.id) }}">
+      <label>Preis <span class="unit"><input type="number" name="price_kg" min="0" max="1000" step="0.01" value="{{ f.price_kg or '' }}"
+        placeholder="z. B. 20" inputmode="decimal"> €/kg</span></label>
+      <label>Dichte <span class="unit"><input type="number" name="density" min="0" max="10" step="0.01" value="{{ f.density or '' }}"
+        placeholder="1,24" inputmode="decimal"> g/cm³</span></label>
+      <button class="btn">Speichern</button>
+    </form>
+    <ul class="chips">
+      {% for value, name, hex in colors %}
+      <li class="chip">{% if hex %}<span class="swatch" style="background:{{ hex }}"></span>{% else %}<span class="swatch random"></span>{% endif %}{{ name }}
+        {% if hex %}<form method="post" action="{{ url_for('delete_color', cid=value[2:]) }}"><button class="btn-link" aria-label="Farbe {{ name }} löschen">×</button></form>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    <form class="row" method="post" action="{{ url_for('add_color', fid=f.id) }}">
+      <input type="color" name="hex" value="#e8620f" aria-label="Farbe">
+      <span class="grow"><input name="name" required maxlength="40" placeholder="Farbname, z. B. Schwarz" aria-label="Farbname"></span>
+      <button class="btn">{{ icon('plus') }}Farbe</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="muted">Noch keine Filamente. Leg unten das erste an, z. B. „PLA“.</p>
+  {% endfor %}
+
+  <form class="row" method="post" action="{{ url_for('add_filament') }}" style="border-top:1px solid var(--line);padding-top:var(--s4);margin-top:var(--s2)">
+    <span class="grow"><input name="name" required maxlength="40" placeholder="Neues Filament, z. B. PETG" aria-label="Filament-Name"></span>
+    <button class="btn btn-primary">{{ icon('plus') }}Filament</button>
+  </form>
+</section>
+
+<section class="card rise" id="rechtliches" style="--i:4">
+  <h3>{{ icon('info') }} Impressum &amp; Datenschutz</h3>
+  <p class="hint" style="margin-bottom:var(--s4)">Öffentlich, verlinkt auf der Anmeldeseite und unten auf jeder Seite. Name, Anschrift und E-Mail stehen verschleiert im HTML und werden erst im Browser zusammengesetzt – Adress- und Mail-Sammler finden sie so nicht.</p>
+  <form method="post" action="{{ url_for('save_legal') }}">
+    <p class="label-t">Impressum</p>
+    <div class="imp-grid">
+      {% for k, name, required in imp_fields %}<label{% if k in ('imp_name', 'imp_street') %} class="wide"{% endif %}>{{ name }}{% if not required %} <small>(optional)</small>{% endif %}
+        <input name="{{ k }}" value="{{ imp[k] }}" maxlength="200"{% if k == 'imp_email' %} type="email" autocomplete="email"{% endif %}
+          placeholder="{{ {'imp_name': 'Vorname Nachname', 'imp_street': 'Musterweg 1', 'imp_city': '12345 Musterstadt', 'imp_email': 'name@example.de', 'imp_phone': '0123 456789'}[k] }}"></label>{% endfor %}
+    </div>
+    {% if imp.imp_name %}<p class="hint"><a href="{{ url_for('legal', page='impressum') }}" target="_blank">Impressum ansehen {{ icon('external') }}</a></p>{% endif %}
+
+    <div class="field" style="margin-top:var(--s5)"><label for="lg-ds">Datenschutz</label>
+      <textarea id="lg-ds" name="datenschutz" rows="14" maxlength="10000">{{ datenschutz or template }}</textarea>
+      {% if not datenschutz %}<p class="hint">Noch nicht gespeichert – oben steht die Vorlage. Lies sie einmal durch, pass sie an und speichere.</p>{% else %}
+      <p class="hint"><a href="{{ url_for('legal', page='datenschutz') }}" target="_blank">Datenschutz ansehen {{ icon('external') }}</a></p>{% endif %}</div>
+    <button class="btn btn-primary">Speichern</button>
+  </form>
+</section>
+</div>
+{% endblock %}

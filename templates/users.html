@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}Freunde · {% endblock %}
+{% block body %}
+<div class="pagehead rise">
+  <div><p class="eyebrow">Werkstatt · Zugänge</p><h1>Freunde<span class="count">{{ '%02d'|format(people|length) }}</span></h1></div>
+  <form method="post" action="{{ url_for('create_invite') }}"><button class="btn btn-primary">{{ icon('plus') }}Einladungslink erzeugen</button></form>
+</div>
+
+{% if invites %}
+<section class="card rise" style="--i:1">
+  <h3>Offene Einladungen</h3>
+  <p class="hint">Jeder Link funktioniert einmal und gilt {{ days }} Tage. Kopieren und z. B. per WhatsApp schicken.</p>
+  <ul class="invites">
+    {% for i in invites %}<li><input readonly value="{{ public('invite', token=i.token) }}" aria-label="Einladungslink vom {{ i.day }}"><small class="mono">{{ i.day }}</small></li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if resets %}
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('rotate') }} Offene Passwort-Links</h3>
+  <p class="hint">Gilt einmal und {{ reset_hours }} Stunden. Schick den Link nur an die Person, der er gehört.</p>
+  <ul class="invites">
+    {% for r in resets %}<li><b style="min-width:6rem">{{ r.name }}</b><input readonly value="{{ public('reset', token=r.token) }}" aria-label="Passwort-Link für {{ r.name }}"><small class="mono">{{ r.at }}</small></li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card rise" style="--i:2">
+  <ul class="people">
+  {% for p in people %}<li class="{{ '' if p.active else 'off' }}">
+    <span class="avatar" aria-hidden="true">{{ p.name[:1]|upper }}</span>
+    <span class="who"><a href="{{ url_for('index', user=p.id) }}">{{ p.name }}</a><br>
+      <small>seit {{ p.created }}{% if p.email %} · {{ icon('mail', 'bekommt Status-Mails') }}{% endif %}{% if not p.active %} · gesperrt{% endif %}</small></span>
+    <span class="stats"><span>{{ p.orders }} Auftr.</span><span>{{ (p.used / 1048576)|round(1) }} MB</span></span>
+    {% if p.active %}<form method="post" action="{{ url_for('create_reset', uid=p.id) }}"><button class="btn btn-sm btn-ghost" title="Link für ein neues Passwort erzeugen">{{ icon('rotate') }}<span class="label-sm">Passwort-Link</span></button></form>{% endif %}
+    <form method="post" action="{{ url_for('toggle_user', uid=p.id) }}"><button class="btn btn-sm">{{ 'Sperren' if p.active else 'Entsperren' }}</button></form>
+  </li>
+  {% else %}<li class="muted">Noch niemand dabei. Erzeuge oben einen Einladungslink.</li>{% endfor %}
+  </ul>
+</section>
+<p class="hint rise" style="--i:3">{{ icon('mail') }} Status-Mails: {{ 'eingerichtet – Freunde mit E-Mail-Adresse werden bei jeder Statusänderung benachrichtigt.' if mail_on else 'aus. Trag einen SMTP-Zugang in die .env ein (siehe BETRIEB.md).' }}</p>
+{% endblock %}

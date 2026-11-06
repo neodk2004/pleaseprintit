@@ -1,0 +1,23 @@
+{% extends "_auth.html" %}
+{% from "_macros.html" import icon with context %}
+{% block form %}
+<p class="eyebrow">Passwort vergessen</p>
+<h2 style="margin:.3rem 0 var(--s4)">Kein Problem.</h2>
+{% if error %}<p class="err" role="alert">{{ icon('info') }}{{ error }}</p>{% endif %}
+{% if sent %}
+<p class="ok-msg" role="status">{{ icon('mail') }}Wenn zu deinen Angaben eine E-Mail-Adresse hinterlegt ist, ist jetzt ein Link unterwegs.</p>
+<p class="muted">Der Link gilt 24 Stunden. Schau auch im Spam-Ordner nach.</p>
+<p class="muted">Keine Mail bekommen? Dann hast du vermutlich keine Adresse im Profil hinterlegt – frag die Werkstatt nach einem Passwort-Link.</p>
+{% elif mail_on %}
+<p class="muted" style="margin-bottom:var(--s4)">Gib deinen Namen oder deine E-Mail-Adresse ein. Hast du im Profil eine Adresse hinterlegt, schicken wir dir einen Link zum Zurücksetzen.</p>
+<form method="post">
+  <div class="field"><label for="who">Name oder E-Mail</label>
+    <input id="who" name="who" required autofocus autocomplete="username" autocapitalize="none" maxlength="200"></div>
+  <button class="btn btn-primary btn-wide">{{ icon('mail') }}Link schicken</button>
+</form>
+<p class="hint" style="margin-top:var(--s4)">Keine E-Mail hinterlegt? Die Werkstatt kann dir einen Passwort-Link schicken.</p>
+{% else %}
+<p class="muted">Frag die Werkstatt – sie schickt dir einen Link, mit dem du ein neues Passwort setzen kannst.</p>
+{% endif %}
+<p style="margin-top:var(--s5)"><a class="back" href="{{ url_for('index') }}">{{ icon('back') }}Zur Anmeldung</a></p>
+{% endblock %}

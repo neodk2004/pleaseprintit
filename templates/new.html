@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, picker with context %}
+{% block title %}Neuer Auftrag · {% endblock %}
+{% block body %}
+<div style="max-width:40rem;margin:0 auto">
+<a class="back" href="{{ url_for('index') }}">{{ icon('back') }}{{ 'Alle Aufträge' if g.admin else 'Meine Aufträge' }}</a>
+<div class="pagehead rise"><div><p class="eyebrow">Neuer Auftrag</p><h1>Was soll gedruckt werden?</h1></div></div>
+
+<form id="order" class="steps" method="post" enctype="multipart/form-data" action="{{ url_for('create_order') }}"
+      data-bed="{{ bed|join(',') }}" data-admin="{{ 1 if g.admin else 0 }}">
+  <section class="card rise" style="--i:1">
+    <div class="step-h"><span class="step-n">1</span><h3>Modell</h3></div>
+    <div class="field"><label for="url">Link zum Modell</label>
+      <input id="url" type="url" name="url" maxlength="2000" placeholder="https://…" inputmode="url" value="{{ request.form.url }}">
+      <p class="hint">Egal woher: Printables, MakerWorld, Thingiverse, aber auch Instagram, TikTok, Etsy, Amazon …</p></div>
+    <div class="or-line">oder</div>
+    <label class="drop dropzone" for="model">{{ icon('upload') }}<b>STL oder 3MF hierher ziehen</b>
+      <small>oder klicken zum Auswählen · bis 100 MB</small>
+      <input id="model" type="file" name="model" accept=".stl,.3mf"></label>
+    <p id="check" class="check" aria-live="polite"></p>
+    {% if bed|select|list %}<p class="hint">Druckbereich der Werkstatt: max. {{ fmt_dims(bed) }} mm{% if not bed|min %} (0 = beliebig){% endif %}</p>{% endif %}
+    <input type="hidden" name="dims_x"><input type="hidden" name="dims_y"><input type="hidden" name="dims_z">
+  </section>
+
+  {% if options %}
+  <section class="card rise" style="--i:2">
+    <div class="step-h"><span class="step-n">2</span><h3>Filament &amp; Farbe</h3></div>
+    <fieldset style="border:0;margin:0;padding:0"><legend class="sr-only">Filament und Farbe</legend>
+    {{ picker(options, request.form.choice) }}
+    </fieldset>
+    <p class="hint">„Random“ heißt: Die Werkstatt sucht die Farbe aus.</p>
+  </section>
+  {% elif g.admin %}
+  <p class="hint">Tipp: Unter <a href="{{ url_for('settings') }}">Einstellungen</a> legst du Filamente und Farben an, aus denen Freunde wählen.</p>
+  {% endif %}
+
+  <section class="card rise" style="--i:3">
+    <div class="step-h"><span class="step-n">{{ 3 if options else 2 }}</span><h3>Stückzahl &amp; Titel</h3></div>
+    <div class="row">
+      <label style="flex:0 0 8rem">Stückzahl <input id="qty" type="number" name="qty" min="1" max="{{ max_qty }}" step="1" inputmode="numeric"
+        value="{{ request.form.qty or 1 }}" required></label>
+      <label class="grow">Titel <small>(optional)</small><input id="title" name="title" maxlength="200"
+        placeholder="sonst aus Link oder Dateiname" value="{{ request.form.title }}"></label>
+    </div>
+    <button type="submit" class="btn btn-primary btn-wide" style="margin-top:var(--s4)">{{ icon('check') }}Auftrag einreichen</button>
+  </section>
+</form>
+</div>
+{% include "_three.html" %}
+<script type="module" src="{{ url_for('static', filename='new.js') }}"></script>
+{% endblock %}

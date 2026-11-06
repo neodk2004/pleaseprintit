@@ -1,0 +1,41 @@
+{% from "_macros.html" import icon, logo with context %}<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>{% block title %}{% endblock %}PleasePrintit</title>
+<meta name="theme-color" content="#f5f3ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-180.png') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+</head><body>
+{% include "_icons.html" %}
+<a class="sr-only" href="#inhalt">Zum Inhalt</a>
+{% if g.admin or g.user %}
+<header class="topbar"><div class="topbar-inner">
+  <a href="{{ url_for('index') }}" aria-label="PleasePrintit – Startseite" class="brand">{{ logo() }}<span>Please<b>Print</b>it</span></a>
+  <nav class="nav" aria-label="Hauptmenü">
+    <span class="role">{{ 'Werkstatt' if g.admin else g.user.name }}</span>
+    {% set ep = request.endpoint %}
+    <a href="{{ url_for('index') }}" aria-label="Aufträge"{% if ep in ('index', 'entry', 'new') %} aria-current="page"{% endif %}>{{ icon('layers') }}<span class="label">Aufträge</span></a>
+    {% if g.admin %}
+    <a href="{{ url_for('users') }}" aria-label="Freunde"{% if ep == 'users' %} aria-current="page"{% endif %}>{{ icon('users') }}<span class="label">Freunde</span></a>
+    <a href="{{ url_for('settings') }}" aria-label="Einstellungen"{% if ep == 'settings' %} aria-current="page"{% endif %}>{{ icon('sliders') }}<span class="label">Einstellungen</span></a>
+    {% else %}
+    <a href="{{ url_for('profile') }}" aria-label="Profil"{% if ep == 'profile' %} aria-current="page"{% endif %}>{{ icon('user') }}<span class="label">Profil</span></a>
+    {% endif %}
+    <button type="button" data-theme-toggle aria-label="Hell/Dunkel umschalten">{{ icon('moon') }}</button>
+    <form method="post" action="{{ url_for('logout') }}"><button aria-label="Abmelden">{{ icon('logout') }}<span class="label">Abmelden</span></button></form>
+  </nav>
+</div></header>
+{% endif %}
+<main id="inhalt" class="{% block main_class %}{% endblock %}">
+{% if error and not self.main_class() %}<p class="err" role="alert">{{ icon('info') }}{{ error }}</p>{% endif %}
+{% block body %}{% endblock %}
+</main>
+{% if not self.main_class() %}
+<footer class="site-foot"><div>{{ logo(18) }}<span>© {{ year }} PleasePrintit</span><span aria-hidden="true">·</span><span>Privat, nur für Freunde</span><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='impressum') }}">Impressum</a><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='datenschutz') }}">Datenschutz</a></div></footer>
+{% endif %}
+</body></html>

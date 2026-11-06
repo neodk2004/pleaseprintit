@@ -1,0 +1,15 @@
+{% extends "_auth.html" %}
+{% from "_macros.html" import icon with context %}
+{% block form %}
+<p class="eyebrow">Neues Passwort</p>
+<h2 style="margin:.3rem 0 var(--s2)">Hallo {{ name }}!</h2>
+<p class="muted" style="margin-bottom:var(--s5)">Wähle ein neues Passwort. Danach bist du direkt angemeldet.</p>
+{% if error %}<p class="err" role="alert">{{ icon('info') }}{{ error }}</p>{% endif %}
+<form method="post">
+  <input type="text" name="username" value="{{ name }}" autocomplete="username" hidden>
+  <div class="field"><label for="pw">Neues Passwort</label>
+    <input id="pw" type="password" name="password" required minlength="8" autocomplete="new-password" autofocus>
+    <p class="hint">mindestens 8 Zeichen</p></div>
+  <button class="btn btn-primary btn-wide">Passwort speichern</button>
+</form>
+{% endblock %}

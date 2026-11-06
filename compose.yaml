@@ -1,0 +1,41 @@
+# Start:  docker compose up -d   → http://<dein-rechner>:8080
+x-hardening: &hardening
+  restart: unless-stopped
+  read_only: true                 # Container kann sein eigenes System nicht verändern
+  tmpfs: [/tmp]
+  cap_drop: [ALL]                 # keine Sonderrechte
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options: {max-size: 10m, max-file: "3"}
+
+services:
+  app:
+    <<: *hardening
+    build: .
+    image: pleaseprintit-app
+    ports:
+      - "8080:8000"               # nur lokal: "127.0.0.1:8080:8000"
+    env_file: .env
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      - ./data:/data
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/')"]
+      interval: 1m
+      timeout: 5s
+
+  backup:                         # tägliche Sicherung nach ./backups, die letzten 14 bleiben
+    <<: *hardening
+    image: pleaseprintit-app
+    command: python backup.py
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      - ./data:/data:ro
+      - ./backups:/backups
+    network_mode: none
+    depends_on: [app]
+    mem_limit: 256m

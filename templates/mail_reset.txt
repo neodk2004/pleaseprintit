@@ -1,0 +1,9 @@
+PleasePrintit – Passwort vergessen
+
+Hallo {{ name }}!
+
+Du hast einen Link für ein neues Passwort angefordert:
+{{ url }}
+
+Der Link gilt {{ hours }} Stunden und nur einmal.
+Du warst das nicht? Dann ignoriere diese Mail einfach – dein Passwort bleibt, wie es ist.

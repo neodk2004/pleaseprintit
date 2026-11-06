@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, logo with context %}
+{% block title %}{{ title }} · {% endblock %}
+{% block body %}
+<div style="max-width:42rem;margin:0 auto">
+{% if not (g.admin or g.user) %}<a class="brand" href="{{ url_for('index') }}" style="margin-bottom:var(--s4)">{{ logo(32) }}<span>Please<b>Print</b>it</span></a>{% endif %}
+<a class="back" href="{{ url_for('index') }}">{{ icon('back') }}{{ 'Zurück' if (g.admin or g.user) else 'Zur Anmeldung' }}</a>
+<div class="pagehead"><div><p class="eyebrow">Rechtliches</p><h1>{{ title }}</h1></div></div>
+{% if page == 'impressum' %}
+<article class="card legal-blocks" id="imp" data-blob="{{ blob }}">
+  {%- if blob %}<p class="muted">Impressum wird geladen … <noscript>Bitte JavaScript aktivieren, um das Impressum zu sehen.</noscript></p>
+  {%- else %}<p class="muted">Noch nicht eingetragen.{% if g.admin %} Trag die Angaben unter <a href="{{ url_for('settings') }}#rechtliches">Einstellungen</a> ein.{% endif %}</p>{% endif -%}
+</article>
+<script src="{{ url_for('static', filename='legal.js') }}" defer></script>
+{% else %}
+<article class="card legal-text">{% if text %}{{ text }}{% else %}<span class="muted">Noch nicht eingetragen.{% if g.admin %} Trag den Text unter <a href="{{ url_for('settings') }}#rechtliches">Einstellungen</a> ein.{% endif %}</span>{% endif %}</article>
+{% endif %}
+</div>
+{% endblock %}

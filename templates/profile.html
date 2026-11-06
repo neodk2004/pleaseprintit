@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}Profil · {% endblock %}
+{% block body %}
+<div style="max-width:36rem;margin:0 auto">
+<div class="pagehead rise"><div><p class="eyebrow">Profil</p><h1>Hallo {{ g.user.name }}</h1></div></div>
+{% if msg %}<p class="ok-msg" role="status">{{ icon('check') }}{{ msg }}</p>{% endif %}
+
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('mail') }} Benachrichtigung per E-Mail</h3>
+  {% if mail_on %}
+  <p class="muted">Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert. Feld leeren = keine Mails mehr.</p>
+  <form method="post">
+    <div class="row"><div class="grow"><label for="email">E-Mail-Adresse</label>
+      <input id="email" type="email" name="email" maxlength="200" autocomplete="email" value="{{ request.form.email if error else (g.user.email or '') }}" placeholder="du@beispiel.de"></div>
+      <button class="btn btn-primary">Speichern</button></div>
+  </form>
+  {% if g.user.email %}<form method="post" action="{{ url_for('test_mail') }}" style="margin-top:var(--s3)">
+    <button class="btn btn-sm">{{ icon('mail') }}Testmail schicken</button></form>{% endif %}
+  {% else %}
+  <p class="muted">Die Werkstatt hat den Mailversand noch nicht eingerichtet.</p>
+  {% endif %}
+</section>
+
+<section class="card rise" style="--i:2">
+  <h3>{{ icon('info') }} Was gespeichert wird</h3>
+  <p class="muted" style="margin:0">Dein Name, dein Passwort (nur verschlüsselt), deine Aufträge mit Dateien und – falls eingetragen – deine E-Mail-Adresse. Nur die Werkstatt sieht deine Aufträge. Die Adresse wird nur für Status-Mails genutzt und nicht weitergegeben.</p>
+</section>
+</div>
+{% endblock %}
