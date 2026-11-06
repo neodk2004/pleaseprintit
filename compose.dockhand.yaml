@@ -1,0 +1,55 @@
+# Für Dockhand (Stacks → aus Git): Compose-Datei = compose.dockhand.yaml, „Build on deploy“ an.
+# Werte kommen aus den Stack-Variablen in Dockhand (ADMIN_PASSWORD und SECRET_KEY als „Secret“).
+# Daten liegen in Docker-Volumes statt in Ordnern, damit sie Git-Syncs unberührt überstehen.
+x-hardening: &hardening
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options: {max-size: 10m, max-file: "3"}
+
+services:
+  app:
+    <<: *hardening
+    build: .
+    image: pleaseprintit-app
+    ports:
+      - "${PORT:-8080}:8000"
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD fehlt in den Stack-Variablen}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY fehlt in den Stack-Variablen}
+      PUBLIC_URL: ${PUBLIC_URL:-}
+      TZ: ${TZ:-Europe/Berlin}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURITY: ${SMTP_SECURITY:-starttls}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    volumes:
+      - data:/data
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/')"]
+      interval: 1m
+      timeout: 5s
+
+  backup:                         # tägliche Sicherung ins Volume „backups“, die letzten 14 bleiben
+    <<: *hardening
+    image: pleaseprintit-app
+    command: python backup.py
+    environment:
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      - data:/data:ro
+      - backups:/backups
+    network_mode: none
+    depends_on: [app]
+    mem_limit: 256m
+
+volumes:
+  data:
+  backups:

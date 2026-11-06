@@ -17,6 +17,27 @@ docker compose up -d --build
 
 Danach läuft die App unter `http://<dein-rechner>:8080`. Melde dich mit dem Namen **admin** und deinem `ADMIN_PASSWORD` an.
 
+## Alternative: mit Dockhand
+
+Ist [Dockhand](https://dockhand.pro) im Einsatz, braucht es kein Terminal:
+
+1. **Zugang für GitHub:** Auf GitHub unter *Settings → Developer settings → Fine-grained tokens* einen Token anlegen. Nur dieses Repo freigeben, Recht *Contents: Read-only*. In Dockhand beim Repo unter *Zugangsdaten* hinterlegen (Benutzer = GitHub-Name, Passwort = Token).
+2. **Stack anlegen:** *Stacks → Aus Git*, Repo-Adresse eintragen, Branch `main`, Compose-Datei `compose.dockhand.yaml`, **„Images beim Bereitstellen bauen“ einschalten** (englisch: *Build on deploy*).
+3. **Stack-Variablen:**
+
+   | Variable | Pflicht | Hinweis |
+   |---|---|---|
+   | `ADMIN_PASSWORD` | ja | als *Secret* markieren |
+   | `SECRET_KEY` | ja | lange Zufallszeichenkette, als *Secret* markieren |
+   | `PORT` | nein | Standard `8080` |
+   | `PUBLIC_URL` | nein | nur hinter einem HTTPS-Proxy |
+   | `TZ` | nein | Standard `Europe/Berlin` |
+   | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURITY`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | nein | für Status-Mails, Passwort als *Secret* |
+
+4. **Deploy.** Die App läuft dann unter `http://<dein-rechner>:8080`.
+
+Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>_data`, `<stack>_backups`) statt in Ordnern, `chown` ist nicht nötig. Updates holt Dockhand per Sync oder Webhook. **Volumes beim Löschen des Stacks nicht mitlöschen**, sonst sind die Daten weg.
+
 ## Erste Schritte als Admin
 
 1. Unter **Einstellungen** dein Druckbett, deine Filamente und das Impressum eintragen.

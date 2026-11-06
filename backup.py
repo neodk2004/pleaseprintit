@@ -60,7 +60,10 @@ if __name__ == "__main__":
     else:
         while True:
             try:
-                print("Sicherung:", backup(), flush=True)
+                if not os.path.exists(os.path.join(DATA, "app.db")):
+                    print("Noch keine Datenbank (frische Installation), nichts zu sichern.", flush=True)
+                else:
+                    print("Sicherung:", backup(), flush=True)
             except Exception as e:  # nicht abstürzen; morgen erneut versuchen
                 print("Sicherung fehlgeschlagen:", e, flush=True)
             time.sleep(24 * 3600)
