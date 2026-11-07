@@ -1,14 +1,14 @@
-PleasePrintit – Auftrag #{{ '%04d'|format(e.id) }}
+PleasePrintit – {{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}
 
 {{ e.title }}
-Status: {{ e.status|capitalize }}
-Stückzahl: {{ e.qty or 1 }}
+{{ _('Status') }}: {{ status_label(e.status) }}
+{{ _('Stückzahl') }}: {{ e.qty or 1 }}
 {% if e.status == 'abgelehnt' and e.reason %}
-Warum? {{ reason_text(e.reason) }}
+{{ _('Warum?') }} {{ reason_text(e.reason) }}
 {% endif %}
-Ablauf: {% for name, at, state in flow %}{{ name }}{{ ' ✓' if state == 'done' else (' ✕' if state == 'stop' else ' –') }}{{ ' → ' if not loop.last }}{% endfor %}
-{% if cost and cost[1] is not none %}Materialkosten (Schätzung): {{ ('%.2f'|format(cost[1])).replace('.', ',') }} €
+{{ _('Ablauf') }}: {% for name, at, state in flow %}{{ name }}{{ ' ✓' if state == 'done' else (' ✕' if state == 'stop' else ' –') }}{{ ' → ' if not loop.last }}{% endfor %}
+{% if cost and cost[1] is not none %}{{ _('Materialkosten (Schätzung)') }}: {{ money(cost[1]) }}
 {% endif %}
-Auftrag ansehen: {{ url }}
+{{ _('Auftrag ansehen') }}: {{ url }}
 
-Keine Mails mehr? Adresse im Profil löschen: {{ profile_url }}
+{{ _('Keine Mails mehr? Adresse im Profil löschen:') }} {{ profile_url }}

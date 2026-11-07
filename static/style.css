@@ -397,9 +397,17 @@ input[type=file]::file-selector-button{font:inherit;font-weight:600;border:1px s
 main{padding-bottom:var(--s5)}
 /* Rechtliches */
 .legal-text{white-space:pre-line;line-height:1.65}
-.legal-links{display:flex;gap:.5rem;justify-content:center;margin-top:var(--s6);font-size:.82rem;color:var(--ink-3)}
+.legal-links{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;justify-content:center;margin-top:var(--s6);font-size:.82rem;color:var(--ink-3)}
 .legal-links a,.site-foot a{color:var(--ink-2);text-decoration:none}
 .legal-links a:hover,.site-foot a:hover{color:var(--signal);text-decoration:underline}
+/* Sprachwahl DE · EN · FR */
+.langs{display:inline-flex;gap:2px;margin:0;align-items:center}
+.langs button{font:inherit;font-size:.8rem;font-weight:600;letter-spacing:.04em;color:var(--ink-2);background:none;border:1px solid transparent;
+  border-radius:6px;padding:.3rem .5rem;min-height:32px;cursor:pointer}
+.langs button:hover{color:var(--signal);border-color:var(--line)}
+.langs button[aria-current]{color:var(--signal);border-color:var(--signal);background:var(--signal-soft)}
+.card .langs{margin-top:var(--s2)}
+.card .langs button{font-size:.9rem;padding:.45rem .8rem;min-height:40px;border-color:var(--line)}
 textarea{min-height:8rem;resize:vertical;line-height:1.5;font-size:.92rem}
 .imp-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
 .imp-grid label{margin:0}

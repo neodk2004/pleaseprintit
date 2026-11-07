@@ -1,40 +1,46 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, grams, euro with context %}
-{% block title %}Profil · {% endblock %}
+{% from "_macros.html" import icon, grams, euro, langs with context %}
+{% block title %}{{ _('Profil') }} · {% endblock %}
 {% block body %}
 <div style="max-width:36rem;margin:0 auto">
-<div class="pagehead rise"><div><p class="eyebrow">Profil</p><h1>Hallo {{ g.user.name }}</h1></div></div>
+<div class="pagehead rise"><div><p class="eyebrow">{{ _('Profil') }}</p><h1>{{ _('Hallo {name}', name=g.user.name) }}</h1></div></div>
 {% if msg %}<p class="ok-msg" role="status">{{ icon('check') }}{{ msg }}</p>{% endif %}
 
 <section class="card rise" style="--i:1">
-  <h3>{{ icon('coin') }} Für dich gedruckt</h3>
+  <h3>{{ icon('coin') }} {{ _('Für dich gedruckt') }}</h3>
   {% if done[0] %}
-  <p style="margin:0"><b>{{ done[0] }} {{ 'Teil' if done[0] == 1 else 'Teile' }}</b>{% if done[1] %} · {{ grams(done) }}{% endif %}{% if done[2] %} · Material ca. <b>{{ euro(done[2]) }}</b>{% endif %}</p>
-  <p class="muted" style="margin:.4em 0 0">Grobe Schätzung ohne Strom und Druckzeit – falls du dich mal mit einer Rolle Filament oder einem Kaffee revanchieren magst.</p>
+  <p style="margin:0"><b>{{ _('1 Teil') if done[0] == 1 else _('{n} Teile', n=done[0]) }}</b>{% if done[1] %} · {{ grams(done) }}{% endif %}{% if done[2] %} · {{ _('Material ca.') }} <b>{{ euro(done[2]) }}</b>{% endif %}</p>
+  <p class="muted" style="margin:.4em 0 0">{{ _('Grobe Schätzung ohne Strom und Druckzeit – falls du dich mal mit einer Rolle Filament oder einem Kaffee revanchieren magst.') }}</p>
   {% else %}
-  <p class="muted" style="margin:0">Noch nichts gedruckt. Sobald ein Auftrag fertig ist, siehst du hier, was zusammengekommen ist.</p>
+  <p class="muted" style="margin:0">{{ _('Noch nichts gedruckt. Sobald ein Auftrag fertig ist, siehst du hier, was zusammengekommen ist.') }}</p>
   {% endif %}
 </section>
 
 <section class="card rise" style="--i:1">
-  <h3>{{ icon('mail') }} Benachrichtigung per E-Mail</h3>
+  <h3>{{ icon('mail') }} {{ _('Benachrichtigung per E-Mail') }}</h3>
   {% if mail_on %}
-  <p class="muted">Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert. Feld leeren = keine Mails mehr.</p>
+  <p class="muted">{{ _('Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert. Feld leeren = keine Mails mehr.') }}</p>
   <form method="post">
-    <div class="row"><div class="grow"><label for="email">E-Mail-Adresse</label>
-      <input id="email" type="email" name="email" maxlength="200" autocomplete="email" value="{{ request.form.email if error else (g.user.email or '') }}" placeholder="du@beispiel.de"></div>
-      <button class="btn btn-primary">Speichern</button></div>
+    <div class="row"><div class="grow"><label for="email">{{ _('E-Mail-Adresse') }}</label>
+      <input id="email" type="email" name="email" maxlength="200" autocomplete="email" value="{{ request.form.email if error else (g.user.email or '') }}" placeholder="{{ _('du@beispiel.de') }}"></div>
+      <button class="btn btn-primary">{{ _('Speichern') }}</button></div>
   </form>
   {% if g.user.email %}<form method="post" action="{{ url_for('test_mail') }}" style="margin-top:var(--s3)">
-    <button class="btn btn-sm">{{ icon('mail') }}Testmail schicken</button></form>{% endif %}
+    <button class="btn btn-sm">{{ icon('mail') }}{{ _('Testmail schicken') }}</button></form>{% endif %}
   {% else %}
-  <p class="muted">Die Werkstatt hat den Mailversand noch nicht eingerichtet.</p>
+  <p class="muted">{{ _('Die Werkstatt hat den Mailversand noch nicht eingerichtet.') }}</p>
   {% endif %}
 </section>
 
 <section class="card rise" style="--i:2">
-  <h3>{{ icon('info') }} Was gespeichert wird</h3>
-  <p class="muted" style="margin:0">Dein Name, dein Passwort (nur verschlüsselt), deine Aufträge mit Dateien und – falls eingetragen – deine E-Mail-Adresse. Nur die Werkstatt sieht deine Aufträge. Die Adresse wird nur für Status-Mails genutzt und nicht weitergegeben.</p>
+  <h3>{{ icon('info') }} {{ _('Sprache') }}</h3>
+  <p class="muted">{{ _('Gilt für die ganze App und für deine Status-Mails.') }}</p>
+  {{ langs() }}
+</section>
+
+<section class="card rise" style="--i:2">
+  <h3>{{ icon('info') }} {{ _('Was gespeichert wird') }}</h3>
+  <p class="muted" style="margin:0">{{ _('Dein Name, dein Passwort (nur verschlüsselt), deine Aufträge mit Dateien, deine Sprache und – falls eingetragen – deine E-Mail-Adresse. Nur die Werkstatt sieht deine Aufträge. Die Adresse wird nur für Status-Mails genutzt und nicht weitergegeben.') }}</p>
 </section>
 </div>
 {% endblock %}

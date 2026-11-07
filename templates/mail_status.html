@@ -1,13 +1,13 @@
 {%- set C = {'neu': ('#1d4ed8', '#e3ecff'), 'geplant': ('#8a5a00', '#fbefc9'), 'gedruckt': ('#127a3a', '#daf3e3'), 'abgelehnt': ('#b42323', '#fde3e3')} -%}
 {%- set fg, bg = C[e.status] -%}
-{%- set MSG = {'neu': 'ist eingegangen.', 'geplant': 'ist eingeplant – bald liegt er auf dem Druckbett.', 'gedruckt': 'ist fertig gedruckt und kann abgeholt werden.', 'abgelehnt': 'kann leider nicht gedruckt werden.'} -%}
+{%- set MSG = {'neu': _('Dein Druckwunsch ist eingegangen.'), 'geplant': _('Dein Druckwunsch ist eingeplant – bald liegt er auf dem Druckbett.'), 'gedruckt': _('Dein Druckwunsch ist fertig gedruckt und kann abgeholt werden.'), 'abgelehnt': _('Dein Druckwunsch kann leider nicht gedruckt werden.')} -%}
 {%- set FONT = "'Bahnschrift','Segoe UI',Roboto,Helvetica,Arial,sans-serif" -%}
 {%- set MONO = "Consolas,'SF Mono',Menlo,monospace" -%}
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="{{ g.lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><title>{{ e.title }}</title></head>
 <body style="margin:0;padding:0;background:#f5f3ef;color:#17181a;font-family:{{ FONT }};">
-<div style="display:none;max-height:0;overflow:hidden">Auftrag #{{ '%04d'|format(e.id) }}: {{ e.status|capitalize }}</div>
+<div style="display:none;max-height:0;overflow:hidden">{{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}: {{ status_label(e.status) }}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ef;padding:32px 12px;">
 <tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
@@ -20,17 +20,17 @@
   <tr><td style="background:#ffffff;border:1px solid #e2ddd4;border-radius:14px;overflow:hidden;">
     <div style="height:5px;background:{{ fg }};border-radius:14px 14px 0 0;"></div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:28px 28px 8px;">
-      <p style="margin:0 0 6px;font:500 12px {{ MONO }};letter-spacing:2px;text-transform:uppercase;color:#565a61;">Auftrag #{{ '%04d'|format(e.id) }}</p>
+      <p style="margin:0 0 6px;font:500 12px {{ MONO }};letter-spacing:2px;text-transform:uppercase;color:#565a61;">{{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}</p>
       <h1 style="margin:0 0 14px;font:600 24px/1.2 {{ FONT }};color:#17181a;">{{ e.title }}</h1>
-      <span style="display:inline-block;padding:4px 12px;border-radius:99px;background:{{ bg }};color:{{ fg }};font:600 13px {{ FONT }};">● {{ e.status|capitalize }}</span>
-      <p style="margin:18px 0 0;font:16px/1.55 {{ FONT }};color:#17181a;">Dein Druckwunsch {{ MSG[e.status] }}</p>
+      <span style="display:inline-block;padding:4px 12px;border-radius:99px;background:{{ bg }};color:{{ fg }};font:600 13px {{ FONT }};">● {{ status_label(e.status) }}</span>
+      <p style="margin:18px 0 0;font:16px/1.55 {{ FONT }};color:#17181a;">{{ MSG[e.status] }}</p>
     </td></tr>
 
     {% if e.status == 'abgelehnt' and e.reason %}
     <tr><td style="padding:16px 28px 0;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdebdd;border:1px solid #f3c6a6;border-radius:10px;"><tr>
         <td width="44" valign="top" style="padding:14px 0 14px 14px;font-size:30px;line-height:1;color:#c2410c;">&#9785;</td>
-        <td style="padding:14px 16px;font:15px/1.5 {{ FONT }};color:#17181a;"><b>Warum?</b><br>{{ reason_text(e.reason) }}</td>
+        <td style="padding:14px 16px;font:15px/1.5 {{ FONT }};color:#17181a;"><b>{{ _('Warum?') }}</b><br>{{ reason_text(e.reason) }}</td>
       </tr></table></td></tr>
     {% endif %}
 
@@ -44,21 +44,21 @@
 
     <tr><td style="padding:22px 28px 0;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px dashed #cfc8bc;font:14px {{ FONT }};">
-        {% if e.filament %}<tr><td style="padding:10px 0 0;color:#565a61;">Filament</td><td align="right" style="padding:10px 0 0;">
-          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ e.color_hex or '#e8620f' }};vertical-align:middle;"></span> {{ e.filament }} · {{ e.color }}</td></tr>{% endif %}
-        <tr><td style="padding:8px 0 0;color:#565a61;">Stückzahl</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">{{ e.qty or 1 }} Stück</td></tr>
-        {% if e.dims %}<tr><td style="padding:8px 0 0;color:#565a61;">Maße</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">{{ e.dims }} mm</td></tr>{% endif %}
-        {% if cost %}<tr><td style="padding:8px 0 0;color:#565a61;">Gewicht (Schätzung)</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">≈ {{ '%.0f'|format(cost[0]) }} g</td></tr>
-          {% if cost[1] is not none %}<tr><td style="padding:8px 0 0;color:#565a61;">Materialkosten (Schätzung)</td><td align="right" style="padding:8px 0 0;font:600 16px {{ MONO }};">{{ ('%.2f'|format(cost[1])).replace('.', ',') }} €</td></tr>{% endif %}{% endif %}
+        {% if e.filament %}<tr><td style="padding:10px 0 0;color:#565a61;">{{ _('Filament') }}</td><td align="right" style="padding:10px 0 0;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ e.color_hex or '#e8620f' }};vertical-align:middle;"></span> {{ e.filament }} · {{ color_name(e.color) }}</td></tr>{% endif %}
+        <tr><td style="padding:8px 0 0;color:#565a61;">{{ _('Stückzahl') }}</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">{{ _('{n} Stück', n=e.qty or 1) }}</td></tr>
+        {% if e.dims %}<tr><td style="padding:8px 0 0;color:#565a61;">{{ _('Maße') }}</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">{{ dec(e.dims) }} mm</td></tr>{% endif %}
+        {% if cost %}<tr><td style="padding:8px 0 0;color:#565a61;">{{ _('Gewicht (Schätzung)') }}</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">≈ {{ num(cost[0], 0) }} g</td></tr>
+          {% if cost[1] is not none %}<tr><td style="padding:8px 0 0;color:#565a61;">{{ _('Materialkosten (Schätzung)') }}</td><td align="right" style="padding:8px 0 0;font:600 16px {{ MONO }};">{{ money(cost[1]) }}</td></tr>{% endif %}{% endif %}
       </table></td></tr>
 
     <tr><td style="padding:26px 28px 30px;">
-      <a href="{{ url }}" style="display:inline-block;background:#c2410c;color:#ffffff;text-decoration:none;font:600 15px {{ FONT }};padding:13px 22px;border-radius:7px;">Auftrag ansehen →</a>
+      <a href="{{ url }}" style="display:inline-block;background:#c2410c;color:#ffffff;text-decoration:none;font:600 15px {{ FONT }};padding:13px 22px;border-radius:7px;">{{ _('Auftrag ansehen') }} →</a>
     </td></tr></table>
   </td></tr>
 
   <tr><td style="padding:18px 8px 0;font:12px/1.5 {{ FONT }};color:#7c8087;" align="center">
-    Du bekommst diese Mail, weil du in PleasePrintit eine E-Mail-Adresse hinterlegt hast.<br>
-    Keine Mails mehr? Adresse im <a href="{{ profile_url }}" style="color:#565a61;">Profil</a> löschen.</td></tr>
+    {{ _('Du bekommst diese Mail, weil du in PleasePrintit eine E-Mail-Adresse hinterlegt hast.') }}<br>
+    {{ _('Keine Mails mehr? Adresse im Profil löschen:') }} <a href="{{ profile_url }}" style="color:#565a61;">{{ _('Profil') }}</a></td></tr>
 </table></td></tr></table>
 </body></html>

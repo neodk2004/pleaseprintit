@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
   <img src="https://img.shields.io/badge/Dockhand-bereit-e8620f" alt="Dockhand bereit">
   <img src="https://img.shields.io/badge/Raspberry%20Pi-ARM64-C51A4A?logo=raspberrypi&logoColor=white" alt="Läuft auf Raspberry Pi (ARM64)">
-  <img src="https://img.shields.io/badge/Sprache-Deutsch-e8620f" alt="Deutsch">
+  <img src="https://img.shields.io/badge/Sprachen-DE%20%C2%B7%20EN%20%C2%B7%20FR-e8620f" alt="Deutsch, Englisch, Französisch">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-MIT-green" alt="Lizenz: MIT"></a>
 </p>
 <p align="center">
@@ -48,7 +48,7 @@ Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst ge
 </p>
 <p align="center"><sub>Links: die Warteschlange der Werkstatt. Rechts: ein Auftrag mit 3D-Vorschau im dunklen Design. Alle Namen und Modelle sind Demodaten.</sub></p>
 
-> **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) with a prebuilt multi-arch image (amd64 and arm64, so a Raspberry Pi works too) and deploys with Docker Compose or Dockhand. The user interface is in German. **→ [Full English guide](README.en.md)**
+> **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) with a prebuilt multi-arch image (amd64 and arm64, so a Raspberry Pi works too) and deploys with Docker Compose or Dockhand. The user interface is available in German, English and French. **→ [Full English guide](README.en.md)**
 
 ## So läuft's ab
 
@@ -76,6 +76,7 @@ flowchart LR
 - 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
 - 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
 - ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
+- 🌍 **Deutsch, Englisch, Französisch:** Jeder wählt seine Sprache unten auf der Seite oder im Profil. Sie gilt für die ganze App und für die Status-Mails, die immer in der Sprache des Empfängers rausgehen.
 - 📱 **Handy-tauglich:** als App auf dem Startbildschirm installierbar (PWA), mit hellem und dunklem Design.
 - 📄 **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
 - 🍓 **Läuft fast überall:** fertiges Image für x86 und ARM64, also auch Raspberry Pi 4/5 mit 64-Bit-System. Rund 50 MB Arbeitsspeicher im Leerlauf, SQLite statt Datenbankserver, HTTPS optional.
@@ -97,7 +98,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 | Anmeldung | Einladung + Passwort | Einladung, Passkeys, SSO | Einladung, SSO, 2FA |
 | Raspberry Pi (ARM64) | ✅ | – (nur x86) | ✅ |
 | Server-Bedarf | SQLite, ~50 MB RAM | Postgres, ~1 GB RAM, HTTPS Pflicht | SQLite oder Postgres |
-| Oberfläche | Deutsch | Englisch | Englisch, Französisch, Deutsch |
+| Oberfläche | Deutsch, Englisch, Französisch | Englisch | Englisch, Französisch, Deutsch |
 | Lizenz | MIT | AGPL-3.0 | AGPL-3.0 |
 
 <sub>Stand November 2026, nach den Angaben in den READMEs der Projekte. Etwas falsch? Bitte ein Issue aufmachen.</sub>
@@ -183,7 +184,7 @@ Wer selbst baut, nimmt stattdessen `git pull && docker compose up -d --build`.
 
 ```sh
 pip install -r requirements.txt
-python test_app.py && python test_models.py && python test_preview.py
+python test_app.py && python test_models.py && python test_preview.py && python test_i18n.py
 ```
 
 </details>

@@ -1,5 +1,5 @@
 // Neuer Auftrag: 3D-Datei schon im Browser ausmessen und gegen den Druckbereich prüfen; Ablagefeld.
-import { fits, fmt, measure, parseBed, parseModel } from './model.js';
+import { fits, fmt, measure, parseBed, parseModel, t } from './model.js';
 
 const form = document.getElementById('order');
 const fileIn = form.elements.model;
@@ -20,20 +20,20 @@ fileIn.addEventListener('change', async () => {
   const file = fileIn.files[0];
   if (!file) return;
   urlIn.value = '';                       // entweder Link oder Datei
-  if (file.size > MAX) { say('✗ Die Datei ist größer als 100 MB.', 'bad'); submit.disabled = true; return; }
-  say(`${file.name} wird ausgemessen …`);
+  if (file.size > MAX) { say(t('✗ Die Datei ist größer als 100 MB.'), 'bad'); submit.disabled = true; return; }
+  say(t('{name} wird ausgemessen …', { name: file.name }));
   try {
     const kind = file.name.toLowerCase().endsWith('.3mf') ? '3mf' : 'stl';
     const d = measure(parseModel(await file.arrayBuffer(), kind));
     setDims(d);
-    if (!bed.some((b) => b > 0)) return say(`Maße: ${fmt(d)} mm`, 'ok');
-    if (fits(d, bed)) return say(`✓ Maße: ${fmt(d)} mm – passt aufs Druckbett`, 'ok');
-    say(`✗ Maße: ${fmt(d)} mm – zu groß für den Druckbereich (${fmt(bed)} mm)` +
-        (admin ? ' – als Werkstatt kannst du trotzdem anlegen.' : '. Bitte verkleinern oder teilen.'), 'bad');
+    if (!bed.some((b) => b > 0)) return say(t('Maße: {d} mm', { d: fmt(d) }), 'ok');
+    if (fits(d, bed)) return say(t('✓ Maße: {d} mm – passt aufs Druckbett', { d: fmt(d) }), 'ok');
+    say(t('✗ Maße: {d} mm – zu groß für den Druckbereich ({bed} mm)', { d: fmt(d), bed: fmt(bed) }) +
+        (admin ? t(' – als Werkstatt kannst du trotzdem anlegen.') : t('. Bitte verkleinern oder teilen.')), 'bad');
     if (!admin) submit.disabled = true;
   } catch (err) {
     console.error(err);
-    say('Die Datei konnte nicht gelesen werden. Ist es eine echte STL- oder 3MF-Datei?', 'bad');
+    say(t('Die Datei konnte nicht gelesen werden. Ist es eine echte STL- oder 3MF-Datei?'), 'bad');
   }
 });
 

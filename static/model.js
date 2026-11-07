@@ -33,6 +33,10 @@ export function fits(dims, bed) {
   return a.every((d, i) => d <= b[i] + 0.01);
 }
 
-export const mm = (v) => v.toLocaleString('de-DE', { maximumFractionDigits: 1 });
+// Texte in der gewählten Sprache: base.html legt die nötigen Übersetzungen als JSON ab (#i18n)
+const T = JSON.parse(document.getElementById('i18n')?.textContent || '{}');
+export const t = (s, vars = {}) => (T[s] || s).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+const LOCALE = { de: 'de-DE', en: 'en-GB', fr: 'fr-FR' }[document.documentElement.lang] || 'de-DE';
+export const mm = (v) => v.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
 export const fmt = (d) => d.map(mm).join(' × ');
 export const parseBed = (s) => (s || '0,0,0').split(',').map(Number);

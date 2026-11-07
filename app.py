@@ -12,6 +12,7 @@ from flask import Flask, abort, g, redirect, render_template, request, send_from
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
+import i18n
 import mail
 from models import MAX_MODEL, embedded_thumbnail, fits, model_kind, volume_cm3
 from preview import MAX_IMAGE, image_ext, preview
@@ -61,6 +62,8 @@ def db():
     con.execute("PRAGMA foreign_keys = ON")
     if "email" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
         con.execute("ALTER TABLE users ADD COLUMN email TEXT")   # freiwillig, für Status-Mails
+    if "lang" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
+        con.execute("ALTER TABLE users ADD COLUMN lang TEXT")    # de/en/fr: Oberfläche und Status-Mails
     fcols = {r["name"] for r in con.execute("PRAGMA table_info(filaments)")}
     for col in ("density", "price_kg"):   # g/cm³ und €/kg für die Kostenschätzung
         if col not in fcols:
@@ -100,13 +103,13 @@ def flow(con, e):
     """Ablauf-Leiste: [(Name, Zeitpunkt, 'done'|'stop'|'off'), …]."""
     at = dict(con.execute("SELECT status, at FROM status_log WHERE link_id = ? ORDER BY rowid", (e["id"],)).fetchall())
     s = e["status"]
-    steps = [("Eingereicht", at.get("neu") or e["created"], "done")]
+    steps = [(_("Eingereicht"), at.get("neu") or e["created"], "done")]
     if s == "abgelehnt":
         if "geplant" in at:
-            steps.append(("Geplant", at["geplant"], "done"))
-        return steps + [("Abgelehnt", at.get("abgelehnt"), "stop")]
-    steps.append(("Geplant", at.get("geplant"), "done" if s in ("geplant", "gedruckt") else "off"))
-    return steps + [("Gedruckt", at.get("gedruckt"), "done" if s == "gedruckt" else "off")]
+            steps.append((_("Geplant"), at["geplant"], "done"))
+        return steps + [(_("Abgelehnt"), at.get("abgelehnt"), "stop")]
+    steps.append((_("Geplant"), at.get("geplant"), "done" if s in ("geplant", "gedruckt") else "off"))
+    return steps + [(_("Gedruckt"), at.get("gedruckt"), "done" if s == "gedruckt" else "off")]
 
 
 def get_entry(con, link_id):
@@ -181,14 +184,14 @@ def filament_options(con):
     out = []
     for f in con.execute("SELECT * FROM filaments ORDER BY name").fetchall():
         colors = con.execute("SELECT * FROM colors WHERE filament_id = ? ORDER BY name", (f["id"],)).fetchall()
-        out.append((f, [(f"r:{f['id']}", f"{RANDOM} – freie Wahl", None)] +
+        out.append((f, [(f"r:{f['id']}", RANDOM, None)] +
                     [(f"c:{c['id']}", c["name"], c["hex"]) for c in colors]))
     return out
 
 
 def parse_choice(con, value):
     """Auswahl 'c:<farbe>' oder 'r:<filament>' → (filament, farbe, hex). None, wenn ungültig."""
-    kind_, _, ident = (value or "").partition(":")
+    kind_, _sep, ident = (value or "").partition(":")
     if not ident.isdigit():
         return None
     if kind_ == "c":
@@ -241,15 +244,15 @@ def limit_error(con, new_bytes=0):
         "SELECT SUM(status IN ('neu', 'geplant')), COALESCE(SUM(size), 0) FROM links WHERE user_id = ?",
         (uid,)).fetchone()
     if (open_count or 0) >= MAX_OPEN:
-        return f"Du hast schon {MAX_OPEN} offene Aufträge. Warte, bis welche gedruckt sind."
+        return _("Du hast schon {n} offene Aufträge. Warte, bis welche gedruckt sind.", n=MAX_OPEN)
     if used + new_bytes > MAX_STORAGE:
-        return f"Dein Speicherplatz ({MAX_STORAGE // 1024 // 1024} MB) ist voll."
+        return _("Dein Speicherplatz ({mb} MB) ist voll.", mb=MAX_STORAGE // 1024 // 1024)
     return None
 
 
 # --- Anmeldung und Rechte -------------------------------------------------
 
-PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset"}
+PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang"}
 PAGES = {"entry", "new", "profile", "users", "settings"}   # ohne Anmeldung → Login, danach zurück
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ONLY = {"set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
@@ -273,8 +276,73 @@ REASONS = {
 
 
 def reason_text(reason):
-    """Was der Freund liest: Vorlage ausformuliert, Freitext unverändert."""
-    return REASONS.get(reason, reason)
+    """Was der Freund liest: Vorlage ausformuliert (übersetzt), Freitext unverändert."""
+    return _(REASONS[reason]) if reason in REASONS else reason
+
+
+def reason_short(reason):
+    """Kurzform für die Werkstatt; gespeichert wird immer der deutsche Schlüssel."""
+    return _(reason) if reason in REASONS else reason
+
+
+# --- Sprache: Konto > Cookie > Browser > Deutsch ---------------------------------
+
+def _(text, **kw):
+    return i18n.t(g.get("lang", i18n.DEFAULT), text, **kw)
+
+
+def pick_lang():
+    if g.user and g.user["lang"] in i18n.LANGS:
+        return g.user["lang"]
+    if request.cookies.get("lang") in i18n.LANGS:
+        return request.cookies["lang"]
+    return request.accept_languages.best_match(list(i18n.LANGS)) or i18n.DEFAULT
+
+
+class in_lang:
+    """Kurz in einer anderen Sprache rendern, z. B. eine Mail für den Empfänger."""
+    def __init__(self, lang):
+        self.lang = lang if lang in i18n.LANGS else i18n.DEFAULT
+
+    def __enter__(self):
+        self.old, g.lang = g.get("lang"), self.lang
+
+    def __exit__(self, *exc):
+        g.lang = self.old
+
+
+def status_label(s):
+    return _(s.capitalize())
+
+
+def color_name(name):
+    return _("Random") if name == RANDOM else name
+
+
+def num(v, digits=1):
+    """Zahl mit dem Dezimalzeichen der Sprache (Englisch Punkt, sonst Komma)."""
+    return dec(f"{v:.{digits}f}".replace(".", ","))
+
+
+def dec(text):
+    return (text or "").replace(",", ".") if g.get("lang") == "en" else text
+
+
+def money(v):
+    return f"€{v:.2f}" if g.get("lang") == "en" else f"{num(v, 2)} €"
+
+
+@app.post("/lang")
+def set_lang():
+    lang = request.form.get("lang")
+    r = redirect(safe_next())
+    if lang in i18n.LANGS:
+        r.set_cookie("lang", lang, max_age=365 * 24 * 3600, samesite="Lax", httponly=True,
+                     secure=app.config["SESSION_COOKIE_SECURE"])
+        if g.user:
+            with db() as con:
+                con.execute("UPDATE users SET lang = ? WHERE id = ?", (lang, g.user["id"]))
+    return r
 
 
 @app.before_request
@@ -287,6 +355,7 @@ def load_user():
             g.user = con.execute("SELECT * FROM users WHERE id = ? AND active = 1", (uid,)).fetchone()
         if not g.user:
             session.clear()
+    g.lang = pick_lang()
     if request.endpoint not in PUBLIC and not (g.admin or g.user):
         if request.method == "GET" and request.endpoint in PAGES:   # z. B. Link aus einer Status-Mail
             return redirect(url_for("index", next=request.full_path.rstrip("?")))
@@ -311,7 +380,9 @@ def security_headers(r):
 @app.context_processor
 def helpers():
     return {"domain": domain, "kind": kind, "statuses": STATUSES, "fmt_dims": fmt_dims, "reasons": REASONS,
-            "reason_text": reason_text,
+            "reason_text": reason_text, "reason_short": reason_short, "_": _, "status_label": status_label,
+            "color_name": color_name, "num": num, "dec": dec, "money": money, "languages": i18n.LANGS,
+            "js_texts": lambda: i18n.js_texts(g.lang),
             "year": time.localtime().tm_year, "public": public, "max_qty": MAX_QTY}
 
 
@@ -331,7 +402,7 @@ def fail(ip):
 
 
 def slowed():
-    return render_template("login.html", error="Zu viele Fehlversuche. Bitte 15 Minuten warten."), 429
+    return render_template("login.html", error=_("Zu viele Fehlversuche. Bitte 15 Minuten warten.")), 429
 
 
 def sign_in(uid):
@@ -365,7 +436,7 @@ def login():
             sign_in(u["id"])
             return redirect(safe_next())
     fail(ip)
-    return render_template("login.html", error="Name oder Passwort falsch."), 401
+    return render_template("login.html", error=_("Name oder Passwort falsch.")), 401
 
 
 @app.post("/logout")
@@ -385,20 +456,20 @@ def invite(token):
                           "AND julianday('now') - julianday(created) < ?", (token, INVITE_DAYS)).fetchone()
         if not inv:
             fail(ip)
-            return render_template("login.html", error="Diese Einladung ist ungültig oder abgelaufen."), 404
+            return render_template("login.html", error=_("Diese Einladung ist ungültig oder abgelaufen.")), 404
         if request.method == "GET":
             return render_template("invite.html")
         name = request.form.get("name", "").strip()
         pw = request.form.get("password", "")
         if not NAME_RE.match(name) or name.lower() == "admin":
-            return render_template("invite.html", error="Name: 3–30 Zeichen, nur Buchstaben, Ziffern, . _ -"), 400
+            return render_template("invite.html", error=_("Name: 3–30 Zeichen, nur Buchstaben, Ziffern, . _ -")), 400
         if len(pw) < 8:
-            return render_template("invite.html", error="Passwort: mindestens 8 Zeichen."), 400
+            return render_template("invite.html", error=_("Passwort: mindestens 8 Zeichen.")), 400
         try:
-            cur = con.execute("INSERT INTO users (name, pw, created) VALUES (?, ?, ?)",
-                              (name, generate_password_hash(pw), now(con)))
+            cur = con.execute("INSERT INTO users (name, pw, created, lang) VALUES (?, ?, ?, ?)",
+                              (name, generate_password_hash(pw), now(con), g.lang))
         except sqlite3.IntegrityError:
-            return render_template("invite.html", error="Dieser Name ist schon vergeben."), 400
+            return render_template("invite.html", error=_("Dieser Name ist schon vergeben.")), 400
         con.execute("UPDATE invites SET used_by = ? WHERE token = ?", (cur.lastrowid, token))
     sign_in(cur.lastrowid)
     return redirect(url_for("index"))
@@ -458,20 +529,20 @@ def create_order():
     url = request.form.get("url", "").strip()[:2000]
     title = request.form.get("title", "").strip()[:200]
     if has_file == bool(url):
-        return new_page("Bitte entweder einen Link oder eine 3D-Datei angeben.", 400)
+        return new_page(_("Bitte entweder einen Link oder eine 3D-Datei angeben."), 400)
     # nur http/https, damit kein "javascript:"-Link gespeichert werden kann
     if url and (urlparse(url).scheme not in ("http", "https") or not urlparse(url).hostname):
-        return new_page("Bitte einen Link mit http:// oder https:// eingeben.", 400)
+        return new_page(_("Bitte einen Link mit http:// oder https:// eingeben."), 400)
     with db() as con:
         choice = parse_choice(con, request.form.get("choice"))
         if not choice and con.execute("SELECT 1 FROM filaments").fetchone():
-            return new_page("Bitte Filament und Farbe auswählen.", 400)
+            return new_page(_("Bitte Filament und Farbe auswählen."), 400)
         filament, color, color_hex = choice or (None, None, None)
         # ponytail: Maße misst der Browser des Freundes (umgehbar); Server-Messung für 3MF wäre deutlich aufwendiger
         dims = parse_dims(request.form)
         if dims and not g.admin and not fits(dims, bed(con)):
-            return new_page(f"Das Modell ({fmt_dims(dims)} mm) passt nicht in den Druckbereich "
-                            f"({fmt_dims(bed(con))} mm).", 400)
+            return new_page(_("Das Modell ({dims} mm) passt nicht in den Druckbereich ({bed} mm).",
+                              dims=dec(fmt_dims(dims)), bed=dec(fmt_dims(bed(con)))), 400)
         if err := limit_error(con):
             return new_page(err, 400)
     extra = {"filament": filament, "color": color, "color_hex": color_hex,
@@ -513,7 +584,7 @@ def add_thumbnail(con, link_id, m):
 def save_file_order(f, title, extra):
     m = store_model(f)
     with db() as con:
-        err = limit_error(con, m["size"]) if m else "Nur echte STL- oder 3MF-Dateien bis 100 MB."
+        err = limit_error(con, m["size"]) if m else _("Nur echte STL- oder 3MF-Dateien bis 100 MB.")
         if err:
             if m:
                 os.remove(os.path.join(MODELS, m["file"]))
@@ -524,8 +595,8 @@ def save_file_order(f, title, extra):
 
 
 @app.errorhandler(413)
-def too_large(_):
-    return new_page("Die Datei ist zu groß (max. 100 MB).", 413)
+def too_large(_err):
+    return new_page(_("Die Datei ist zu groß (max. 100 MB)."), 413)
 
 
 @app.get("/entry/<int:link_id>")
@@ -537,7 +608,7 @@ def entry(link_id):
             con.execute("UPDATE links SET volume = ? WHERE id = ?", (v, link_id))
             e = get_entry(con, link_id)
         owner = con.execute("SELECT name FROM users WHERE id = ?", (e["user_id"],)).fetchone()
-        return render_template("detail.html", e=e, owner=owner["name"] if owner else "ich", bed=bed(con),
+        return render_template("detail.html", e=e, owner=owner["name"] if owner else _("ich"), bed=bed(con),
                                cost=estimate(con, e), flow=flow(con, e), options=filament_options(con),
                                can_resubmit=can_resubmit(e))
 
@@ -561,7 +632,7 @@ def resubmit(link_id):
             abort(400)
         choice = parse_choice(con, request.form.get("choice"))
         if not choice:
-            abort(400, "Bitte Filament und Farbe auswählen.")
+            abort(400, _("Bitte Filament und Farbe auswählen."))
         if err := limit_error(con):
             abort(400, err)
         filament, color, color_hex = choice
@@ -602,22 +673,23 @@ def public(endpoint, **kw):
     return (PUBLIC_URL or request.host_url.rstrip("/")) + url_for(endpoint, **kw)
 
 
-def status_mail(con, e, to):
+def status_mail(con, e, to, lang):
     title = " ".join(e["title"].split())   # keine Zeilenumbrüche im Betreff
-    ctx = {"e": e, "flow": flow(con, e), "cost": estimate(con, e), "url": public("entry", link_id=e["id"]),
-           "profile_url": public("profile")}
-    return mail.build(to, f"#{e['id']:04d} {title}: {e['status'].capitalize()}",
-                      render_template("mail_status.txt", **ctx),
-                      lambda cid: render_template("mail_status.html", cid=cid, **ctx))
+    with in_lang(lang):
+        ctx = {"e": e, "flow": flow(con, e), "cost": estimate(con, e), "url": public("entry", link_id=e["id"]),
+               "profile_url": public("profile")}
+        return mail.build(to, f"#{e['id']:04d} {title}: {status_label(e['status'])}",
+                          render_template("mail_status.txt", **ctx),
+                          lambda cid: render_template("mail_status.html", cid=cid, **ctx))
 
 
 def notify(con, e):
     """Status-Mail an den Freund, falls er eine Adresse hinterlegt hat."""
     if not (mail.configured() and e["user_id"]):
         return
-    u = con.execute("SELECT email FROM users WHERE id = ? AND active = 1", (e["user_id"],)).fetchone()
+    u = con.execute("SELECT email, lang FROM users WHERE id = ? AND active = 1", (e["user_id"],)).fetchone()
     if u and u["email"]:
-        mail.send(status_mail(con, e, u["email"]))
+        mail.send(status_mail(con, e, u["email"], u["lang"]))
 
 
 @app.post("/entry/<int:link_id>/model")
@@ -628,7 +700,7 @@ def attach_model(link_id):
         old = get_entry(con, link_id)
         m = store_model(f) if f and f.filename else None
         if not m:
-            abort(400, "Nur echte STL- oder 3MF-Dateien bis 100 MB.")
+            abort(400, _("Nur echte STL- oder 3MF-Dateien bis 100 MB."))
         con.execute("UPDATE links SET file = ?, file_name = ?, size = ?, volume = ? WHERE id = ?",
                     (m["file"], m["file_name"], m["size"], m["volume"], link_id))
         if old["file"]:
@@ -657,7 +729,7 @@ def replace_image(link_id):
     data = f.read(MAX_IMAGE + 1) if f else b""
     ext = image_ext(data)
     if not ext or len(data) > MAX_IMAGE:
-        abort(400, "Nur JPG, PNG, GIF oder WebP bis 5 MB.")
+        abort(400, _("Nur JPG, PNG, GIF oder WebP bis 5 MB."))
     with db() as con:
         save_image(con, link_id, data, ext)
     return redirect(url_for("entry", link_id=link_id))
@@ -683,11 +755,11 @@ def profile():
     if request.method == "POST":
         email = request.form.get("email", "").strip()[:200]
         if email and not EMAIL_RE.match(email):
-            err = "Das sieht nicht wie eine E-Mail-Adresse aus."
+            err = _("Das sieht nicht wie eine E-Mail-Adresse aus.")
         else:
             with db() as con:
                 con.execute("UPDATE users SET email = ? WHERE id = ?", (email or None, g.user["id"]))
-            msg = "Gespeichert." if email else "E-Mail-Adresse gelöscht – du bekommst keine Mails mehr."
+            msg = _("Gespeichert.") if email else _("E-Mail-Adresse gelöscht – du bekommst keine Mails mehr.")
             g.user = dict(g.user, email=email or None)
     with db() as con:
         done = printed(con, g.user["id"])
@@ -702,11 +774,11 @@ def test_mail():
         e = con.execute("SELECT * FROM links WHERE user_id = ? ORDER BY id DESC", (g.user["id"],)).fetchone()
         if not e:
             return render_template("profile.html", mail_on=True, done=printed(con, g.user["id"]),
-                                   error="Reich zuerst einen Auftrag ein – die Testmail zeigt deinen neuesten."), 400
-        fail = mail.send_now(status_mail(con, e, g.user["email"]))
+                                   error=_("Reich zuerst einen Auftrag ein – die Testmail zeigt deinen neuesten.")), 400
+        fail = mail.send_now(status_mail(con, e, g.user["email"], g.lang))
         done = printed(con, g.user["id"])
-    return render_template("profile.html", mail_on=True, done=done, error=fail and "Versand fehlgeschlagen. Die Werkstatt schaut nach.",
-                           msg=None if fail else f"Testmail an {g.user['email']} ist raus."), 502 if fail else 200
+    return render_template("profile.html", mail_on=True, done=done, error=fail and _("Versand fehlgeschlagen. Die Werkstatt schaut nach."),
+                           msg=None if fail else _("Testmail an {to} ist raus.", to=g.user["email"])), 502 if fail else 200
 
 
 # --- Freunde verwalten (nur Administrator) -----------------------------------
@@ -739,7 +811,7 @@ def create_invite():
 def short_token(con, table):
     """5 Zeichen: kurz zum Abtippen; Schutz gegen Raten über die Bremse (FAILS) beim Einlösen."""
     while True:
-        token = "".join(secrets.choice(INVITE_ALPHABET) for _ in range(INVITE_LEN))
+        token = "".join(secrets.choice(INVITE_ALPHABET) for _i in range(INVITE_LEN))
         if not con.execute(f"SELECT 1 FROM {table} WHERE token = ?", (token,)).fetchone():
             return token
 
@@ -771,7 +843,7 @@ def forgot():
     ip = request.remote_addr
     if too_many_fails(ip):
         return render_template("forgot.html", mail_on=mail.configured(),
-                               error="Zu viele Versuche. Bitte 15 Minuten warten."), 429
+                               error=_("Zu viele Versuche. Bitte 15 Minuten warten.")), 429
     fail(ip)   # jede Anfrage zählt: bremst Massen-Mails und Ausspähen
     who = request.form.get("who", "").strip()[:200]
     with db() as con:
@@ -780,9 +852,11 @@ def forgot():
         if u and who and mail.configured():
             url = public("reset", token=new_reset(con, u["id"]))
             ctx = {"name": u["name"], "url": url, "hours": RESET_HOURS}
-            mail.send(mail.build(u["email"], "PleasePrintit: Passwort zurücksetzen",
+            with in_lang(u["lang"]):   # Mail in der Sprache des Empfängers
+                msg = mail.build(u["email"], "PleasePrintit: " + _("Passwort zurücksetzen"),
                                  render_template("mail_reset.txt", **ctx),
-                                 lambda cid: render_template("mail_reset.html", cid=cid, **ctx)))
+                                 lambda cid: render_template("mail_reset.html", cid=cid, **ctx))
+            mail.send(msg)
     # Immer dieselbe Antwort: verrät nicht, ob es Name oder Adresse gibt
     return render_template("forgot.html", mail_on=mail.configured(), sent=True)
 
@@ -799,12 +873,12 @@ def reset(token):
                         "AND (julianday('now') - julianday(r.created)) * 24 < ?", (token, RESET_HOURS)).fetchone()
         if not r:
             fail(ip)
-            return render_template("login.html", error="Dieser Link ist ungültig oder abgelaufen."), 404
+            return render_template("login.html", error=_("Dieser Link ist ungültig oder abgelaufen.")), 404
         if request.method == "GET":
             return render_template("reset.html", name=r["name"])
         pw = request.form.get("password", "")
         if len(pw) < 8:
-            return render_template("reset.html", name=r["name"], error="Passwort: mindestens 8 Zeichen."), 400
+            return render_template("reset.html", name=r["name"], error=_("Passwort: mindestens 8 Zeichen.")), 400
         con.execute("UPDATE users SET pw = ? WHERE id = ?", (generate_password_hash(pw), r["user_id"]))
         con.execute("UPDATE resets SET used = 1 WHERE user_id = ?", (r["user_id"],))   # alle offenen Links ungültig
     sign_in(r["user_id"])
@@ -825,20 +899,21 @@ def settings():
     with db() as con:
         return render_template("settings.html", bed=bed(con), options=filament_options(con), random=RANDOM,
                                fill=setting(con, "fill", FILL), imp=impressum_data(con), imp_fields=IMPRESSUM,
-                               datenschutz=text_setting(con, "datenschutz"), template=DATENSCHUTZ_TEMPLATE)
+                               datenschutz=text_setting(con, "datenschutz"),
+                               template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))
 
 
 # --- Impressum und Datenschutz (öffentlich; die Werkstatt pflegt beides in den Einstellungen) ---
 
 IMPRESSUM = (("imp_name", "Name", True), ("imp_street", "Straße und Hausnummer", True),
              ("imp_city", "PLZ und Ort", True), ("imp_email", "E-Mail", True), ("imp_phone", "Telefon", False))
-DATENSCHUTZ_TEMPLATE = """Verantwortlich
+DATENSCHUTZ_TEMPLATE = i18n.PRIVACY_TEMPLATES["de"] = """Verantwortlich
 Die Person aus dem Impressum.
 
 Was gespeichert wird
-– Konto: Name, Passwort (nur als verschlüsselter Hash), optional E-Mail-Adresse
+– Konto: Name, Passwort (nur als verschlüsselter Hash), optional E-Mail-Adresse, Sprache
 – Aufträge: Links, hochgeladene 3D-Dateien, Vorschaubilder, gewähltes Filament
-– Ein Anmelde-Cookie (technisch notwendig, 30 Tage), keine Tracking- oder Werbe-Cookies
+– Ein Anmelde-Cookie (30 Tage) und ein Sprach-Cookie, beide technisch notwendig; keine Tracking- oder Werbe-Cookies
 – Der Server protokolliert kurzzeitig IP-Adressen zum Schutz vor Angriffen
 
 Wozu
@@ -852,7 +927,7 @@ Auskunft, Berichtigung und Löschung deiner Daten: kurze Nachricht an die Werkst
 
 
 def impressum_data(con):
-    return {k: text_setting(con, k) for k, _, _ in IMPRESSUM}
+    return {k: text_setting(con, k) for k, *_rest in IMPRESSUM}
 
 
 def scramble(data):
@@ -869,7 +944,7 @@ def legal(page):
             ctx = {"blob": scramble(data) if data["imp_name"] else ""}
         else:
             ctx = {"text": text_setting(con, "datenschutz")}
-    return render_template("legal.html", title=page.capitalize(), page=page, **ctx)
+    return render_template("legal.html", title=_(page.capitalize()), page=page, **ctx)
 
 
 @app.get("/robots.txt")
@@ -881,11 +956,12 @@ def robots():
 def save_legal():
     f = request.form
     with db() as con:
-        values = {k: f.get(k, "").strip()[:200] for k, _, _ in IMPRESSUM}
+        values = {k: f.get(k, "").strip()[:200] for k, *_rest in IMPRESSUM}
         if values["imp_email"] and not EMAIL_RE.match(values["imp_email"]):
-            abort(400, "Die E-Mail-Adresse im Impressum sieht nicht richtig aus.")
+            abort(400, _("Die E-Mail-Adresse im Impressum sieht nicht richtig aus."))
         ds = f.get("datenschutz", "").strip()[:10000]
-        values["datenschutz"] = "" if ds == DATENSCHUTZ_TEMPLATE.strip() else ds   # unveränderte Vorlage nicht veröffentlichen
+        templates = {t.strip() for t in i18n.PRIVACY_TEMPLATES.values()}
+        values["datenschutz"] = "" if ds in templates else ds   # unveränderte Vorlage nicht veröffentlichen
         for k, v in values.items():
             put_setting(con, k, v)
     return redirect(url_for("settings") + "#rechtliches")

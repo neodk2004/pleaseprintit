@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, logo, printer with context %}
+{% from "_macros.html" import icon, logo, printer, langs with context %}
 {% block main_class %}auth{% endblock %}
 {% block body %}
 <section class="art" aria-hidden="true">
   <div class="brand" style="color:#fff">{{ logo(36) }}<span>Please<b>Print</b>it</span></div>
   <div style="display:grid;place-items:center;color:#fff">{{ printer(300) }}</div>
-  <div><h1>Deine Druckwünsche. Sortiert statt im Chat.</h1>
-    <p style="margin-top:var(--s3)">Link oder Datei einreichen, Farbe wählen, Status verfolgen – die Werkstatt erledigt den Rest.</p></div>
+  <div><h1>{{ _('Deine Druckwünsche. Sortiert statt im Chat.') }}</h1>
+    <p style="margin-top:var(--s3)">{{ _('Link oder Datei einreichen, Farbe wählen, Status verfolgen – die Werkstatt erledigt den Rest.') }}</p></div>
 </section>
 <section class="form"><div class="rise">
   <div class="brand mobile-only" style="margin-bottom:var(--s5)">{{ logo(36) }}<span>Please<b>Print</b>it</span></div>
   {% block form %}{% endblock %}
-  <p class="legal-links"><a href="{{ url_for('legal', page='impressum') }}">Impressum</a><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='datenschutz') }}">Datenschutz</a></p>
+  <div class="legal-links"><a href="{{ url_for('legal', page='impressum') }}">{{ _('Impressum') }}</a><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='datenschutz') }}">{{ _('Datenschutz') }}</a><span aria-hidden="true">·</span>{{ langs() }}</div>
 </div></section>
 {% endblock %}

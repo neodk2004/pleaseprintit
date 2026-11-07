@@ -2,31 +2,31 @@
 {% from "_macros.html" import icon, badge, nr, filament_chip, thumb, grams, euro, printer with context %}
 {% block body %}
 <div class="pagehead rise">
-  <div><p class="eyebrow">{{ 'Werkstatt · Warteschlange' if g.admin else 'Hallo ' ~ g.user.name }}</p>
-    <h1>{{ 'Aufträge' if g.admin else 'Meine Aufträge' }}<span class="count">{{ '%02d'|format(entries|length) }}</span></h1></div>
-  <a class="btn btn-primary" href="{{ url_for('new') }}">{{ icon('plus') }}Neuer Auftrag</a>
+  <div><p class="eyebrow">{{ _('Werkstatt · Warteschlange') if g.admin else _('Hallo {name}', name=g.user.name) }}</p>
+    <h1>{{ _('Aufträge') if g.admin else _('Meine Aufträge') }}<span class="count">{{ '%02d'|format(entries|length) }}</span></h1></div>
+  <a class="btn btn-primary" href="{{ url_for('new') }}">{{ icon('plus') }}{{ _('Neuer Auftrag') }}</a>
 </div>
 
 {% set total = counts.values()|sum %}
 {% if total %}
-<nav class="tabs rise" style="--i:1" aria-label="Nach Status filtern">
-  {% set keep = f.to_dict() %}{% set _ = keep.pop('status', None) %}
-  <a class="tab" href="{{ url_for('index', **keep) }}"{% if not f.status %} aria-current="page"{% endif %}>Alle<span class="n">{{ total }}</span></a>
-  {% for s in statuses %}<a class="tab" href="{{ url_for('index', status=s, **keep) }}"{% if f.status == s %} aria-current="page"{% endif %}>{{ s|capitalize }}<span class="n">{{ counts.get(s, 0) }}</span></a>{% endfor %}
+<nav class="tabs rise" style="--i:1" aria-label="{{ _('Nach Status filtern') }}">
+  {% set keep = f.to_dict() %}{% set _x = keep.pop('status', None) %}
+  <a class="tab" href="{{ url_for('index', **keep) }}"{% if not f.status %} aria-current="page"{% endif %}>{{ _('Alle') }}<span class="n">{{ total }}</span></a>
+  {% for s in statuses %}<a class="tab" href="{{ url_for('index', status=s, **keep) }}"{% if f.status == s %} aria-current="page"{% endif %}>{{ status_label(s) }}<span class="n">{{ counts.get(s, 0) }}</span></a>{% endfor %}
 </nav>
 {% endif %}
 
 {% if g.admin %}
 <form class="filters card rise" style="--i:2" method="get">
   {% if f.status %}<input type="hidden" name="status" value="{{ f.status }}">{% endif %}
-  <div class="search">{{ icon('search') }}<input type="search" name="q" value="{{ f.q }}" placeholder="Titel, Link oder Datei …" aria-label="Suchen"></div>
-  <select name="user" aria-label="Person"><option value="">Alle Personen</option>
-    <option value="0" {{ 'selected' if f.user == '0' }}>Ich selbst</option>
+  <div class="search">{{ icon('search') }}<input type="search" name="q" value="{{ f.q }}" placeholder="{{ _('Titel, Link oder Datei …') }}" aria-label="{{ _('Suchen') }}"></div>
+  <select name="user" aria-label="{{ _('Person') }}"><option value="">{{ _('Alle Personen') }}</option>
+    <option value="0" {{ 'selected' if f.user == '0' }}>{{ _('Ich selbst') }}</option>
     {% for p in people %}<option value="{{ p.id }}" {{ 'selected' if f.user == p.id|string }}>{{ p.name }}</option>{% endfor %}</select>
-  <select name="kind" aria-label="Art"><option value="">Links &amp; Dateien</option>
-    <option value="link" {{ 'selected' if f.kind == 'link' }}>Nur Links</option>
-    <option value="file" {{ 'selected' if f.kind == 'file' }}>Nur Dateien</option></select>
-  <button class="btn">Filtern</button>
+  <select name="kind" aria-label="{{ _('Art') }}"><option value="">{{ _('Links & Dateien') }}</option>
+    <option value="link" {{ 'selected' if f.kind == 'link' }}>{{ _('Nur Links') }}</option>
+    <option value="file" {{ 'selected' if f.kind == 'file' }}>{{ _('Nur Dateien') }}</option></select>
+  <button class="btn">{{ _('Filtern') }}</button>
 </form>
 {% endif %}
 
@@ -38,21 +38,21 @@
     <span style="min-width:0"><span class="order-head">{{ nr(e) }}{{ badge(e.status) }}{% if e.filament %}{{ filament_chip(e) }}{% endif %}</span>
       <span class="order-title">{{ e.title }}</span>
       <span class="meta">
-        {%- if g.admin %}<span>{{ icon('users') }}{{ e.user_name or 'ich' }}</span>{% endif %}
+        {%- if g.admin %}<span>{{ icon('users') }}{{ e.user_name or _('ich') }}</span>{% endif %}
         {%- if kind(e) %}<span>{{ icon('file') }}{{ e.file_name }}</span>{% else %}<span>{{ icon('link') }}{{ e.site or domain(e.url) }}</span>{% endif %}
-        {%- if e.qty > 1 %}<span>{{ icon('layers') }}{{ e.qty }} Stück</span>{% endif %}
+        {%- if e.qty > 1 %}<span>{{ icon('layers') }}{{ _('{n} Stück', n=e.qty) }}</span>{% endif %}
         {%- if c %}<span>{{ icon('scale') }}{{ grams(c) }}</span>{% endif %}
         {%- if e.created %}<span>{{ icon('clock') }}{{ e.created }}</span>{% endif %}</span></span>
     <span class="aside"><span class="price">{{ euro(c[1]) if c and c[1] is not none else '' }}</span>{{ icon('go', cls='go') }}</span>
   </a></li>{% endfor %}
 </ul>
 {% elif f %}
-<div class="card empty rise"><h2>Nichts gefunden</h2><p>Keine Aufträge passen zu diesem Filter.</p>
-  <a class="btn" href="{{ url_for('index') }}">Filter zurücksetzen</a></div>
+<div class="card empty rise"><h2>{{ _('Nichts gefunden') }}</h2><p>{{ _('Keine Aufträge passen zu diesem Filter.') }}</p>
+  <a class="btn" href="{{ url_for('index') }}">{{ _('Filter zurücksetzen') }}</a></div>
 {% else %}
 <div class="card empty rise">{{ printer() }}
-  <h2>Noch nichts in der Warteschlange</h2>
-  <p style="margin-bottom:var(--s4)">Ein Link (Printables, Instagram, Etsy …) oder eine STL/3MF-Datei genügt.</p>
-  <a class="btn btn-primary" href="{{ url_for('new') }}">{{ icon('plus') }}Ersten Wunsch einreichen</a></div>
+  <h2>{{ _('Noch nichts in der Warteschlange') }}</h2>
+  <p style="margin-bottom:var(--s4)">{{ _('Ein Link (Printables, Instagram, Etsy …) oder eine STL/3MF-Datei genügt.') }}</p>
+  <a class="btn btn-primary" href="{{ url_for('new') }}">{{ icon('plus') }}{{ _('Ersten Wunsch einreichen') }}</a></div>
 {% endif %}
 {% endblock %}

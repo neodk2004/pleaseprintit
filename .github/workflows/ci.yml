@@ -23,6 +23,7 @@ jobs:
       - run: python test_app.py
       - run: python test_models.py
       - run: python test_preview.py
+      - run: python test_i18n.py
 
   docker:
     runs-on: ubuntu-latest

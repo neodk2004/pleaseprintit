@@ -6,7 +6,7 @@ Guide for AI coding agents (Claude Code, Codex, Copilot, Cursor …) working on 
 
 PleasePrintit is a small, self-hosted **3D print request queue** for a private circle (up to ~50 people). Friends join via one-time invite link, submit print requests (model link or STL/3MF upload, filament, color, quantity), and the admin works through a sorted queue with 3D preview and cost estimate. Status flow: `neu` (submitted) → `geplant` (planned) → `gedruckt` (printed), or `abgelehnt` (rejected, with reason).
 
-The **user interface, code comments and commit messages are German.** Keep new UI text German.
+**Code comments and commit messages are German.** The UI is translated (German, English, French): write new UI text in German inside `_('…')` (templates, `app.py`) or `t('…')` (`static/*.js`), then add the English and French translation to `i18n.T`. JS strings also go into `i18n.JS_KEYS`. `test_i18n.py` fails on any missing or mismatched translation.
 
 ## Layout
 
@@ -15,6 +15,7 @@ The **user interface, code comments and commit messages are German.** Keep new U
 | `app.py` | The whole Flask app: routes, auth, invites, orders, settings, security headers, SQLite schema (`db()`) |
 | `models.py` | Validates uploaded 3D files by content (STL/3MF), dimensions, volume, 3MF thumbnails |
 | `preview.py` | Fetches link previews (Open Graph) with SSRF protection — every IP must be public, connects to the checked IP |
+| `i18n.py` | Translation table (German key → English, French), language list, privacy-policy templates |
 | `mail.py` | SMTP e-mail via stdlib only; disabled when `SMTP_HOST` is empty |
 | `backup.py` | Daily `.tar.gz` backups (`--once`, `--check FILE`) |
 | `templates/` | Jinja2 templates (`base.html` layout, `_*.html` partials, `mail_*` e-mails) |
@@ -26,7 +27,7 @@ The **user interface, code comments and commit messages are German.** Keep new U
 
 ```sh
 pip install -r requirements.txt
-python test_app.py && python test_models.py && python test_preview.py   # each prints OK
+python test_app.py && python test_models.py && python test_preview.py && python test_i18n.py   # each prints OK
 docker compose up -d --build                                            # run locally on :8080
 ```
 

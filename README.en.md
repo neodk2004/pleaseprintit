@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
   <img src="https://img.shields.io/badge/Dockhand-ready-e8620f" alt="Dockhand ready">
   <img src="https://img.shields.io/badge/Raspberry%20Pi-ARM64-C51A4A?logo=raspberrypi&logoColor=white" alt="Runs on Raspberry Pi (ARM64)">
-  <img src="https://img.shields.io/badge/UI-German-e8620f" alt="UI language: German">
+  <img src="https://img.shields.io/badge/UI-DE%20%C2%B7%20EN%20%C2%B7%20FR-e8620f" alt="UI languages: German, English, French">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT"></a>
 </p>
 <p align="center">
@@ -42,7 +42,7 @@ If you own a 3D printer, you know the drill: “Could you print this for me?”,
 
 Built for a private circle of a handful up to about 50 people, self-hosted with Docker, no cloud, no tracking.
 
-> **Note:** The app’s user interface is currently **German only**. Menu names in this guide are given in German with the English meaning in brackets.
+> **Note:** The app speaks **German, English and French** – everyone picks their language at the bottom of the page or in their profile. Menu names in this guide are given in German with the English meaning in brackets.
 
 <p align="center">
   <img src="docs/auftraege.png" alt="Print queue with status, filament, weight and material cost" width="49%">
@@ -76,6 +76,7 @@ flowchart LR
 - 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
 - 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
 - ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
+- 🌍 **German, English, French:** everyone picks their language at the bottom of the page or in their profile. It applies to the whole app and to status emails, which are always sent in the recipient’s language.
 - 📱 **Mobile friendly:** installable on the home screen (PWA), with light and dark theme.
 - 📄 **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
 - 🍓 **Runs almost anywhere:** prebuilt image for x86 and ARM64, including a Raspberry Pi 4/5 with a 64-bit OS. About 50 MB of RAM when idle, SQLite instead of a database server, HTTPS optional.
@@ -97,7 +98,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 | Sign-in | invite + password | invite, passkeys, SSO | invite, SSO, 2FA |
 | Raspberry Pi (ARM64) | ✅ | – (x86 only) | ✅ |
 | Server needs | SQLite, ~50 MB RAM | Postgres, ~1 GB RAM, HTTPS required | SQLite or Postgres |
-| UI language | German | English | English, French, German |
+| UI language | German, English, French | English | English, French, German |
 | License | MIT | AGPL-3.0 | AGPL-3.0 |
 
 <sub>As of November 2026, based on each project's README. Something wrong? Please open an issue.</sub>
@@ -211,7 +212,7 @@ If you build it yourself, use `git pull && docker compose up -d --build` instead
 
 ```sh
 pip install -r requirements.txt
-python test_app.py && python test_models.py && python test_preview.py
+python test_app.py && python test_models.py && python test_preview.py && python test_i18n.py
 ```
 
 </details>

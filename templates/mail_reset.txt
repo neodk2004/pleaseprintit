@@ -1,9 +1,9 @@
-PleasePrintit – Passwort vergessen
+PleasePrintit – {{ _('Passwort vergessen') }}
 
-Hallo {{ name }}!
+{{ _('Hallo {name}!', name=name) }}
 
-Du hast einen Link für ein neues Passwort angefordert:
+{{ _('Du hast einen Link für ein neues Passwort angefordert:') }}
 {{ url }}
 
-Der Link gilt {{ hours }} Stunden und nur einmal.
-Du warst das nicht? Dann ignoriere diese Mail einfach – dein Passwort bleibt, wie es ist.
+{{ _('Der Link gilt {hours} Stunden und nur einmal.', hours=hours) }}
+{{ _('Du warst das nicht? Dann ignoriere diese Mail einfach – dein Passwort bleibt, wie es ist.') }}

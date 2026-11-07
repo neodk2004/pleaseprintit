@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { fits, fmt, measure, parseBed, parseModel } from './model.js';
+import { fits, fmt, measure, parseBed, parseModel, t } from './model.js';
 
 const box = document.getElementById('viewer');
 const dims = document.getElementById('dims');
@@ -35,12 +35,12 @@ new ResizeObserver(() => {
 function show(object) {
   const size = measure(object);
   const limited = bed.some((b) => b > 0);
-  dims.textContent = `Maße: ${fmt(size)} mm (B × T × H)`;
+  dims.textContent = t('Maße: {d} mm (B × T × H)', { d: fmt(size) });
   if (limited) {
     const ok = fits(size, bed);
     const tag = document.createElement('span');
     tag.className = ok ? 'fit ok' : 'fit bad';
-    tag.textContent = ok ? '✓ passt aufs Druckbett' : `✗ größer als Druckbereich (${fmt(bed)} mm)`;
+    tag.textContent = ok ? t('✓ passt aufs Druckbett') : t('✗ größer als Druckbereich ({bed} mm)', { bed: fmt(bed) });
     dims.append(' ', tag);
   }
 
@@ -69,4 +69,4 @@ function show(object) {
 fetch(src)
   .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
   .then((buf) => show(parseModel(buf, kind)))
-  .catch((err) => { dims.textContent = 'Modell konnte nicht angezeigt werden.'; console.error(err); });
+  .catch((err) => { dims.textContent = t('Modell konnte nicht angezeigt werden.'); console.error(err); });

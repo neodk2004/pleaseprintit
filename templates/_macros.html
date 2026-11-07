@@ -1,24 +1,30 @@
 {% macro icon(name, label=None, cls='') %}<svg class="icon {{ cls }}" {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true"{% endif %}><use href="#i-{{ name }}"/></svg>{% endmacro %}
 
 {% set STATUS_ICON = {'neu': 'inbox', 'geplant': 'calendar', 'gedruckt': 'check-c', 'abgelehnt': 'x-c'} %}
-{% macro badge(status) %}<span class="badge s-{{ status }}">{{ icon(STATUS_ICON[status]) }}{{ status|capitalize }}</span>{% endmacro %}
+{% macro badge(status) %}<span class="badge s-{{ status }}">{{ icon(STATUS_ICON[status]) }}{{ status_label(status) }}</span>{% endmacro %}
 
 {% macro nr(e) %}<span class="nr">#{{ '%04d'|format(e.id) }}</span>{% endmacro %}
 
 {# Filament · Farbe mit Farbpunkt; Random = bunter Punkt #}
 {% macro filament_chip(e) %}<span class="chip">
   {%- if e.color_hex %}<span class="swatch" style="background:{{ e.color_hex }}"></span>{% else %}<span class="swatch random"></span>{% endif -%}
-  {{ e.filament }} · {{ e.color }}</span>{% endmacro %}
+  {{ e.filament }} · {{ color_name(e.color) }}</span>{% endmacro %}
 
 {# Kleine Vorschau in der Liste: Bild oder Würfel mit Schichtlinien #}
 {% macro thumb(e) %}<span class="thumb">{% if e.image %}<img src="{{ url_for('image', name=e.image) }}" alt="" loading="lazy">{% else %}{{ icon('cube') }}{% endif %}
   <span class="kind">{{ kind(e)|upper if kind(e) else 'LINK' }}</span></span>{% endmacro %}
 
-{% macro picture(e, cls='picture') %}{% if e.image %}<img class="{{ cls }}" src="{{ url_for('image', name=e.image) }}" alt="Vorschau">
+{% macro picture(e, cls='picture') %}{% if e.image %}<img class="{{ cls }}" src="{{ url_for('image', name=e.image) }}" alt="{{ _('Vorschau') }}">
   {%- else %}<div class="{{ cls }}">{{ icon('cube') }}</div>{% endif %}{% endmacro %}
 
-{% macro grams(c) %}≈ {{ '%.0f'|format(c[0]) }} g{% endmacro %}
-{% macro euro(v) %}{{ ('%.2f'|format(v)).replace('.', ',') }} €{% endmacro %}
+{% macro grams(c) %}≈ {{ num(c[0], 0) }} g{% endmacro %}
+{% macro euro(v) %}{{ money(v) }}{% endmacro %}
+
+{# Sprachwahl: unten auf jeder Seite; merkt sich die Wahl im Cookie und im Konto #}
+{% macro langs() %}<form class="langs" method="post" action="{{ url_for('set_lang') }}" aria-label="{{ _('Sprache') }}">
+  <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+  {%- for code, label in languages.items() %}<button name="lang" value="{{ code }}" lang="{{ code }}" title="{{ label }}"{% if code == g.lang %} aria-current="true"{% endif %}>{{ code|upper }}</button>{% endfor -%}
+</form>{% endmacro %}
 
 {% set HEART = "M32 56c-10.5-7-11.8-12.4-8.6-15.4 2.7-2.5 6.6-1.6 8.6 1.6 2-3.2 5.9-4.1 8.6-1.6 3.2 3 1.9 8.4-8.6 15.4z" %}
 {% macro logo(size=32) %}<svg viewBox="0 0 64 64" width="{{ size }}" height="{{ size }}" aria-hidden="true">
@@ -26,7 +32,7 @@
   <rect x="18" y="12" width="28" height="13" rx="3.5"/><path d="M24.5 25h15l-5 8.5h-5z"/><path class="heart" d="{{ HEART }}"/></g></svg>{% endmacro %}
 
 {# Signatur: Drucker druckt das Herz Schicht für Schicht #}
-{% macro printer(w=260) %}<svg class="printing" viewBox="0 0 240 200" width="{{ w }}" role="img" aria-label="Ein 3D-Drucker druckt ein Herz" style="--lift:-57px">
+{% macro printer(w=260) %}<svg class="printing" viewBox="0 0 240 200" width="{{ w }}" role="img" aria-label="{{ _('Ein 3D-Drucker druckt ein Herz') }}" style="--lift:-57px">
   <defs><pattern id="lay" width="4" height="1.15" patternUnits="userSpaceOnUse"><rect width="4" height=".3" fill="rgba(0,0,0,.16)"/></pattern></defs>
   <rect x="18" y="12" width="204" height="176" rx="12" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>
   <path d="M40 20v160M200 20v160" stroke="currentColor" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
@@ -39,18 +45,18 @@
       <path d="M113 134h14l-4.5 9h-5z" fill="currentColor"/></g></g>
 </svg>{% endmacro %}
 
-{% macro sad() %}<svg class="sad" viewBox="0 0 48 48" role="img" aria-label="Traurig">
+{% macro sad() %}<svg class="sad" viewBox="0 0 48 48" role="img" aria-label="{{ _('Traurig') }}">
   <circle cx="24" cy="24" r="21" fill="var(--signal-soft)" stroke="var(--signal)" stroke-width="3"/>
   <circle cx="17" cy="20" r="2.8" fill="var(--signal)"/><circle cx="31" cy="20" r="2.8" fill="var(--signal)"/>
   <path d="M15.5 34.5c4.5-5 12.5-5 17 0" stroke="var(--signal)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>{% endmacro %}
 
 {# Ablauf-Leiste #}
-{% macro flowbar(flow) %}<ol class="flow rise" aria-label="Ablauf">
+{% macro flowbar(flow) %}<ol class="flow rise" aria-label="{{ _('Ablauf') }}">
   {%- for name, at, state in flow %}<li class="{{ state }}">{{ icon({'done': 'check', 'stop': 'x', 'off': 'dot'}[state]) }}
     <span><b>{{ name }}</b><small>{% if at %}{{ at[:6] }}, {{ at[-5:] }}{% else %}—{% endif %}</small></span></li>{% endfor %}</ol>{% endmacro %}
 
 {# Filament- und Farbauswahl als runde Knöpfe; skip = (Filament, Farbe), die nicht angeboten wird #}
 {% macro picker(options, checked=None, skip=None) %}{% for f, colors in options %}<div class="picker-group"><p class="label-t">{{ f.name }}</p><div class="picker">
-  {%- for value, name, hex in colors if (f.name, name.split(' – ')[0]) != skip %}<label class="pick"><input type="radio" name="choice" value="{{ value }}" required
-    {{- ' checked' if checked == value }}><span>{% if hex %}<span class="swatch" style="background:{{ hex }}"></span>{% else %}<span class="swatch random"></span>{% endif %}{{ name.split(' – ')[0] }}</span></label>{% endfor %}
+  {%- for value, name, hex in colors if (f.name, name) != skip %}<label class="pick"><input type="radio" name="choice" value="{{ value }}" required
+    {{- ' checked' if checked == value }}><span>{% if hex %}<span class="swatch" style="background:{{ hex }}"></span>{% else %}<span class="swatch random"></span>{% endif %}{{ color_name(name) }}</span></label>{% endfor %}
 </div></div>{% endfor %}{% endmacro %}

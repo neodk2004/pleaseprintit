@@ -2,66 +2,66 @@
 {% from "_macros.html" import icon, badge, nr, filament_chip, picture, grams, euro, sad, flowbar, picker, STATUS_ICON with context %}
 {% block title %}#{{ e.id }} {{ e.title }} · {% endblock %}
 {% block body %}
-<a class="back" href="{{ url_for('index') }}">{{ icon('back') }}{{ 'Alle Aufträge' if g.admin else 'Meine Aufträge' }}</a>
+<a class="back" href="{{ url_for('index') }}">{{ icon('back') }}{{ _('Alle Aufträge') if g.admin else _('Meine Aufträge') }}</a>
 <div class="pagehead rise">
-  <div><p class="eyebrow">Auftrag {{ nr(e) }}{% if e.created %} · eingereicht {{ e.created }}{% endif %}</p><h1>{{ e.title }}</h1></div>
+  <div><p class="eyebrow">{{ _('Auftrag') }} {{ nr(e) }}{% if e.created %} · {{ _('eingereicht {at}', at=e.created) }}{% endif %}</p><h1>{{ e.title }}</h1></div>
   {{ badge(e.status) }}
 </div>
 {{ flowbar(flow) }}
 
 {% macro specs() %}
 <dl class="specs">
-  {% if g.admin %}<dt>{{ icon('users') }}Von</dt><dd>{{ owner }}</dd>{% endif %}
-  {% if e.filament %}<dt>{{ icon('spool') }}Filament</dt><dd>{{ filament_chip(e) }}</dd>{% endif %}
-  {% if kind(e) %}<dt>{{ icon('file') }}Datei</dt><dd class="mono" style="font-size:.82rem;overflow-wrap:anywhere">{{ e.file_name }}</dd>{% endif %}
-  {% if e.url %}<dt>{{ icon('link') }}Link</dt><dd style="overflow-wrap:anywhere"><a href="{{ e.url }}" rel="noopener noreferrer" target="_blank">{{ e.site or domain(e.url) }} {{ icon('external') }}</a></dd>{% endif %}
-  <dt>{{ icon('layers') }}Stückzahl</dt><dd class="mono">{{ e.qty }} Stück</dd>
-  {% if e.dims %}<dt>{{ icon('ruler') }}Maße</dt><dd class="mono">{{ e.dims }} mm</dd>{% endif %}
+  {% if g.admin %}<dt>{{ icon('users') }}{{ _('Von') }}</dt><dd>{{ owner }}</dd>{% endif %}
+  {% if e.filament %}<dt>{{ icon('spool') }}{{ _('Filament') }}</dt><dd>{{ filament_chip(e) }}</dd>{% endif %}
+  {% if kind(e) %}<dt>{{ icon('file') }}{{ _('Datei') }}</dt><dd class="mono" style="font-size:.82rem;overflow-wrap:anywhere">{{ e.file_name }}</dd>{% endif %}
+  {% if e.url %}<dt>{{ icon('link') }}{{ _('Link') }}</dt><dd style="overflow-wrap:anywhere"><a href="{{ e.url }}" rel="noopener noreferrer" target="_blank">{{ e.site or domain(e.url) }} {{ icon('external') }}</a></dd>{% endif %}
+  <dt>{{ icon('layers') }}{{ _('Stückzahl') }}</dt><dd class="mono">{{ _('{n} Stück', n=e.qty) }}</dd>
+  {% if e.dims %}<dt>{{ icon('ruler') }}{{ _('Maße') }}</dt><dd class="mono">{{ dec(e.dims) }} mm</dd>{% endif %}
   {% if cost %}<div class="divider"></div>
-    <dt>{{ icon('cube') }}Volumen</dt><dd class="mono">{{ ('%.1f'|format(e.volume)).replace('.', ',') }} cm³</dd>
-    <dt>{{ icon('scale') }}Gewicht{% if e.qty > 1 %} <small>(gesamt)</small>{% endif %}</dt><dd class="mono">{{ grams(cost) }}</dd>{% endif %}
+    <dt>{{ icon('cube') }}{{ _('Volumen') }}</dt><dd class="mono">{{ num(e.volume, 1) }} cm³</dd>
+    <dt>{{ icon('scale') }}{{ _('Gewicht') }}{% if e.qty > 1 %} <small>{{ _('(gesamt)') }}</small>{% endif %}</dt><dd class="mono">{{ grams(cost) }}</dd>{% endif %}
 </dl>
 {% if cost and cost[1] is not none %}
-<div class="cost"><div><small>Materialkosten (Schätzung)</small><span class="big">{{ euro(cost[1]) }}</span></div>
-  <small style="text-align:right">grob aus dem<br>Modellvolumen</small></div>
-{% elif cost and g.admin %}<p class="hint">Für einen Preis trag in den <a href="{{ url_for('settings') }}">Einstellungen</a> den Preis pro kg ein.</p>{% endif %}
+<div class="cost"><div><small>{{ _('Materialkosten (Schätzung)') }}</small><span class="big">{{ euro(cost[1]) }}</span></div>
+  <small style="text-align:right">{{ _('grob aus dem Modellvolumen') }}</small></div>
+{% elif cost and g.admin %}<p class="hint">{{ _('Für einen Preis trag in den Einstellungen den Preis pro kg ein.') }} <a href="{{ url_for('settings') }}">{{ _('Einstellungen') }}</a></p>{% endif %}
 {% endmacro %}
 
 {% if e.status == 'abgelehnt' and not g.admin %}
 {# Freund: Ablehnung mit Original-Vorschau und Grund #}
 <div class="reject rise" style="--i:1">
   <figure class="preview">{{ picture(e, 'preview-img') }}
-    <figcaption>{{ icon('image') }}{{ 'Vorschau von ' ~ (e.site or domain(e.url)) if e.url else 'Vorschau deines Modells' }}</figcaption></figure>
+    <figcaption>{{ icon('image') }}{{ _('Vorschau von {site}', site=e.site or domain(e.url)) if e.url else _('Vorschau deines Modells') }}</figcaption></figure>
   <div>
-    <div class="reason" role="note">{{ sad() }}<div><b>Leider nicht{{ ' – warum?' if e.reason }}</b>
-      <p>{{ reason_text(e.reason) if e.reason else 'Die Werkstatt kann diesen Wunsch nicht drucken.' }}</p></div></div>
+    <div class="reason" role="note">{{ sad() }}<div><b>{{ _('Leider nicht – warum?') if e.reason else _('Leider nicht') }}</b>
+      <p>{{ reason_text(e.reason) if e.reason else _('Die Werkstatt kann diesen Wunsch nicht drucken.') }}</p></div></div>
     <div class="card">{{ specs() }}</div>
     {% if can_resubmit %}
     <form class="card resubmit" method="post" action="{{ url_for('resubmit', link_id=e.id) }}" style="margin-top:var(--s4)">
-      <h3>{{ icon('spool') }} Mit anderem Filament neu einreichen</h3>
-      <p class="hint" style="margin-bottom:var(--s3)">Dein Modell wird übernommen – du musst nichts neu hochladen. Es bekommt eine neue Auftragsnummer.</p>
+      <h3>{{ icon('spool') }} {{ _('Mit anderem Filament neu einreichen') }}</h3>
+      <p class="hint" style="margin-bottom:var(--s3)">{{ _('Dein Modell wird übernommen – du musst nichts neu hochladen. Es bekommt eine neue Auftragsnummer.') }}</p>
       {{ picker(options, skip=(e.filament, e.color)) }}
       <div class="row" style="margin-top:var(--s4)">
-        <label style="flex:0 0 8rem">Stückzahl <input type="number" name="qty" min="1" max="{{ max_qty }}" value="{{ e.qty }}" inputmode="numeric" required></label>
-        <button class="btn btn-primary">{{ icon('check') }}Neu einreichen</button></div>
+        <label style="flex:0 0 8rem">{{ _('Stückzahl') }} <input type="number" name="qty" min="1" max="{{ max_qty }}" value="{{ e.qty }}" inputmode="numeric" required></label>
+        <button class="btn btn-primary">{{ icon('check') }}{{ _('Neu einreichen') }}</button></div>
     </form>
     {% elif e.successor %}
-    <a class="btn btn-primary" href="{{ url_for('entry', link_id=e.successor) }}" style="margin-top:var(--s4)">{{ icon('go') }}Neu eingereicht als #{{ '%04d'|format(e.successor) }}</a>
+    <a class="btn btn-primary" href="{{ url_for('entry', link_id=e.successor) }}" style="margin-top:var(--s4)">{{ icon('go') }}{{ _('Neu eingereicht als #{nr}', nr='%04d'|format(e.successor)) }}</a>
     {% else %}
-    <a class="btn" href="{{ url_for('new') }}" style="margin-top:var(--s4)">{{ icon('plus') }}Neuen Wunsch einreichen</a>
+    <a class="btn" href="{{ url_for('new') }}" style="margin-top:var(--s4)">{{ icon('plus') }}{{ _('Neuen Wunsch einreichen') }}</a>
     {% endif %}
   </div>
 </div>
 {% else %}
-{% if e.successor %}<p class="ok-msg rise">{{ icon('go') }}Mit anderem Filament neu eingereicht als <a href="{{ url_for('entry', link_id=e.successor) }}">#{{ '%04d'|format(e.successor) }}</a></p>{% endif %}
+{% if e.successor %}<p class="ok-msg rise">{{ icon('go') }}{{ _('Mit anderem Filament neu eingereicht als') }} <a href="{{ url_for('entry', link_id=e.successor) }}">#{{ '%04d'|format(e.successor) }}</a></p>{% endif %}
 <div class="detail">
   <div class="rise" style="--i:1">
-    {% if e.status == 'abgelehnt' and e.reason %}<div class="reason" role="note" style="margin-top:0">{{ sad() }}<div><b>Abgelehnt: {{ e.reason }}</b><p class="muted" style="font-size:.9rem">Der Freund liest: „{{ reason_text(e.reason) }}“</p></div></div>{% endif %}
+    {% if e.status == 'abgelehnt' and e.reason %}<div class="reason" role="note" style="margin-top:0">{{ sad() }}<div><b>{{ _('Abgelehnt: {reason}', reason=reason_short(e.reason)) }}</b><p class="muted" style="font-size:.9rem">{{ _('Der Freund liest: „{text}“', text=reason_text(e.reason)) }}</p></div></div>{% endif %}
     {% if kind(e) %}
       <div id="viewer" data-src="{{ url_for('model_file', link_id=e.id) }}" data-kind="{{ kind(e) }}"
            data-thumb="{{ '' if e.image else url_for('replace_image', link_id=e.id) }}" data-bed="{{ bed|join(',') }}"></div>
-      <p id="dims">Modell wird geladen …</p>
-      <p class="hint">Ziehen zum Drehen · Mausrad oder zwei Finger zum Zoomen</p>
+      <p id="dims">{{ _('Modell wird geladen …') }}</p>
+      <p class="hint">{{ _('Ziehen zum Drehen · Mausrad oder zwei Finger zum Zoomen') }}</p>
       {% include "_three.html" %}
       <script type="module" src="{{ url_for('static', filename='viewer.js') }}"></script>
     {% else %}
@@ -70,22 +70,22 @@
 
     {% if g.admin %}
     <form class="card status" method="post" action="{{ url_for('set_status', link_id=e.id) }}" style="margin-top:var(--s4)">
-      <p class="label-t">Status setzen</p>
-      <div class="segmented" role="group" aria-label="Status">
+      <p class="label-t">{{ _('Status setzen') }}</p>
+      <div class="segmented" role="group" aria-label="{{ _('Status') }}">
         {% for s in statuses %}<button name="status" value="{{ s }}" style="--sc:var(--{{ s }});--sb:var(--{{ s }}-bg)"
-          aria-pressed="{{ 'true' if e.status == s else 'false' }}"><span class="dotc">{{ icon(STATUS_ICON[s]) }}</span>{{ s|capitalize }}</button>{% endfor %}
+          aria-pressed="{{ 'true' if e.status == s else 'false' }}"><span class="dotc">{{ icon(STATUS_ICON[s]) }}</span>{{ status_label(s) }}</button>{% endfor %}
       </div>
       {% set reject = url_for('set_status', link_id=e.id, status='abgelehnt') %}
       {% set free = e.reason if e.reason and e.reason not in reasons else '' %}
       <div class="reject-box">
-        <p class="label-t">Ablehnen mit Grund <small>(ein Klick genügt)</small></p>
+        <p class="label-t">{{ _('Ablehnen mit Grund') }} <small>{{ _('(ein Klick genügt)') }}</small></p>
         <div class="reasons">
-          {% for r in reasons %}<button class="reason-btn" name="reason" value="{{ r }}" formaction="{{ reject }}" title="{{ reasons[r] }}"
-            aria-pressed="{{ 'true' if e.status == 'abgelehnt' and e.reason == r else 'false' }}">{{ icon('x') }}{{ r }}</button>{% endfor %}
+          {% for r in reasons %}<button class="reason-btn" name="reason" value="{{ r }}" formaction="{{ reject }}" title="{{ reason_text(r) }}"
+            aria-pressed="{{ 'true' if e.status == 'abgelehnt' and e.reason == r else 'false' }}">{{ icon('x') }}{{ reason_short(r) }}</button>{% endfor %}
         </div>
-        <label for="free" style="margin-top:var(--s4)">Freitext <small>(sieht der Freund genau so)</small></label>
-        <div class="row"><span class="grow"><input id="free" name="free" maxlength="300" value="{{ free }}" placeholder="z. B. Lass uns kurz telefonieren"></span>
-          <button class="btn" name="reason" value="" formaction="{{ reject }}">{{ icon('x') }}Mit Freitext ablehnen</button></div>
+        <label for="free" style="margin-top:var(--s4)">{{ _('Freitext') }} <small>{{ _('(sieht der Freund genau so)') }}</small></label>
+        <div class="row"><span class="grow"><input id="free" name="free" maxlength="300" value="{{ free }}" placeholder="{{ _('z. B. Lass uns kurz telefonieren') }}"></span>
+          <button class="btn" name="reason" value="" formaction="{{ reject }}">{{ icon('x') }}{{ _('Mit Freitext ablehnen') }}</button></div>
       </div>
     </form>
     {% endif %}
@@ -94,27 +94,27 @@
   <aside class="rise" style="--i:2">
     <div class="card">{{ specs() }}
       <div class="actions">
-        {% if g.admin and kind(e) %}<a class="btn btn-primary btn-wide" href="{{ url_for('model_file', link_id=e.id, download=1) }}">{{ icon('download') }}Datei herunterladen</a>{% endif %}
-        {% if e.url %}<a class="btn btn-wide" href="{{ e.url }}" rel="noopener noreferrer" target="_blank">{{ icon('external') }}Link öffnen</a>{% endif %}
+        {% if g.admin and kind(e) %}<a class="btn btn-primary btn-wide" href="{{ url_for('model_file', link_id=e.id, download=1) }}">{{ icon('download') }}{{ _('Datei herunterladen') }}</a>{% endif %}
+        {% if e.url %}<a class="btn btn-wide" href="{{ e.url }}" rel="noopener noreferrer" target="_blank">{{ icon('external') }}{{ _('Link öffnen') }}</a>{% endif %}
       </div>
     </div>
 
     {% if g.admin %}
     <details class="card">
-      <summary>{{ icon('upload') }}{{ '3D-Datei ersetzen' if kind(e) else '3D-Datei hinterlegen' }}</summary>
+      <summary>{{ icon('upload') }}{{ _('3D-Datei ersetzen') if kind(e) else _('3D-Datei hinterlegen') }}</summary>
       <form method="post" enctype="multipart/form-data" action="{{ url_for('attach_model', link_id=e.id) }}">
-        <label for="mdl">STL oder 3MF <small>(bis 100 MB)</small></label>
+        <label for="mdl">{{ _('STL oder 3MF') }} <small>{{ _('(bis 100 MB)') }}</small></label>
         <input id="mdl" type="file" name="model" accept=".stl,.3mf" required>
-        <button class="btn" style="margin-top:var(--s3)">Datei hinterlegen</button>
+        <button class="btn" style="margin-top:var(--s3)">{{ _('Datei hinterlegen') }}</button>
       </form>
     </details>
     {% endif %}
     <details class="card">
-      <summary>{{ icon('image') }}Vorschaubild ersetzen</summary>
+      <summary>{{ icon('image') }}{{ _('Vorschaubild ersetzen') }}</summary>
       <form method="post" enctype="multipart/form-data" action="{{ url_for('replace_image', link_id=e.id) }}">
-        <label for="img">Neues Bild <small>(JPG, PNG, GIF oder WebP, bis 5 MB)</small></label>
+        <label for="img">{{ _('Neues Bild') }} <small>{{ _('(JPG, PNG, GIF oder WebP, bis 5 MB)') }}</small></label>
         <input id="img" type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp" required>
-        <button class="btn" style="margin-top:var(--s3)">Bild ersetzen</button>
+        <button class="btn" style="margin-top:var(--s3)">{{ _('Bild ersetzen') }}</button>
       </form>
     </details>
   </aside>
