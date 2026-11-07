@@ -30,6 +30,7 @@
   <a href="#funktionen">Funktionen</a> ·
   <a href="#welches-tool-passt-zu-dir">Vergleich</a> ·
   <a href="#starten">Starten</a> ·
+  <a href="#nur-mit-dem-fertigen-image-ohne-git">Fertiges Image</a> ·
   <a href="#alternative-mit-dockhand">Dockhand</a> ·
   <a href="#daten-und-sicherung">Sicherung</a> ·
   <a href="#aktivität">Aktivität</a> ·
@@ -125,6 +126,42 @@ docker compose up -d
 Compose lädt das fertige Image von `ghcr.io/neodk2004/pleaseprintit`. Lieber selbst bauen? Dann `docker compose up -d --build`.
 
 Danach läuft die App unter `http://<dein-rechner>:8080` (anderer Port: `PORT` in der `.env`). Melde dich mit dem Namen **admin** und deinem `ADMIN_PASSWORD` an.
+
+## Nur mit dem fertigen Image (ohne Git)
+
+Das Image liegt als [Package auf GitHub](https://github.com/neodk2004/pleaseprintit/pkgs/container/pleaseprintit) unter `ghcr.io/neodk2004/pleaseprintit`. Es ist öffentlich, ein Login ist nicht nötig. Den Quellcode brauchst du nicht, zwei Dateien reichen:
+
+```sh
+mkdir pleaseprintit && cd pleaseprintit
+curl -fsSLO https://raw.githubusercontent.com/neodk2004/pleaseprintit/main/compose.yaml
+curl -fsSL -o .env https://raw.githubusercontent.com/neodk2004/pleaseprintit/main/.env.example
+nano .env                   # ADMIN_PASSWORD und SECRET_KEY ändern
+mkdir -p data backups
+sudo chown 1000:1000 data backups   # nur Linux
+docker compose up -d
+```
+
+Compose holt das passende Image für deinen Rechner (x86 oder ARM64) selbst. Die App und die tägliche Sicherung laufen dann genau wie oben.
+
+**Nur kurz ausprobieren?** Ein einzelner Befehl genügt, allerdings ohne tägliche Sicherung:
+
+```sh
+docker run -d --name pleaseprintit -p 8080:8000 \
+  -e ADMIN_PASSWORD=dein-passwort -e SECRET_KEY=lange-zufallszeichenkette \
+  -v pleaseprintit-data:/data ghcr.io/neodk2004/pleaseprintit:latest
+```
+
+**Welche Version?** Das Image gibt es mit mehreren Tags:
+
+| Tag | Bedeutung |
+|---|---|
+| `latest` | immer der neueste Stand, bei jeder Änderung aktualisiert |
+| `1.0` | bleibt bei Version 1.0, bekommt aber Fehlerbehebungen (1.0.1, 1.0.2 …) |
+| `1.0.0` | genau diese Version, ändert sich nie |
+
+Wer lieber selbst entscheidet, wann ein Update kommt, ersetzt in der `compose.yaml` beide Male `:latest` durch z. B. `:1.0`. Alle Versionen stehen unter [Releases](https://github.com/neodk2004/pleaseprintit/releases).
+
+**Update:** `docker compose pull && docker compose up -d`. Die Daten in `./data` bleiben dabei erhalten.
 
 ## Alternative: mit Dockhand
 

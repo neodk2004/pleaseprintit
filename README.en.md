@@ -30,6 +30,7 @@
   <a href="#features">Features</a> ·
   <a href="#which-tool-is-right-for-you">Comparison</a> ·
   <a href="#getting-started">Getting started</a> ·
+  <a href="#prebuilt-image-only-no-git">Prebuilt image</a> ·
   <a href="#alternative-with-dockhand">Dockhand</a> ·
   <a href="#data-and-backups">Backups</a> ·
   <a href="#activity">Activity</a> ·
@@ -146,6 +147,42 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | `SMTP_SECURITY` | no | `starttls` (default), `ssl` or `none` |
 | `SMTP_USER`, `SMTP_PASSWORD` | no | login for the mail server (use an app password) |
 | `SMTP_FROM` | no | sender, e.g. `PleasePrintit <print@example.org>` |
+
+## Prebuilt image only (no Git)
+
+The image is published as a [GitHub package](https://github.com/neodk2004/pleaseprintit/pkgs/container/pleaseprintit) at `ghcr.io/neodk2004/pleaseprintit`. It is public, no login needed. You don't need the source code, two files are enough:
+
+```sh
+mkdir pleaseprintit && cd pleaseprintit
+curl -fsSLO https://raw.githubusercontent.com/neodk2004/pleaseprintit/main/compose.yaml
+curl -fsSL -o .env https://raw.githubusercontent.com/neodk2004/pleaseprintit/main/.env.example
+nano .env                   # change ADMIN_PASSWORD and SECRET_KEY
+mkdir -p data backups
+sudo chown 1000:1000 data backups   # Linux only
+docker compose up -d
+```
+
+Compose picks the right image for your machine (x86 or ARM64). The app and the daily backup then run exactly as described above.
+
+**Just want to try it?** A single command does it, but without the daily backup:
+
+```sh
+docker run -d --name pleaseprintit -p 8080:8000 \
+  -e ADMIN_PASSWORD=your-password -e SECRET_KEY=long-random-string \
+  -v pleaseprintit-data:/data ghcr.io/neodk2004/pleaseprintit:latest
+```
+
+**Which version?** The image comes with several tags:
+
+| Tag | Meaning |
+|---|---|
+| `latest` | always the newest state, updated with every change |
+| `1.0` | stays on version 1.0 but receives bug fixes (1.0.1, 1.0.2 …) |
+| `1.0.0` | exactly this version, never changes |
+
+If you'd rather decide yourself when to update, replace both `:latest` in `compose.yaml` with e.g. `:1.0`. All versions are listed under [Releases](https://github.com/neodk2004/pleaseprintit/releases).
+
+**Update:** `docker compose pull && docker compose up -d`. Your data in `./data` is kept.
 
 ## Alternative: with Dockhand
 
