@@ -17,6 +17,7 @@
   <img src="https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white" alt="Flask 3.1">
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
   <img src="https://img.shields.io/badge/Dockhand-ready-e8620f" alt="Dockhand ready">
+  <img src="https://img.shields.io/badge/Raspberry%20Pi-ARM64-C51A4A?logo=raspberrypi&logoColor=white" alt="Runs on Raspberry Pi (ARM64)">
   <img src="https://img.shields.io/badge/UI-German-e8620f" alt="UI language: German">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT"></a>
 </p>
@@ -27,7 +28,7 @@
 <p align="center">
   <a href="#how-it-works">How it works</a> ·
   <a href="#features">Features</a> ·
-  <a href="#is-pleaseprintit-right-for-you">Right for you?</a> ·
+  <a href="#which-tool-is-right-for-you">Comparison</a> ·
   <a href="#getting-started">Getting started</a> ·
   <a href="#alternative-with-dockhand">Dockhand</a> ·
   <a href="#data-and-backups">Backups</a> ·
@@ -71,23 +72,45 @@ flowchart LR
 - 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL/3MF file.
 - 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate.
 - 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
+- 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. No payment feature, just so nobody has to guess.
 - 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
 - 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
 - ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
 - 📱 **Mobile friendly:** installable on the home screen (PWA), with light and dark theme.
 - 📄 **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
+- 🍓 **Runs almost anywhere:** prebuilt image for x86 and ARM64, including a Raspberry Pi 4/5 with a 64-bit OS. About 50 MB of RAM when idle, SQLite instead of a database server, HTTPS optional.
 - 💾 **Daily backups** with a verification tool, the last 14 are kept.
 - 🔒 **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system.
 
-## Is PleasePrintit right for you?
+## Which tool is right for you?
 
-PleasePrintit is deliberately small: **one printer, one admin, one private circle of friends.** Accounts are created only through invite links, there is no telemetry, and the app is a handful of Python files with SQLite that you can read in an evening.
+There are now three free, self-hosted tools for print requests. They come in different sizes, and each has its place:
 
-If you run **several printers or a small print farm** and need things like automatic printer assignment, fair queueing across requesters, SSO or cloud storage, [STL Quest](https://github.com/richardsolomou/stl.quest) is the better fit.
+| | **PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
+|---|---|---|---|
+| Built for | friends, one printer | small office, one printer | hobby up to print farm |
+| Request by link | Printables, MakerWorld, Thingiverse | Printables only (opt-in) | five sites incl. MakerWorld |
+| 3D preview | ✅ with build-plate check | ✅ | ✅ |
+| Material cost | ✅ per request and per friend | – | – |
+| Questions | rejection with a reason | ✅ comments on the request | notes |
+| Several printers | – | – | ✅ with auto-assignment |
+| Sign-in | invite + password | invite, passkeys, SSO | invite, SSO, 2FA |
+| Raspberry Pi (ARM64) | ✅ | – (x86 only) | ✅ |
+| Server needs | SQLite, ~50 MB RAM | Postgres, ~1 GB RAM, HTTPS required | SQLite or Postgres |
+| UI language | German | English | English, French, German |
+| License | MIT | AGPL-3.0 | AGPL-3.0 |
+
+<sub>As of November 2026, based on each project's README. Something wrong? Please open an issue.</sub>
+
+**What PleasePrintit deliberately leaves out:** single sign-on, an API, multiple printers, payments. That keeps it small: a handful of Python files you can read in an evening, started with one command.
+
+- **Printing for friends and family** and want to know what it costs? → PleasePrintit.
+- **One printer in an office**, you want to discuss requests and already have SSO? → PrettyPleasePrint.
+- **Several printers or a small print farm?** → STL Quest.
 
 ## Getting started
 
-You need Docker with Compose.
+You need Docker with Compose. The prebuilt image is available for x86 and ARM64, so it also runs on a Raspberry Pi 4/5 with a 64-bit OS.
 
 ```sh
 git clone https://github.com/neodk2004/pleaseprintit.git
@@ -95,8 +118,10 @@ cd pleaseprintit
 cp .env.example .env        # then change ADMIN_PASSWORD and SECRET_KEY
 mkdir -p data backups
 sudo chown 1000:1000 data backups   # Linux only: the app runs as user 1000 inside the container
-docker compose up -d --build
+docker compose up -d
 ```
+
+Compose pulls the prebuilt image from `ghcr.io/neodk2004/pleaseprintit`. Prefer to build it yourself? Use `docker compose up -d --build`.
 
 The app is then available at `http://<your-host>:8080` (different port: set `PORT` in `.env`). Log in with the name **admin** and your `ADMIN_PASSWORD`.
 
@@ -173,8 +198,11 @@ Put the app behind a reverse proxy with HTTPS, e.g. Nginx Proxy Manager, Caddy o
 
 ```sh
 git pull
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
+
+If you build it yourself, use `git pull && docker compose up -d --build` instead.
 
 ## Tests
 
@@ -188,7 +216,7 @@ python test_app.py && python test_models.py && python test_preview.py
 
 </details>
 
-Every push runs the tests, validates the compose files and test-starts the Docker image via GitHub Actions. Dependabot checks for outdated dependencies once a week.
+Every push runs the tests, validates the compose files and test-starts the Docker image on x86 and ARM64 via GitHub Actions. When everything is green, the prebuilt image on ghcr.io is updated. Dependabot checks for outdated dependencies once a week.
 
 ## Activity
 

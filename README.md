@@ -17,6 +17,7 @@
   <img src="https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white" alt="Flask 3.1">
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
   <img src="https://img.shields.io/badge/Dockhand-bereit-e8620f" alt="Dockhand bereit">
+  <img src="https://img.shields.io/badge/Raspberry%20Pi-ARM64-C51A4A?logo=raspberrypi&logoColor=white" alt="Läuft auf Raspberry Pi (ARM64)">
   <img src="https://img.shields.io/badge/Sprache-Deutsch-e8620f" alt="Deutsch">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-MIT-green" alt="Lizenz: MIT"></a>
 </p>
@@ -27,7 +28,7 @@
 <p align="center">
   <a href="#so-läufts-ab">So läuft's ab</a> ·
   <a href="#funktionen">Funktionen</a> ·
-  <a href="#passt-pleaseprintit-zu-dir">Passt es?</a> ·
+  <a href="#welches-tool-passt-zu-dir">Vergleich</a> ·
   <a href="#starten">Starten</a> ·
   <a href="#alternative-mit-dockhand">Dockhand</a> ·
   <a href="#daten-und-sicherung">Sicherung</a> ·
@@ -39,7 +40,7 @@
 
 Wer einen 3D-Drucker hat, kennt das: „Kannst du mir das mal drucken?“, dazu ein Link, irgendwo zwischen Urlaubsfotos und Sprachnachrichten. **PleasePrintit** sammelt diese Wünsche an einem Ort. Freunde melden sich über einen persönlichen Einladungslink an, reichen Modelle mit Filament, Farbe und Stückzahl ein und sehen jederzeit, wie weit ihr Auftrag ist. Du bekommst eine aufgeräumte Liste mit Vorschau und arbeitest sie in Ruhe ab.
 
-Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst gehostet mit Docker, ohne Cloud und ohne Tracking.
+Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst gehostet mit Docker, ohne Cloud und ohne Tracking. Läuft auf dem NAS, einem kleinen Server oder einem **Raspberry Pi**: fertiges Image, ein Befehl, keine Datenbank einzurichten.
 
 <p align="center">
   <img src="docs/auftraege.png" alt="Auftragsliste der Werkstatt mit Status, Filament, Gewicht und Materialkosten" width="49%">
@@ -47,7 +48,7 @@ Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst ge
 </p>
 <p align="center"><sub>Links: die Warteschlange der Werkstatt. Rechts: ein Auftrag mit 3D-Vorschau im dunklen Design. Alle Namen und Modelle sind Demodaten.</sub></p>
 
-> **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) and deploys with Docker Compose or Dockhand. The user interface is in German. **→ [Full English guide](README.en.md)**
+> **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) with a prebuilt multi-arch image (amd64 and arm64, so a Raspberry Pi works too) and deploys with Docker Compose or Dockhand. The user interface is in German. **→ [Full English guide](README.en.md)**
 
 ## So läuft's ab
 
@@ -71,23 +72,45 @@ flowchart LR
 - 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-/3MF-Datei.
 - 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
+- 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Ganz ohne Bezahlfunktion, nur damit niemand raten muss.
 - 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
 - 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
 - ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
 - 📱 **Handy-tauglich:** als App auf dem Startbildschirm installierbar (PWA), mit hellem und dunklem Design.
 - 📄 **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
+- 🍓 **Läuft fast überall:** fertiges Image für x86 und ARM64, also auch Raspberry Pi 4/5 mit 64-Bit-System. Rund 50 MB Arbeitsspeicher im Leerlauf, SQLite statt Datenbankserver, HTTPS optional.
 - 💾 **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
 - 🔒 **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System.
 
-## Passt PleasePrintit zu dir?
+## Welches Tool passt zu dir?
 
-PleasePrintit ist bewusst klein: **ein Drucker, ein Admin, ein privater Freundeskreis.** Konten entstehen nur über Einladungslinks, es gibt keine Telemetrie, und die App besteht aus wenigen Python-Dateien mit SQLite, die man an einem Abend durchgelesen hat.
+Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie sind unterschiedlich groß, und jedes hat seinen Platz:
 
-Wer **mehrere Drucker oder eine kleine Druckfarm** verwaltet und Funktionen wie automatische Druckerzuteilung, faire Warteschlange über mehrere Einreicher, SSO oder Cloud-Speicher braucht, ist mit [STL Quest](https://github.com/richardsolomou/stl.quest) besser bedient.
+| | **PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
+|---|---|---|---|
+| Gedacht für | Freundeskreis, ein Drucker | kleines Büro, ein Drucker | Hobby bis Druckfarm |
+| Wunsch per Link | Printables, MakerWorld, Thingiverse | nur Printables (abschaltbar) | fünf Seiten, u. a. MakerWorld |
+| 3D-Vorschau | ✅ mit Druckbett-Check | ✅ | ✅ |
+| Materialkosten | ✅ pro Auftrag und pro Freund | – | – |
+| Rückfragen | Ablehnung mit Grund | ✅ Kommentare am Auftrag | Notizen |
+| Mehrere Drucker | – | – | ✅ mit Auto-Zuteilung |
+| Anmeldung | Einladung + Passwort | Einladung, Passkeys, SSO | Einladung, SSO, 2FA |
+| Raspberry Pi (ARM64) | ✅ | – (nur x86) | ✅ |
+| Server-Bedarf | SQLite, ~50 MB RAM | Postgres, ~1 GB RAM, HTTPS Pflicht | SQLite oder Postgres |
+| Oberfläche | Deutsch | Englisch | Englisch, Französisch, Deutsch |
+| Lizenz | MIT | AGPL-3.0 | AGPL-3.0 |
+
+<sub>Stand November 2026, nach den Angaben in den READMEs der Projekte. Etwas falsch? Bitte ein Issue aufmachen.</sub>
+
+**Was PleasePrintit bewusst nicht hat:** Single Sign-on, eine Programmierschnittstelle, mehrere Drucker, Bezahlfunktionen. Das hält die App klein: wenige Python-Dateien, die man an einem Abend durchgelesen hat, und ein Start mit einem Befehl.
+
+- **Du druckst für Freunde und Familie** und willst wissen, was es kostet? → PleasePrintit.
+- **Ein Drucker im Büro**, ihr wollt am Auftrag diskutieren und habt schon SSO? → PrettyPleasePrint.
+- **Mehrere Drucker oder eine kleine Druckfarm?** → STL Quest.
 
 ## Starten
 
-Du brauchst Docker mit Compose.
+Du brauchst Docker mit Compose. Das fertige Image gibt es für x86 und ARM64, es läuft also auch auf einem Raspberry Pi 4/5 mit 64-Bit-System.
 
 ```sh
 git clone https://github.com/neodk2004/pleaseprintit.git
@@ -95,8 +118,10 @@ cd pleaseprintit
 cp .env.example .env        # dann ADMIN_PASSWORD und SECRET_KEY ändern
 mkdir -p data backups
 sudo chown 1000:1000 data backups   # nur Linux: die App läuft im Container als Benutzer 1000
-docker compose up -d --build
+docker compose up -d
 ```
+
+Compose lädt das fertige Image von `ghcr.io/neodk2004/pleaseprintit`. Lieber selbst bauen? Dann `docker compose up -d --build`.
 
 Danach läuft die App unter `http://<dein-rechner>:8080` (anderer Port: `PORT` in der `.env`). Melde dich mit dem Namen **admin** und deinem `ADMIN_PASSWORD` an.
 
@@ -145,8 +170,11 @@ Stell die App hinter einen Reverse Proxy mit HTTPS, z. B. Nginx Proxy Manager, C
 
 ```sh
 git pull
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
+
+Wer selbst baut, nimmt stattdessen `git pull && docker compose up -d --build`.
 
 ## Tests
 
@@ -160,7 +188,7 @@ python test_app.py && python test_models.py && python test_preview.py
 
 </details>
 
-Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probestart des Docker-Images automatisch über GitHub Actions. Dependabot meldet einmal pro Woche veraltete Abhängigkeiten.
+Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probestart des Docker-Images auf x86 und ARM64 automatisch über GitHub Actions. Sind alle grün, wird das fertige Image auf ghcr.io aktualisiert. Dependabot meldet einmal pro Woche veraltete Abhängigkeiten.
 
 ## Aktivität
 
