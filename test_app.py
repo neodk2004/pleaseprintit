@@ -208,6 +208,12 @@ assert "1 g" in page and "0,03 €" in page and "127.0.0.1/wuerfel" in page   # 
 old = con.execute("SELECT file FROM links WHERE id = ?", (w_id,)).fetchone()[0]
 admin.post(f"/entry/{w_id}/model", data=cube(), content_type="multipart/form-data")
 assert not os.path.exists(os.path.join(A.MODELS, old)), "alte Datei nicht gelöscht"
+# „Für dich gedruckt“: zählt nur Gedrucktes, Freund im Profil, Werkstatt in der Freundesliste
+assert "0,03 €" not in ben.get("/me").data.decode()
+was = con.execute("SELECT status FROM links WHERE id = ?", (w_id,)).fetchone()[0]
+con.execute("UPDATE links SET status = 'gedruckt' WHERE id = ?", (w_id,)); con.commit()
+assert "0,03 €" in ben.get("/me").data.decode() and "0,03 €" in admin.get("/users").data.decode()
+con.execute("UPDATE links SET status = ? WHERE id = ?", (was, w_id)); con.commit()
 
 admin.post(f"/entry/{w_id}/status", data={"status": "abgelehnt", "reason": "Zu komplex"})
 page = ben.get(f"/entry/{w_id}").data.decode()

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon with context %}
+{% from "_macros.html" import icon, euro with context %}
 {% block title %}Freunde · {% endblock %}
 {% block body %}
 <div class="pagehead rise">
@@ -33,7 +33,7 @@
     <span class="avatar" aria-hidden="true">{{ p.name[:1]|upper }}</span>
     <span class="who"><a href="{{ url_for('index', user=p.id) }}">{{ p.name }}</a><br>
       <small>seit {{ p.created }}{% if p.email %} · {{ icon('mail', 'bekommt Status-Mails') }}{% endif %}{% if not p.active %} · gesperrt{% endif %}</small></span>
-    <span class="stats"><span>{{ p.orders }} Auftr.</span><span>{{ (p.used / 1048576)|round(1) }} MB</span></span>
+    <span class="stats"><span>{{ p.orders }} Auftr.</span><span>{{ (p.used / 1048576)|round(1) }} MB</span>{% if done[p.id][2] %}<span title="Materialkosten aller gedruckten Teile (Schätzung)">{{ euro(done[p.id][2]) }}</span>{% endif %}</span>
     {% if p.active %}<form method="post" action="{{ url_for('create_reset', uid=p.id) }}"><button class="btn btn-sm btn-ghost" title="Link für ein neues Passwort erzeugen">{{ icon('rotate') }}<span class="label-sm">Passwort-Link</span></button></form>{% endif %}
     <form method="post" action="{{ url_for('toggle_user', uid=p.id) }}"><button class="btn btn-sm">{{ 'Sperren' if p.active else 'Entsperren' }}</button></form>
   </li>

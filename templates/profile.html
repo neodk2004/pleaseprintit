@@ -1,10 +1,20 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon with context %}
+{% from "_macros.html" import icon, grams, euro with context %}
 {% block title %}Profil · {% endblock %}
 {% block body %}
 <div style="max-width:36rem;margin:0 auto">
 <div class="pagehead rise"><div><p class="eyebrow">Profil</p><h1>Hallo {{ g.user.name }}</h1></div></div>
 {% if msg %}<p class="ok-msg" role="status">{{ icon('check') }}{{ msg }}</p>{% endif %}
+
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('coin') }} Für dich gedruckt</h3>
+  {% if done[0] %}
+  <p style="margin:0"><b>{{ done[0] }} {{ 'Teil' if done[0] == 1 else 'Teile' }}</b>{% if done[1] %} · {{ grams(done) }}{% endif %}{% if done[2] %} · Material ca. <b>{{ euro(done[2]) }}</b>{% endif %}</p>
+  <p class="muted" style="margin:.4em 0 0">Grobe Schätzung ohne Strom und Druckzeit – falls du dich mal mit einer Rolle Filament oder einem Kaffee revanchieren magst.</p>
+  {% else %}
+  <p class="muted" style="margin:0">Noch nichts gedruckt. Sobald ein Auftrag fertig ist, siehst du hier, was zusammengekommen ist.</p>
+  {% endif %}
+</section>
 
 <section class="card rise" style="--i:1">
   <h3>{{ icon('mail') }} Benachrichtigung per E-Mail</h3>

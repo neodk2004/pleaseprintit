@@ -159,6 +159,18 @@ def estimate(con, e):
     return grams, grams * f["price_kg"] / 1000 if f and f["price_kg"] else None
 
 
+def printed(con, user_id):
+    """(Stück, Gramm, Euro oder None) aller gedruckten Aufträge einer Person – für „Für dich gedruckt“."""
+    n, grams, eur = 0, 0.0, None
+    for e in con.execute("SELECT * FROM links WHERE user_id = ? AND status = 'gedruckt'", (user_id,)).fetchall():
+        n += e["qty"] or 1
+        if c := estimate(con, e):
+            grams += c[0]
+            if c[1] is not None:
+                eur = (eur or 0) + c[1]
+    return n, grams, eur
+
+
 def bed(con):
     """Druckbereich (x, y, z) in mm; 0 = keine Grenze."""
     return tuple(setting(con, k) for k in ("bed_x", "bed_y", "bed_z"))
@@ -677,7 +689,9 @@ def profile():
                 con.execute("UPDATE users SET email = ? WHERE id = ?", (email or None, g.user["id"]))
             msg = "Gespeichert." if email else "E-Mail-Adresse gelöscht – du bekommst keine Mails mehr."
             g.user = dict(g.user, email=email or None)
-    return render_template("profile.html", msg=msg, error=err, mail_on=mail.configured()), 400 if err else 200
+    with db() as con:
+        done = printed(con, g.user["id"])
+    return render_template("profile.html", msg=msg, error=err, mail_on=mail.configured(), done=done), 400 if err else 200
 
 
 @app.post("/me/test")
@@ -687,10 +701,11 @@ def test_mail():
     with db() as con:
         e = con.execute("SELECT * FROM links WHERE user_id = ? ORDER BY id DESC", (g.user["id"],)).fetchone()
         if not e:
-            return render_template("profile.html", mail_on=True,
+            return render_template("profile.html", mail_on=True, done=printed(con, g.user["id"]),
                                    error="Reich zuerst einen Auftrag ein – die Testmail zeigt deinen neuesten."), 400
         fail = mail.send_now(status_mail(con, e, g.user["email"]))
-    return render_template("profile.html", mail_on=True, error=fail and "Versand fehlgeschlagen. Die Werkstatt schaut nach.",
+        done = printed(con, g.user["id"])
+    return render_template("profile.html", mail_on=True, done=done, error=fail and "Versand fehlgeschlagen. Die Werkstatt schaut nach.",
                            msg=None if fail else f"Testmail an {g.user['email']} ist raus."), 502 if fail else 200
 
 
@@ -709,7 +724,8 @@ def users():
                              "FROM resets r JOIN users u ON u.id = r.user_id WHERE r.used = 0 "
                              "AND (julianday('now') - julianday(r.created)) * 24 < ? ORDER BY r.created DESC",
                              (RESET_HOURS,)).fetchall()
-    return render_template("users.html", people=people, invites=invites, days=INVITE_DAYS,
+        done = {p["id"]: printed(con, p["id"]) for p in people}
+    return render_template("users.html", people=people, done=done, invites=invites, days=INVITE_DAYS,
                            mail_on=mail.configured(), resets=resets, reset_hours=RESET_HOURS)
 
 
