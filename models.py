@@ -8,7 +8,7 @@ MAX_3MF_UNPACKED = 500 * 1024 * 1024    # 3MF ist ein ZIP: Schutz vor "Zip-Bombe
 
 
 def model_kind(path):
-    """Gibt 'stl', '3mf' oder None zurück."""
+    """Gibt 'stl', '3mf', 'step' oder None zurück."""
     with open(path, "rb") as f:
         head = f.read(84)
         size = f.seek(0, 2)
@@ -19,6 +19,8 @@ def model_kind(path):
         start = f.read(65536).lower()
     if start.lstrip().startswith(b"solid") and b"facet" in start:
         return "stl"
+    if start.lstrip(b"\xef\xbb\xbf \t\r\n").startswith(b"iso-10303-21;"):   # STEP (ISO 10303-21), Text
+        return "step"
     if zipfile.is_zipfile(path):
         try:
             with zipfile.ZipFile(path) as z:
@@ -40,6 +42,8 @@ def _signed(a, b, c):
 def volume_cm3(path, kind):
     """Volumen des Modells in cm³ (Einheit mm angenommen) oder None, wenn nicht lesbar.
     Summe über alle Netze; mehrfach platzierte Instanzen in 3MF zählen einmal."""
+    if kind == "step":
+        return None   # braucht OpenCascade; misst der Browser (static/step.js), siehe app.measure
     total = 0.0
     try:
         if kind == "stl":

@@ -140,7 +140,13 @@ con = sqlite3.connect(A.DB)
 assert ben.get("/settings").status_code == 403
 assert ben.post("/settings/filaments", data={"name": "PLA"}).status_code == 403
 admin.post("/settings/filaments", data={"name": "PLA"})
-admin.post("/settings/filaments", data={"name": "pla"})          # doppelt (Groß/Klein egal) → ignoriert
+admin.post("/settings/filaments", data={"name": "PLA"})          # doppelt → ignoriert
+for bad in ("pla", "Holz-Mix", ""):                              # nur Sorten aus der Liste, kein Freitext
+    assert admin.post("/settings/filaments", data={"name": bad}).status_code == 400, bad
+assert con.execute("SELECT density FROM filaments WHERE name = 'PLA'").fetchone()[0] == 1.24, "Dichte vorausgefüllt"
+page = admin.get("/settings?tab=filamente").data.decode()
+assert "<option>PETG</option>" in page and "<option>PLA</option>" not in page, "nur noch fehlende Sorten"
+assert '<select name="name" required' in page and "Neues Filament" not in page, "Auswahl statt Freitext"
 fid = con.execute("SELECT id FROM filaments WHERE name = 'PLA'").fetchone()[0]
 assert con.execute("SELECT COUNT(*) FROM filaments").fetchone()[0] == 1
 assert admin.post(f"/settings/filaments/{fid}/colors", data={"name": "Rot", "hex": "red"}).status_code == 400
@@ -354,4 +360,117 @@ assert client().get(f"/reset/{tok}").status_code == 404, "nach 24 Stunden abgela
 del os.environ["SMTP_HOST"]
 A.FAILS.clear()
 benpw = "neuespasswort"
+
+# Archiv: Erledigtes wandert nach der Frist aus der Warteschlange; Suche, Zeitraum, Knöpfe
+r = admin.post("/orders", data={"url": "http://127.0.0.1/archiv", "title": "Archivstueck", "choice": f"r:{pid}"})
+aid = int(r.headers["Location"].rsplit("/", 1)[1])
+admin.post(f"/entry/{aid}/status", data={"status": "gedruckt"})
+assert "Archivstueck" in admin.get("/").data.decode(), "frisch gedruckt: noch in der Warteschlange"
+old = lambda: (con.execute("UPDATE status_log SET at = '01.01.2020 10:00' WHERE link_id = ?", (aid,)), con.commit())
+old()
+assert "Archivstueck" not in admin.get("/").data.decode(), "nach 14 Tagen archiviert"
+assert "Archivstueck" in admin.get("/?archiv=1&q=archivst").data.decode()
+assert "Archivstueck" not in admin.get("/?archiv=1&bis=2000-01-01").data.decode(), "Zeitraum filtert"
+assert anna.post("/archive", data={"id": aid, "action": "restore"}).status_code == 403
+admin.post("/archive", data={"id": aid, "action": "restore"})
+assert "Archivstueck" in admin.get("/").data.decode(), "zurückgeholt bleibt in der Warteschlange"
+admin.post("/archive", data={"id": [str(aid), str(anna_id)], "action": "archive"})
+assert "Archivstueck" not in admin.get("/").data.decode(), "mehrere auf einmal"
+assert "teil.stl" in admin.get("/?archiv=1&q=anna").data.decode(), "Suche nach Freund"
+admin.post(f"/users/{anna_uid}/toggle")   # oben gesperrt, kurz wieder freischalten
+login(anna, "anna", "annapasswort")
+assert "teil.stl" in anna.get("/").data.decode(), "Freunde sehen ihre Aufträge weiter"
+admin.post(f"/entry/{aid}/status", data={"status": "geplant"})
+assert "Archivstueck" in admin.get("/").data.decode(), "Statuswechsel holt zurück"
+admin.post("/settings/bed", data={"archive_days": "0"})
+admin.post(f"/entry/{aid}/status", data={"status": "gedruckt"})
+old()
+assert "Archivstueck" in admin.get("/").data.decode(), "0 Tage = nie automatisch"
+assert admin.get(f"/entry/{aid}").status_code == 200
+
+# Werkstatt öffnet abgelehnten Auftrag mit Grund (Platzhalter {text} kollidierte mit _())
+admin.post(f"/entry/{aid}/status?status=abgelehnt", data={"reason": "Zu komplex"})
+assert "Der Freund liest" in admin.get(f"/entry/{aid}").data.decode()
+
+# Statistik: Werkstatt sieht alles, Freunde nur ihre eigenen Zahlen
+from datetime import datetime, timedelta  # noqa: E402
+admin.post("/users/invite")
+carl = client()
+carl.post(f"/invite/{token()}", data={"name": "carl", "password": "carlpasswort"})
+cid_ = int(carl.post("/orders", data={"url": "http://127.0.0.1/c1", "choice": f"r:{pid}", "qty": "2"})
+           .headers["Location"].rsplit("/", 1)[1])
+admin.post(f"/entry/{cid_}/status", data={"status": "gedruckt"})
+stamp = lambda d: d.strftime("%d.%m.%Y %H:%M")
+con.execute("UPDATE status_log SET at = ? WHERE link_id = ? AND status = 'neu'", (stamp(datetime.now() - timedelta(days=3)), cid_))
+con.execute("UPDATE status_log SET at = ? WHERE link_id = ? AND status = 'gedruckt'", (stamp(datetime.now()), cid_))
+con.commit()
+carl_uid = con.execute("SELECT id FROM users WHERE name = 'carl'").fetchone()[0]
+with A.app.test_request_context("/"):
+    with A.db() as db_:
+        st = A.stats(db_, carl_uid, months=6)
+        assert st["total"]["orders"] == 1 and st["total"]["pieces"] == 2
+        assert round(st["wait"], 1) == 3.0 and st["filaments"] == [("PETG", 1)]
+        assert sum(p["in"] for _l, p in st["months"]) == 1 and st["months"][-1][1]["out"] == 1
+        assert st["months"][-1][0] == datetime.now().strftime("%m/%Y"), "neuester Monat zuletzt"
+        assert A.stats(db_, months=13)["months"][0][0] == st["months"][-1][0][:3] + str(datetime.now().year - 1)
+        alle = A.stats(db_)
+        assert alle["total"]["orders"] == db_.execute("SELECT COUNT(*) FROM links").fetchone()[0]
+        assert ("Zu komplex", 1) in alle["reasons"]
+assert carl.get("/stats").status_code == 403
+assert "3,0 Tage" in carl.get("/me").data.decode()
+page = admin.get("/stats").data.decode()
+assert "Ablehnungsgründe" in page and "PETG" in page
+
+# Trinkgeld: nur https-Links, nur die Werkstatt stellt ein; Knopf bei gedruckt und im Profil
+TIP = "https://paypal.me/werkstatt"
+assert "Trinkgeld geben" not in carl.get("/me").data.decode(), "ohne Link kein Knopf"
+assert carl.post("/settings/tip", data={"tip_url": TIP}).status_code == 403
+for bad in ("javascript:alert(1)", "http://paypal.me/x", "https://localhost", "https://a@paypal.me/x", "paypal.me/x"):
+    assert admin.post("/settings/tip", data={"tip_url": bad}).status_code == 400, bad
+assert admin.post("/settings/tip", data={"tip_url": TIP}).status_code == 302
+assert f'href="{TIP}"' in carl.get("/me").data.decode()
+assert f'href="{TIP}"' in carl.get(f"/entry/{cid_}").data.decode(), "bei gedrucktem Auftrag"
+carl.post("/orders", data={"url": "http://127.0.0.1/c2", "choice": f"r:{pid}"})
+offen = con.execute("SELECT MAX(id) FROM links WHERE user_id = ?", (carl_uid,)).fetchone()[0]
+assert "Trinkgeld geben" not in carl.get(f"/entry/{offen}").data.decode(), "nicht bei offenem Auftrag"
+assert "Trinkgeld geben" not in admin.get(f"/entry/{cid_}").data.decode(), "Werkstatt sieht keinen Knopf"
+admin.post("/settings/tip", data={"tip_url": ""})
+assert "Trinkgeld geben" not in carl.get("/me").data.decode(), "geleert = weg"
+
+# STEP: Upload wird am Inhalt erkannt; Volumen reicht die Auftragsseite einmalig und plausibel nach
+STEP = b"ISO-10303-21;\nHEADER;\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n"
+assert carl.post("/orders", data={"model": (io.BytesIO(b"kein step"), "fake.step"), "choice": f"r:{pid}"},
+                 content_type="multipart/form-data").status_code == 400
+r = carl.post("/orders", data={"model": (io.BytesIO(STEP), "Halter.STEP"), "choice": f"r:{pid}", "dims_x": "10",
+                               "dims_y": "10", "dims_z": "10"}, content_type="multipart/form-data")
+sid = int(r.headers["Location"].rsplit("/", 1)[1])
+page = carl.get(f"/entry/{sid}").data.decode()
+assert 'data-kind="step"' in page and f'data-measure="/entry/{sid}/measure"' in page
+assert carl.get(f"/models/{sid}/file").data == STEP
+admin.post("/settings/bed", data={"bed_x": "100", "bed_y": "100", "bed_z": "100"})
+assert anna.post(f"/entry/{sid}/measure", data={"volume": "1"}).status_code == 404, "fremder Auftrag"
+for bad in ("", "abc", "0", "-5", "nan", "inf", "1000.1"):   # Druckbett 1000 cm³
+    assert carl.post(f"/entry/{sid}/measure", data={"volume": bad}).status_code == 400, bad
+assert carl.post(f"/entry/{sid}/measure", data={"volume": "0.946"}).status_code == 204
+assert carl.post(f"/entry/{sid}/measure", data={"volume": "5"}).status_code == 409, "nur einmal"
+row = con.execute("SELECT volume, dims FROM links WHERE id = ?", (sid,)).fetchone()
+assert row == (0.946, "10 × 10 × 10"), row
+page = carl.get(f"/entry/{sid}").data.decode()
+assert "data-measure=\"\"" in page and "0,9 cm³" in page, "danach Kostenschätzung statt erneuter Messung"
+assert carl.post(f"/entry/{cid_}/measure", data={"volume": "1"}).status_code == 409, "nur für STEP"
+assert "eval" not in carl.get(f"/entry/{sid}").headers["Content-Security-Policy"], "Seiten bleiben ohne eval"
+csp = client().get("/static/occt/occt-import-js-worker.js").headers["Content-Security-Policy"]
+assert "'unsafe-eval'" in csp and "'wasm-unsafe-eval'" in csp, "nur der STEP-Worker darf eval"
+admin.post("/settings/bed", data={"bed_x": "", "bed_y": "", "bed_z": ""})
+
+# Einstellungen in Tabs: jeder Tab zeigt nur seinen Bereich; Speichern führt in denselben Tab zurück
+for tab, inside, outside in (("drucker", "bed_x", "tip_url"), ("filamente", "price_kg", "bed_x"),
+                             ("werkstatt", "tip_url", "imp_name"), ("rechtliches", "imp_name", "price_kg"),
+                             ("quatsch", "bed_x", "imp_name")):
+    page = admin.get(f"/settings?tab={tab}").data.decode()
+    assert f'name="{inside}"' in page and f'name="{outside}"' not in page, tab
+for path, data, tab in (("/settings/bed", {"fill": "50"}, "drucker"), ("/settings/bed", {"archive_days": "14"}, "werkstatt"),
+                        ("/settings/tip", {"tip_url": ""}, "werkstatt"), ("/settings/filaments", {"name": "ASA"}, "filamente"),
+                        ("/settings/legal", {}, "rechtliches")):
+    assert admin.post(path, data=data).headers["Location"].endswith(f"/settings?tab={tab}"), path
 print("OK")

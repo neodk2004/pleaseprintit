@@ -4,7 +4,7 @@ import { fits, fmt, measure, parseBed, parseModel, t } from './model.js';
 
 const box = document.getElementById('viewer');
 const dims = document.getElementById('dims');
-const { src, kind, thumb } = box.dataset;
+const { src, kind, thumb, measure: measureUrl } = box.dataset;
 const bed = parseBed(box.dataset.bed);
 
 // Transparenter Hintergrund: das Druckbett-Raster aus dem CSS scheint durch; Vorschaubilder passen zu Hell und Dunkel
@@ -44,6 +44,13 @@ function show(object) {
     dims.append(' ', tag);
   }
 
+  if (measureUrl && object.userData.volume) {   // STEP: Volumen für die Kostenschätzung einmalig nachreichen
+    const fd = new FormData();
+    fd.append('volume', object.userData.volume);
+    ['x', 'y', 'z'].forEach((a, i) => fd.append('dims_' + a, size[i].toFixed(2)));
+    fetch(measureUrl, { method: 'POST', body: fd });
+  }
+
   object.rotation.x = -Math.PI / 2; // Z-oben (Drucker) → Y-oben (three.js)
   const wrap = new THREE.Group();
   wrap.add(object);
@@ -68,5 +75,5 @@ function show(object) {
 
 fetch(src)
   .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-  .then((buf) => show(parseModel(buf, kind)))
+  .then(async (buf) => show(await parseModel(buf, kind)))
   .catch((err) => { dims.textContent = t('Modell konnte nicht angezeigt werden.'); console.error(err); });

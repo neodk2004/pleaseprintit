@@ -6,6 +6,8 @@ import re
 import secrets
 import sqlite3
 import time
+from collections import Counter
+from datetime import date, datetime
 from urllib.parse import urlparse
 
 from flask import Flask, abort, g, redirect, render_template, request, send_from_directory, session, url_for
@@ -40,6 +42,7 @@ INVITE_DAYS = 7
 INVITE_LEN = 5
 INVITE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"   # ohne Verwechsler 0/o, 1/l/i
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]{3,30}$")
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def db():
@@ -72,11 +75,12 @@ def db():
     # Jede Zeile in links ist ein Auftrag; id = Auftragsnummer. url = '' bei Dateien.
     # user_id NULL = vom Administrator selbst angelegt.
     # filament/color/color_hex: Auswahl als Text mitgespeichert, damit sie nach Löschen der Farbe erhalten bleibt.
+    # archived: Zeitpunkt der Archivierung; NULL = in der Warteschlange; '' = von Hand zurückgeholt (bleibt draußen).
     for col, typ in (("site", "TEXT"), ("image", "TEXT"), ("file", "TEXT"), ("file_name", "TEXT"),
                      ("created", "TEXT"), ("user_id", "INTEGER"), ("status", "TEXT NOT NULL DEFAULT 'neu'"),
                      ("size", "INTEGER NOT NULL DEFAULT 0"), ("filament", "TEXT"), ("color", "TEXT"),
                      ("color_hex", "TEXT"), ("dims", "TEXT"), ("reason", "TEXT"), ("volume", "REAL"),
-                     ("qty", "INTEGER NOT NULL DEFAULT 1"), ("successor", "INTEGER")):
+                     ("qty", "INTEGER NOT NULL DEFAULT 1"), ("successor", "INTEGER"), ("archived", "TEXT")):
         if col not in cols:
             con.execute(f"ALTER TABLE links ADD COLUMN {col} {typ}")
     return con
@@ -84,6 +88,23 @@ def db():
 
 def now(con):
     return con.execute("SELECT strftime('%d.%m.%Y %H:%M', 'now', 'localtime')").fetchone()[0]
+
+
+ARCHIVE_DAYS = 14   # Standard: gedruckte und abgelehnte Aufträge nach 14 Tagen ins Archiv
+
+
+def iso(col):
+    """SQL: 'TT.MM.JJJJ HH:MM' (so speichert now() Zeitpunkte) → 'JJJJ-MM-TT', damit SQLite Daten vergleichen kann."""
+    return f"substr({col}, 7, 4) || '-' || substr({col}, 4, 2) || '-' || substr({col}, 1, 2)"
+
+
+def auto_archive(con):
+    """Erledigte Aufträge (gedruckt/abgelehnt) wandern nach der Frist ins Archiv; 0 Tage = nur per Knopf.
+    ponytail: läuft beim Aufruf der Warteschlange statt per Zeitplan, für einen Freundeskreis schnell genug."""
+    if days := int(setting(con, "archive_days", ARCHIVE_DAYS)):
+        con.execute(f"UPDATE links SET archived = ? WHERE archived IS NULL AND status IN ('gedruckt', 'abgelehnt') "
+                    f"AND (SELECT MAX({iso('at')}) FROM status_log WHERE link_id = links.id) "
+                    "<= date('now', 'localtime', ?)", (now(con), f"-{days} days"))
 
 
 def insert(con, **fields):
@@ -148,6 +169,10 @@ def put_setting(con, key, value):
                 "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, value))
 
 
+# Filament-Sorten zur Auswahl (kein Freitext) mit typischer Dichte in g/cm³ als Startwert für die Kostenschätzung
+FILAMENT_TYPES = {"PLA": 1.24, "PLA+": 1.24, "PLA Silk": 1.24, "PLA Matt": 1.24, "PLA-CF": 1.29, "PETG": 1.27,
+                  "PETG-CF": 1.30, "ABS": 1.04, "ASA": 1.07, "TPU": 1.21, "PA (Nylon)": 1.14, "PC": 1.20,
+                  "HIPS": 1.04, "PVA": 1.23}
 FILL = 50   # Standard: Druckteil wiegt etwa die Hälfte eines Vollkörpers (Wände + Füllung)
 
 
@@ -172,6 +197,64 @@ def printed(con, user_id):
             if c[1] is not None:
                 eur = (eur or 0) + c[1]
     return n, grams, eur
+
+
+def parse_at(s):
+    """'TT.MM.JJJJ HH:MM' (so speichert now() Zeitpunkte) → datetime oder None."""
+    try:
+        return datetime.strptime(s, "%d.%m.%Y %H:%M")
+    except (TypeError, ValueError):
+        return None
+
+
+def stats(con, user_id=None, months=12):
+    """Zahlen für die Statistik: alle Aufträge (Werkstatt) oder nur die einer Person.
+    ponytail: rechnet bei jedem Aufruf alles in Python durch; reicht für ein paar tausend Aufträge."""
+    sql, args = ("SELECT * FROM links WHERE user_id = ?", (user_id,)) if user_id else ("SELECT * FROM links", ())
+    rows = con.execute(sql, args).fetchall()
+    logs = {}
+    for lid, s, at in con.execute("SELECT link_id, status, at FROM status_log ORDER BY rowid"):
+        logs.setdefault(lid, {})[s] = at   # letzter Eintrag je Status gewinnt
+    y, m = date.today().year, date.today().month
+    keys = []
+    for i in range(months - 1, -1, -1):   # die letzten Monate, ältester zuerst
+        k = y * 12 + m - 1 - i
+        keys.append((k // 12, k % 12 + 1))
+    per = {k: {"in": 0, "out": 0, "g": 0.0, "eur": 0.0} for k in keys}
+    total = {"orders": len(rows), "pieces": 0, "g": 0.0, "eur": None, "status": Counter()}
+    waits, fil, col, reasons = [], Counter(), Counter(), Counter()
+    for e in rows:
+        at = logs.get(e["id"], {})
+        start = parse_at(at.get("neu") or e["created"])
+        total["status"][e["status"]] += 1
+        if start and (start.year, start.month) in per:
+            per[(start.year, start.month)]["in"] += 1
+        if e["filament"]:
+            fil[e["filament"]] += 1
+            if e["color"] and e["color"] != RANDOM:
+                col[(e["filament"], e["color"], e["color_hex"])] += 1
+        if e["status"] == "abgelehnt":
+            reasons[e["reason"] or ""] += 1
+        if e["status"] != "gedruckt":
+            continue
+        done, c = parse_at(at.get("gedruckt")), estimate(con, e)
+        total["pieces"] += e["qty"] or 1
+        if c:
+            total["g"] += c[0]
+            if c[1] is not None:
+                total["eur"] = (total["eur"] or 0) + c[1]
+        if done and start:
+            waits.append((done - start).total_seconds() / 86400)
+        if done and (done.year, done.month) in per:
+            p = per[(done.year, done.month)]
+            p["out"] += 1
+            if c:
+                p["g"] += c[0]
+                p["eur"] += c[1] or 0
+    top = max([p["in"] for p in per.values()] + [p["out"] for p in per.values()] + [1])
+    return {"total": total, "months": [(f"{mo:02d}/{yr}", per[(yr, mo)]) for yr, mo in keys], "top": top,
+            "wait": sum(waits) / len(waits) if waits else None, "filaments": fil.most_common(5),
+            "colors": col.most_common(5), "reasons": reasons.most_common()}
 
 
 def bed(con):
@@ -250,14 +333,17 @@ def limit_error(con, new_bytes=0):
     return None
 
 
+MAX_VOLUME = 1_000_000   # cm³ = 1 m³; mehr kann kein Hobbydrucker
+
+
 # --- Anmeldung und Rechte -------------------------------------------------
 
 PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang"}
-PAGES = {"entry", "new", "profile", "users", "settings"}   # ohne Anmeldung → Login, danach zurück
+PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne Anmeldung → Login, danach zurück
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ONLY = {"set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
-              "save_legal", "create_reset"}
+              "save_legal", "create_reset", "archive", "stats_page", "save_tip"}
 # Ablehnungsgründe: kurz für die Werkstatt (wird gespeichert) → ausformuliert für den Freund (Seite + Mail)
 REASONS = {
     "Zu komplex": "Das Modell ist für meinen Drucker leider zu komplex – zum Beispiel wegen vieler Stützstrukturen "
@@ -287,7 +373,7 @@ def reason_short(reason):
 
 # --- Sprache: Konto > Cookie > Browser > Deutsch ---------------------------------
 
-def _(text, **kw):
+def _(text, /, **kw):
     return i18n.t(g.get("lang", i18n.DEFAULT), text, **kw)
 
 
@@ -370,6 +456,11 @@ def security_headers(r):
     r.headers["Content-Security-Policy"] = (
         f"default-src 'self'; script-src 'self' 'nonce-{g.get('nonce', '')}'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+    if request.path.startswith("/static/occt/"):
+        # STEP-Leser: läuft nur im Web Worker (eigene Regel aus diesem Header, kein Zugriff auf die Seite)
+        # und braucht WebAssembly plus eval (embind). Die Seiten selbst bleiben ohne eval.
+        r.headers["Content-Security-Policy"] = ("default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; "
+                                                "object-src 'none'; base-uri 'none'")
     r.headers["X-Content-Type-Options"] = "nosniff"
     r.headers["Referrer-Policy"] = "same-origin"
     if app.config["SESSION_COOKIE_SECURE"]:
@@ -483,6 +574,7 @@ def index():
         return render_template("login.html")
     where, args = [], []
     f = request.args
+    arch = g.admin and f.get("archiv") == "1"
     if f.get("status") in STATUSES:
         where.append("l.status = ?")
         args.append(f["status"])
@@ -495,20 +587,38 @@ def index():
         elif f.get("kind") == "file":
             where.append("l.file IS NOT NULL")
         if q := f.get("q", "").strip():
-            where.append("(l.title LIKE ? OR l.url LIKE ? OR l.file_name LIKE ?)")
-            args += [f"%{q}%"] * 3
+            where.append("(l.title LIKE ? OR l.url LIKE ? OR l.file_name LIKE ? OR u.name LIKE ?)")
+            args += [f"%{q}%"] * 4
+        for key, op in (("von", ">="), ("bis", "<=")):   # Zeitraum (Eingereicht), aus <input type="date">
+            if DATE_RE.match(f.get(key, "")):
+                where.append(f"{iso('l.created')} {op} ?")
+                args.append(f[key])
+        where.append("COALESCE(l.archived, '') != ''" if arch else "COALESCE(l.archived, '') = ''")
     else:
         where.append("l.user_id = ?")
         args.append(g.user["id"])
     sql = ("SELECT l.*, u.name AS user_name FROM links l LEFT JOIN users u ON u.id = l.user_id"
            + (" WHERE " + " AND ".join(where) if where else "") + " ORDER BY l.id DESC")
     with db() as con:
+        if g.admin:
+            auto_archive(con)
         entries = con.execute(sql, args).fetchall()
         people = con.execute("SELECT id, name FROM users ORDER BY name").fetchall() if g.admin else []
         costs = {e["id"]: estimate(con, e) for e in entries}
-        counts = dict(con.execute("SELECT status, COUNT(*) FROM links" + ("" if g.admin else " WHERE user_id = ?")
-                                  + " GROUP BY status", () if g.admin else (g.user["id"],)).fetchall())
-    return render_template("list.html", entries=entries, people=people, f=f, costs=costs, counts=counts)
+        scope = (f"COALESCE(archived, '') {'!=' if arch else '='} ''", ()) if g.admin else ("user_id = ?", (g.user["id"],))
+        counts = dict(con.execute(f"SELECT status, COUNT(*) FROM links WHERE {scope[0]} GROUP BY status",
+                                  scope[1]).fetchall())
+    return render_template("list.html", entries=entries, people=people, f=f, costs=costs, counts=counts, arch=arch)
+
+
+@app.post("/archive")
+def archive():
+    """Aufträge ins Archiv legen oder zurückholen: einzeln vom Auftrag aus oder mehrere aus der Liste."""
+    ids = [int(i) for i in request.form.getlist("id") if i.isdigit()]
+    with db() as con:
+        stamp = "" if request.form.get("action") == "restore" else now(con)
+        con.executemany("UPDATE links SET archived = ? WHERE id = ?", [(stamp, i) for i in ids])
+    return redirect(safe_next())
 
 
 def new_page(error=None, code=200):
@@ -584,7 +694,7 @@ def add_thumbnail(con, link_id, m):
 def save_file_order(f, title, extra):
     m = store_model(f)
     with db() as con:
-        err = limit_error(con, m["size"]) if m else _("Nur echte STL- oder 3MF-Dateien bis 100 MB.")
+        err = limit_error(con, m["size"]) if m else _("Nur echte STL-, 3MF- oder STEP-Dateien bis 100 MB.")
         if err:
             if m:
                 os.remove(os.path.join(MODELS, m["file"]))
@@ -610,7 +720,7 @@ def entry(link_id):
         owner = con.execute("SELECT name FROM users WHERE id = ?", (e["user_id"],)).fetchone()
         return render_template("detail.html", e=e, owner=owner["name"] if owner else _("ich"), bed=bed(con),
                                cost=estimate(con, e), flow=flow(con, e), options=filament_options(con),
-                               can_resubmit=can_resubmit(e))
+                               can_resubmit=can_resubmit(e), tip=text_setting(con, "tip_url"))
 
 
 NO_FILAMENT = "Filament nicht vorrätig"
@@ -664,6 +774,7 @@ def set_status(link_id):
         old = get_entry(con, link_id)
         con.execute("UPDATE links SET status = ?, reason = ? WHERE id = ?", (status, reason or None, link_id))
         if old["status"] != status:
+            con.execute("UPDATE links SET archived = NULL WHERE id = ?", (link_id,))   # Frist beginnt neu
             log_status(con, link_id, status)
             notify(con, get_entry(con, link_id))
     return redirect(url_for("entry", link_id=link_id))
@@ -700,7 +811,7 @@ def attach_model(link_id):
         old = get_entry(con, link_id)
         m = store_model(f) if f and f.filename else None
         if not m:
-            abort(400, _("Nur echte STL- oder 3MF-Dateien bis 100 MB."))
+            abort(400, _("Nur echte STL-, 3MF- oder STEP-Dateien bis 100 MB."))
         con.execute("UPDATE links SET file = ?, file_name = ?, size = ?, volume = ? WHERE id = ?",
                     (m["file"], m["file_name"], m["size"], m["volume"], link_id))
         if old["file"]:
@@ -708,6 +819,28 @@ def attach_model(link_id):
         if not old["image"]:
             add_thumbnail(con, link_id, m)
     return redirect(url_for("entry", link_id=link_id))
+
+
+@app.post("/entry/<int:link_id>/measure")
+def measure(link_id):
+    """STEP kann der Server nicht vermessen: Die Auftragsseite schickt Volumen und Maße einmalig nach.
+    Nur plausible Werte; sie steuern nur die Kostenschätzung, nicht die Rechte."""
+    try:
+        v = float(request.form.get("volume", ""))
+    except ValueError:
+        abort(400)
+    with db() as con:
+        e = get_entry(con, link_id)
+        if kind(e) != "step" or e["volume"]:
+            abort(409)   # nur STEP, nur einmal
+        b = bed(con)
+        top = MAX_VOLUME if g.admin or not all(b) else min(MAX_VOLUME, b[0] * b[1] * b[2] / 1000)
+        if not 0 < v <= top:
+            abort(400)
+        d = parse_dims(request.form)
+        con.execute("UPDATE links SET volume = ?, dims = ? WHERE id = ?",
+                    (v, e["dims"] or (fmt_dims(d) if d else None), link_id))
+    return "", 204
 
 
 @app.get("/models/<int:link_id>/file")
@@ -762,8 +895,14 @@ def profile():
             msg = _("Gespeichert.") if email else _("E-Mail-Adresse gelöscht – du bekommst keine Mails mehr.")
             g.user = dict(g.user, email=email or None)
     with db() as con:
-        done = printed(con, g.user["id"])
-    return render_template("profile.html", msg=msg, error=err, mail_on=mail.configured(), done=done), 400 if err else 200
+        ctx = mine(con)
+    return render_template("profile.html", msg=msg, error=err, mail_on=mail.configured(), **ctx), 400 if err else 200
+
+
+def mine(con):
+    """Zahlen fürs Profil: „Für dich gedruckt“ und die eigene Statistik."""
+    return {"done": printed(con, g.user["id"]), "st": stats(con, g.user["id"], months=6),
+            "tip": text_setting(con, "tip_url")}
 
 
 @app.post("/me/test")
@@ -773,15 +912,21 @@ def test_mail():
     with db() as con:
         e = con.execute("SELECT * FROM links WHERE user_id = ? ORDER BY id DESC", (g.user["id"],)).fetchone()
         if not e:
-            return render_template("profile.html", mail_on=True, done=printed(con, g.user["id"]),
+            return render_template("profile.html", mail_on=True, **mine(con),
                                    error=_("Reich zuerst einen Auftrag ein – die Testmail zeigt deinen neuesten.")), 400
         fail = mail.send_now(status_mail(con, e, g.user["email"], g.lang))
-        done = printed(con, g.user["id"])
-    return render_template("profile.html", mail_on=True, done=done, error=fail and _("Versand fehlgeschlagen. Die Werkstatt schaut nach."),
+        ctx = mine(con)
+    return render_template("profile.html", mail_on=True, **ctx, error=fail and _("Versand fehlgeschlagen. Die Werkstatt schaut nach."),
                            msg=None if fail else _("Testmail an {to} ist raus.", to=g.user["email"])), 502 if fail else 200
 
 
 # --- Freunde verwalten (nur Administrator) -----------------------------------
+
+@app.get("/stats")
+def stats_page():
+    with db() as con:
+        return render_template("stats.html", st=stats(con))
+
 
 @app.get("/users")
 def users():
@@ -896,9 +1041,16 @@ def toggle_user(uid):
 
 @app.get("/settings")
 def settings():
+    tab = request.args.get("tab")
+    tab = tab if tab in ("drucker", "filamente", "werkstatt", "rechtliches") else "drucker"
     with db() as con:
-        return render_template("settings.html", bed=bed(con), options=filament_options(con), random=RANDOM,
+        options = filament_options(con)
+        have = {f["name"].lower() for f, _c in options}
+        return render_template("settings.html", tab=tab, bed=bed(con), options=options, random=RANDOM,
+                               types=[t for t in FILAMENT_TYPES if t.lower() not in have],
                                fill=setting(con, "fill", FILL), imp=impressum_data(con), imp_fields=IMPRESSUM,
+                               archive_days=int(setting(con, "archive_days", ARCHIVE_DAYS)),
+                               tip=text_setting(con, "tip_url"),
                                datenschutz=text_setting(con, "datenschutz"),
                                template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))
 
@@ -964,38 +1116,57 @@ def save_legal():
         values["datenschutz"] = "" if ds in templates else ds   # unveränderte Vorlage nicht veröffentlichen
         for k, v in values.items():
             put_setting(con, k, v)
-    return redirect(url_for("settings") + "#rechtliches")
+    return redirect(url_for("settings", tab="rechtliches"))
+
+
+def valid_tip(url):
+    """Trinkgeld-Link: nur https mit echtem Rechnernamen, sonst None. Leer = kein Knopf."""
+    p = urlparse(url)
+    return url if p.scheme == "https" and p.hostname and "." in p.hostname and not p.username else None
+
+
+@app.post("/settings/tip")
+def save_tip():
+    """Link für den Trinkgeld-Knopf, z. B. PayPal.me oder Ko-fi. Die App selbst verarbeitet kein Geld."""
+    url = request.form.get("tip_url", "").strip()[:300]
+    if url and not valid_tip(url):
+        abort(400, _("Bitte eine vollständige Adresse mit https:// eintragen, z. B. https://paypal.me/deinname."))
+    with db() as con:
+        put_setting(con, "tip_url", url)
+    return redirect(url_for("settings", tab="werkstatt"))
 
 
 @app.post("/settings/bed")
 def save_bed():
     with db() as con:
-        for k in ("bed_x", "bed_y", "bed_z", "fill"):
+        for k in ("bed_x", "bed_y", "bed_z", "fill", "archive_days"):
             if k not in request.form:
                 continue
             v = request.form[k].strip().replace(",", ".")
+            top = {"fill": 100.0, "archive_days": 3650.0}.get(k, 10_000.0)
             try:
-                v = str(max(0.0, min(float(v), 100.0 if k == "fill" else 10_000.0))) if v else ""
+                v = str(max(0.0, min(float(v), top))) if v else ""
             except ValueError:
                 abort(400)
             put_setting(con, k, v)
-    return redirect(url_for("settings"))
+    return redirect(url_for("settings", tab="werkstatt" if "archive_days" in request.form else "drucker"))
 
 
 @app.post("/settings/filaments")
 def add_filament():
-    name = request.form.get("name", "").strip()[:40]
-    if name:
-        with db() as con:
-            con.execute("INSERT OR IGNORE INTO filaments (name) VALUES (?)", (name,))
-    return redirect(url_for("settings"))
+    name = request.form.get("name", "")
+    if name not in FILAMENT_TYPES:
+        abort(400)
+    with db() as con:   # schon vorhanden → nichts tun (Name ist UNIQUE)
+        con.execute("INSERT OR IGNORE INTO filaments (name, density) VALUES (?, ?)", (name, FILAMENT_TYPES[name]))
+    return redirect(url_for("settings", tab="filamente"))
 
 
 @app.post("/settings/filaments/<int:fid>/delete")
 def delete_filament(fid):
     with db() as con:
         con.execute("DELETE FROM filaments WHERE id = ?", (fid,))   # Farben fallen mit weg (CASCADE)
-    return redirect(url_for("settings"))
+    return redirect(url_for("settings", tab="filamente"))
 
 
 @app.post("/settings/filaments/<int:fid>/price")
@@ -1009,7 +1180,7 @@ def save_filament_price(fid):
             abort(400)
     with db() as con:
         con.execute("UPDATE filaments SET density = ?, price_kg = ? WHERE id = ?", (*vals, fid))
-    return redirect(url_for("settings"))
+    return redirect(url_for("settings", tab="filamente"))
 
 
 @app.post("/settings/filaments/<int:fid>/colors")
@@ -1022,11 +1193,11 @@ def add_color(fid):
         if not con.execute("SELECT 1 FROM filaments WHERE id = ?", (fid,)).fetchone():
             abort(404)
         con.execute("INSERT INTO colors (filament_id, name, hex) VALUES (?, ?, ?)", (fid, name, hex_.lower()))
-    return redirect(url_for("settings"))
+    return redirect(url_for("settings", tab="filamente"))
 
 
 @app.post("/settings/colors/<int:cid>/delete")
 def delete_color(cid):
     with db() as con:
         con.execute("DELETE FROM colors WHERE id = ?", (cid,))
-    return redirect(url_for("settings"))
+    return redirect(url_for("settings", tab="filamente"))

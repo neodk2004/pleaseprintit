@@ -65,15 +65,18 @@ flowchart LR
 | | Für deine Freunde | Für dich |
 |---|---|---|
 | **1** | Einladungslink öffnen, Name und Passwort wählen | Unter **Freunde** einen Einladungslink erzeugen und verschicken |
-| **2** | **Neuer Auftrag:** Link einfügen oder STL/3MF hochladen, Filament, Farbe und Stückzahl wählen | Die Warteschlange mit Vorschau, Gewicht und Kosten ansehen |
+| **2** | **Neuer Auftrag:** Link einfügen oder STL, 3MF oder STEP hochladen, Filament, Farbe und Stückzahl wählen | Die Warteschlange mit Vorschau, Gewicht und Kosten ansehen |
 | **3** | Status verfolgen, auf Wunsch per E-Mail | Auftrag planen, drucken, abhaken |
 
 ## Funktionen
 
-- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-/3MF-Datei.
-- 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt.
+- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-, 3MF- oder STEP-Datei.
+- 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt. Auch STEP-Dateien aus CAD-Programmen werden direkt im Browser gelesen und vermessen.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
 - 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Ganz ohne Bezahlfunktion, nur damit niemand raten muss.
+- ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
+- 📦 **Archiv mit Suche:** Gedruckte und abgelehnte Aufträge wandern nach einer einstellbaren Frist oder per Knopf (auch mehrere auf einmal) ins Archiv. Dort findest du sie über die Suche nach Titel, Datei oder Freund und über einen Zeitraum wieder.
+- 📈 **Statistik:** Für dich Aufträge, Gramm und Materialkosten pro Monat, beliebte Filamente und Farben, Wartezeit und Ablehnungsgründe. Jeder Freund sieht seine eigenen Zahlen im Profil.
 - 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
 - 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
 - ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
@@ -82,7 +85,7 @@ flowchart LR
 - 📄 **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.
 - 🍓 **Läuft fast überall:** fertiges Image für x86 und ARM64, also auch Raspberry Pi 4/5 mit 64-Bit-System. Rund 50 MB Arbeitsspeicher im Leerlauf, SQLite statt Datenbankserver, HTTPS optional.
 - 💾 **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
-- 🔒 **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System.
+- 🔒 **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System. Der STEP-Leser läuft abgeschottet in einem Web Worker.
 
 ## Welches Tool passt zu dir?
 

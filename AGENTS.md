@@ -4,7 +4,7 @@ Guide for AI coding agents (Claude Code, Codex, Copilot, Cursor …) working on 
 
 ## What this is
 
-PleasePrintit is a small, self-hosted **3D print request queue** for a private circle (up to ~50 people). Friends join via one-time invite link, submit print requests (model link or STL/3MF upload, filament, color, quantity), and the admin works through a sorted queue with 3D preview and cost estimate. Status flow: `neu` (submitted) → `geplant` (planned) → `gedruckt` (printed), or `abgelehnt` (rejected, with reason).
+PleasePrintit is a small, self-hosted **3D print request queue** for a private circle (up to ~50 people). Friends join via one-time invite link, submit print requests (model link or STL/3MF/STEP upload, filament, color, quantity), and the admin works through a sorted queue with 3D preview and cost estimate. Status flow: `neu` (submitted) → `geplant` (planned) → `gedruckt` (printed), or `abgelehnt` (rejected, with reason).
 
 **Code comments and commit messages are German.** The UI is translated (German, English, French): write new UI text in German inside `_('…')` (templates, `app.py`) or `t('…')` (`static/*.js`), then add the English and French translation to `i18n.T`. JS strings also go into `i18n.JS_KEYS`. `test_i18n.py` fails on any missing or mismatched translation.
 
@@ -13,13 +13,14 @@ PleasePrintit is a small, self-hosted **3D print request queue** for a private c
 | Path | Purpose |
 |---|---|
 | `app.py` | The whole Flask app: routes, auth, invites, orders, settings, security headers, SQLite schema (`db()`) |
-| `models.py` | Validates uploaded 3D files by content (STL/3MF), dimensions, volume, 3MF thumbnails |
+| `models.py` | Validates uploaded 3D files by content (STL/3MF/STEP), dimensions, volume, 3MF thumbnails |
 | `preview.py` | Fetches link previews (Open Graph) with SSRF protection — every IP must be public, connects to the checked IP |
 | `i18n.py` | Translation table (German key → English, French), language list, privacy-policy templates |
 | `mail.py` | SMTP e-mail via stdlib only; disabled when `SMTP_HOST` is empty |
 | `backup.py` | Daily `.tar.gz` backups (`--once`, `--check FILE`) |
 | `templates/` | Jinja2 templates (`base.html` layout, `_*.html` partials, `mail_*` e-mails) |
 | `static/` | Plain JS/CSS, PWA manifest, vendored three.js in `static/three/` (no build step, no npm) |
+| `static/occt/` | Vendored [occt-import-js](https://github.com/kovacsv/occt-import-js) 0.0.23 (LGPL-2.1, unmodified) that reads STEP in the browser, see `static/step.js` |
 | `test_*.py` | Self-tests, plain `assert`, no framework |
 | `compose.yaml` / `compose.dockhand.yaml` | Docker Compose (bind mounts) / Dockhand variant (named volumes, `${VAR}` stack variables) |
 
@@ -39,6 +40,7 @@ Tests set `SECRET_KEY`, `ADMIN_PASSWORD` and `DB_PATH` themselves and use a temp
 - **Schema changes** go into `db()` in `app.py`: `CREATE TABLE IF NOT EXISTS` plus `ALTER TABLE … ADD COLUMN` guarded by `PRAGMA table_info`. There are no migration files; never drop or rename columns.
 - **Always use SQL parameters** (`?`), never string formatting with user input.
 - **Security is a feature:** keep the CSP/HSTS headers, login throttling, invite-only signup, per-user limits (10 open orders, 500 MB files), content-based file checks and the SSRF guard in `preview.py`. Templates rely on Jinja2 autoescaping — don't use `|safe` on user data.
+- **STEP:** occt-import-js needs `eval` (embind) and WebAssembly. It runs only inside its Web Worker; `security_headers()` grants `'unsafe-eval' 'wasm-unsafe-eval'` to `/static/occt/` only. Never add eval to the page CSP. Python can't read STEP, so the order page measures the volume in the browser and posts it once to `/entry/<id>/measure`, which only accepts plausible values.
 - The container runs as uid 1000 with a read-only filesystem; only `/data` and `/backups` are writable.
 - Configuration comes from environment variables only (see `.env.example`). Never commit `.env`, secrets or real personal data; screenshots use demo data.
 - Add or extend a test in the matching `test_*.py` for any non-trivial change.

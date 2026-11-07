@@ -105,7 +105,7 @@ T = {
     "Neuer Auftrag": ("New request", "Nouvelle demande"),
     "Nach Status filtern": ("Filter by status", "Filtrer par statut"),
     "Alle": ("All", "Toutes"),
-    "Titel, Link oder Datei …": ("Title, link or file …", "Titre, lien ou fichier …"),
+    "Titel, Link, Datei oder Freund …": ("Title, link, file or friend …", "Titre, lien, fichier ou ami …"),
     "Suchen": ("Search", "Rechercher"),
     "Person": ("Person", "Personne"),
     "Alle Personen": ("Everyone", "Tout le monde"),
@@ -120,9 +120,9 @@ T = {
     "Keine Aufträge passen zu diesem Filter.": ("No requests match this filter.", "Aucune demande ne correspond à ce filtre."),
     "Filter zurücksetzen": ("Reset filter", "Réinitialiser le filtre"),
     "Noch nichts in der Warteschlange": ("Nothing in the queue yet", "Rien dans la file pour l’instant"),
-    "Ein Link (Printables, Instagram, Etsy …) oder eine STL/3MF-Datei genügt.":
-        ("A link (Printables, Instagram, Etsy …) or an STL/3MF file is all it takes.",
-         "Un lien (Printables, Instagram, Etsy …) ou un fichier STL/3MF suffit."),
+    "Ein Link (Printables, Instagram, Etsy …) oder eine STL-, 3MF- oder STEP-Datei genügt.":
+        ("A link (Printables, Instagram, Etsy …) or an STL, 3MF or STEP file is all it takes.",
+         "Un lien (Printables, Instagram, Etsy …) ou un fichier STL, 3MF ou STEP suffit."),
     "Ersten Wunsch einreichen": ("Send your first request", "Envoyer ta première demande"),
 
     # --- Neuer Auftrag ---
@@ -132,7 +132,7 @@ T = {
     "Egal woher: Printables, MakerWorld, Thingiverse, aber auch Instagram, TikTok, Etsy, Amazon …":
         ("From anywhere: Printables, MakerWorld, Thingiverse, but also Instagram, TikTok, Etsy, Amazon …",
          "D’où tu veux : Printables, MakerWorld, Thingiverse, mais aussi Instagram, TikTok, Etsy, Amazon …"),
-    "STL oder 3MF hierher ziehen": ("Drop an STL or 3MF here", "Dépose un STL ou 3MF ici"),
+    "STL, 3MF oder STEP hierher ziehen": ("Drop an STL, 3MF or STEP here", "Dépose un STL, 3MF ou STEP ici"),
     "oder klicken zum Auswählen · bis 100 MB": ("or click to choose · up to 100 MB", "ou clique pour choisir · jusqu’à 100 Mo"),
     "Druckbereich der Werkstatt: max. {dims} mm": ("Workshop build volume: max. {dims} mm",
                                                    "Volume d’impression de l’atelier : max. {dims} mm"),
@@ -199,7 +199,7 @@ T = {
     "Link öffnen": ("Open link", "Ouvrir le lien"),
     "3D-Datei ersetzen": ("Replace 3D file", "Remplacer le fichier 3D"),
     "3D-Datei hinterlegen": ("Attach 3D file", "Joindre un fichier 3D"),
-    "STL oder 3MF": ("STL or 3MF", "STL ou 3MF"),
+    "STL, 3MF oder STEP": ("STL, 3MF or STEP", "STL, 3MF ou STEP"),
     "(bis 100 MB)": ("(up to 100 MB)", "(jusqu’à 100 Mo)"),
     "Datei hinterlegen": ("Attach file", "Joindre le fichier"),
     "Vorschaubild ersetzen": ("Replace preview image", "Remplacer l’aperçu"),
@@ -287,8 +287,11 @@ T = {
     "Farbname": ("Colour name", "Nom de couleur"),
     "Noch keine Filamente. Leg unten das erste an, z. B. „PLA“.": ("No filaments yet. Add the first one below, e.g. “PLA”.",
                                                                     "Pas encore de filament. Ajoute le premier ci-dessous, p. ex. « PLA »."),
-    "Neues Filament, z. B. PETG": ("New filament, e.g. PETG", "Nouveau filament, p. ex. PETG"),
-    "Filament-Name": ("Filament name", "Nom du filament"),
+    "Filament-Sorte": ("Filament type", "Type de filament"),
+    "Filament-Sorte wählen …": ("Choose filament type …", "Choisis le type de filament …"),
+    "Die Dichte wird passend zur Sorte vorausgefüllt. Trag noch deinen Preis pro kg ein.":
+        ("The density is pre-filled for the type. Just add your price per kg.",
+         "La densité est préremplie selon le type. Ajoute encore ton prix au kilo."),
     "Impressum & Datenschutz": ("Legal notice & privacy", "Mentions légales et confidentialité"),
     "Öffentlich, verlinkt auf der Anmeldeseite und unten auf jeder Seite. Name, Anschrift und E-Mail stehen verschleiert im HTML und werden erst im Browser zusammengesetzt – Adress- und Mail-Sammler finden sie so nicht.":
         ("Public, linked on the sign-in page and at the bottom of every page. Name, address and email are obfuscated in the HTML and only assembled in the browser – address and email harvesters won’t find them.",
@@ -408,8 +411,8 @@ T = {
     "Das Modell ({dims} mm) passt nicht in den Druckbereich ({bed} mm).":
         ("The model ({dims} mm) doesn’t fit the build volume ({bed} mm).",
          "Le modèle ({dims} mm) ne tient pas dans le volume d’impression ({bed} mm)."),
-    "Nur echte STL- oder 3MF-Dateien bis 100 MB.": ("Only real STL or 3MF files up to 100 MB.",
-                                                    "Uniquement de vrais fichiers STL ou 3MF jusqu’à 100 Mo."),
+    "Nur echte STL-, 3MF- oder STEP-Dateien bis 100 MB.": ("Only real STL, 3MF or STEP files up to 100 MB.",
+                                                         "Uniquement de vrais fichiers STL, 3MF ou STEP jusqu’à 100 Mo."),
     "Die Datei ist zu groß (max. 100 MB).": ("The file is too big (max. 100 MB).", "Le fichier est trop gros (max. 100 Mo)."),
     "Nur JPG, PNG, GIF oder WebP bis 5 MB.": ("Only JPG, PNG, GIF or WebP up to 5 MB.", "Uniquement JPG, PNG, GIF ou WebP jusqu’à 5 Mo."),
     "Das sieht nicht wie eine E-Mail-Adresse aus.": ("That doesn’t look like an email address.",
@@ -439,14 +442,86 @@ T = {
     " – als Werkstatt kannst du trotzdem anlegen.": (" – as the workshop you can still create it.",
                                                      " – en tant qu’atelier, tu peux quand même la créer."),
     ". Bitte verkleinern oder teilen.": (". Please scale it down or split it.", ". Réduis-le ou découpe-le."),
-    "Die Datei konnte nicht gelesen werden. Ist es eine echte STL- oder 3MF-Datei?":
-        ("The file couldn’t be read. Is it a real STL or 3MF file?",
-         "Impossible de lire le fichier. Est-ce un vrai fichier STL ou 3MF ?"),
+    "Die Datei konnte nicht gelesen werden. Ist es eine echte STL-, 3MF- oder STEP-Datei?":
+        ("The file couldn’t be read. Is it a real STL, 3MF or STEP file?",
+         "Impossible de lire le fichier. Est-ce un vrai fichier STL, 3MF ou STEP ?"),
     "Maße: {d} mm (B × T × H)": ("Dimensions: {d} mm (W × D × H)", "Dimensions : {d} mm (L × P × H)"),
     "✓ passt aufs Druckbett": ("✓ fits the print bed", "✓ tient sur le plateau"),
     "✗ größer als Druckbereich ({bed} mm)": ("✗ larger than the build volume ({bed} mm)",
                                             "✗ plus grand que le volume d’impression ({bed} mm)"),
     "Modell konnte nicht angezeigt werden.": ("The model couldn’t be displayed.", "Impossible d’afficher le modèle."),
+
+    # --- Einstellungen: Tabs ---
+    "Bereiche der Einstellungen": ("Settings sections", "Sections des réglages"),
+    "Drucker": ("Printer", "Imprimante"),
+    "Filamente": ("Filaments", "Filaments"),
+
+    # --- Archiv ---
+    "Archiv": ("Archive", "Archives"),
+    "Werkstatt · Archiv": ("Workshop · Archive", "Atelier · Archives"),
+    "Archivieren": ("Archive", "Archiver"),
+    "Zurückholen": ("Restore", "Restaurer"),
+    "Ausgewählte archivieren": ("Archive selected", "Archiver la sélection"),
+    "Ausgewählte zurückholen": ("Restore selected", "Restaurer la sélection"),
+    "Auftrag {nr} auswählen": ("Select request {nr}", "Sélectionner la demande {nr}"),
+    "Archiviert am {at}": ("Archived on {at}", "Archivée le {at}"),
+    "Eingereicht ab": ("Submitted from", "Envoyée à partir du"),
+    "Eingereicht bis": ("Submitted until", "Envoyée jusqu’au"),
+    "Das Archiv ist leer": ("The archive is empty", "Les archives sont vides"),
+    "Gedruckte und abgelehnte Aufträge landen hier nach der Frist aus den Einstellungen oder per Knopf.":
+        ("Printed and declined requests end up here after the period set in Settings, or with a button.",
+         "Les demandes imprimées ou refusées arrivent ici après le délai fixé dans les réglages, ou avec un bouton."),
+    "Gedruckte und abgelehnte Aufträge verschwinden nach so vielen Tagen aus der Warteschlange und liegen im Archiv, mit Suche. 0 = nie automatisch, nur per Knopf.":
+        ("Printed and declined requests leave the queue after this many days and move to the searchable archive. "
+         "0 = never automatically, only with the button.",
+         "Les demandes imprimées ou refusées quittent la file après ce nombre de jours et vont dans les archives, "
+         "avec recherche. 0 = jamais automatiquement, seulement avec le bouton."),
+    "Archivieren nach": ("Archive after", "Archiver après"),
+    "Tagen": ("days", "jours"),
+
+    # --- Trinkgeld ---
+    "Trinkgeld": ("Tip", "Pourboire"),
+    "Trinkgeld geben": ("Leave a tip", "Laisser un pourboire"),
+    "Trinkgeld-Link": ("Tip link", "Lien pour le pourboire"),
+    "Freiwillig: Dein Link zu PayPal.me, Ko-fi oder Ähnlichem. Freunde sehen dann einen Knopf im Profil und bei gedruckten Aufträgen. Die App verarbeitet kein Geld. Leer = kein Knopf.":
+        ("Optional: your link to PayPal.me, Ko-fi or similar. Friends then see a button in their profile and on "
+         "printed requests. The app itself handles no money. Empty = no button.",
+         "Facultatif : ton lien PayPal.me, Ko-fi ou similaire. Tes amis voient alors un bouton dans leur profil et "
+         "sur les demandes imprimées. L’app ne gère aucun argent. Vide = pas de bouton."),
+    "Bitte eine vollständige Adresse mit https:// eintragen, z. B. https://paypal.me/deinname.":
+        ("Please enter a full address starting with https://, e.g. https://paypal.me/yourname.",
+         "Saisis une adresse complète commençant par https://, p. ex. https://paypal.me/tonnom."),
+
+    # --- Statistik ---
+    "Statistik": ("Statistics", "Statistiques"),
+    "Werkstatt · Statistik": ("Workshop · Statistics", "Atelier · Statistiques"),
+    "Deine Statistik": ("Your statistics", "Tes statistiques"),
+    "Gedruckte Teile": ("Printed parts", "Pièces imprimées"),
+    "Material": ("Material", "Matière"),
+    "Materialkosten": ("Material cost", "Coût de la matière"),
+    "Kosten": ("Cost", "Coût"),
+    "Ø Wartezeit": ("Avg. waiting time", "Attente moyenne"),
+    "{n} Tage": ("{n} days", "{n} jours"),
+    "Lieblings-Filament": ("Favourite filament", "Filament préféré"),
+    "Monat": ("Month", "Mois"),
+    "Letzte 12 Monate": ("Last 12 months", "12 derniers mois"),
+    "Letzte 6 Monate": ("Last 6 months", "6 derniers mois"),
+    "Eingereicht zählt nach Datum des Auftrags, Gedruckt nach Datum des Drucks. Material und Kosten sind grob aus dem Modellvolumen geschätzt.":
+        ("Submitted counts by request date, Printed by print date. Material and cost are rough estimates from the "
+         "model volume.",
+         "Envoyée compte selon la date de la demande, Imprimée selon la date d’impression. Matière et coût sont "
+         "estimés grossièrement à partir du volume du modèle."),
+    "Nach Status": ("By status", "Par statut"),
+    "Beliebteste Filamente": ("Most popular filaments", "Filaments les plus demandés"),
+    "Beliebteste Farben": ("Most popular colours", "Couleurs les plus demandées"),
+    "Ablehnungsgründe": ("Reasons for declining", "Motifs de refus"),
+    "ohne Grund": ("no reason given", "sans motif"),
+    "Noch keine Daten.": ("No data yet.", "Pas encore de données."),
+    "Noch nichts abgelehnt.": ("Nothing declined yet.", "Rien de refusé pour l’instant."),
+    "Noch keine Zahlen": ("No numbers yet", "Pas encore de chiffres"),
+    "Sobald Aufträge eingehen, siehst du hier, was los ist.":
+        ("As soon as requests come in, you’ll see what’s going on here.",
+         "Dès que des demandes arrivent, tu verras ici ce qui se passe."),
 }
 
 # Texte, die static/*.js braucht; base.html legt sie für die gewählte Sprache als JSON in die Seite
@@ -454,7 +529,7 @@ JS_KEYS = (
     "✗ Die Datei ist größer als 100 MB.", "{name} wird ausgemessen …", "Maße: {d} mm",
     "✓ Maße: {d} mm – passt aufs Druckbett", "✗ Maße: {d} mm – zu groß für den Druckbereich ({bed} mm)",
     " – als Werkstatt kannst du trotzdem anlegen.", ". Bitte verkleinern oder teilen.",
-    "Die Datei konnte nicht gelesen werden. Ist es eine echte STL- oder 3MF-Datei?", "Maße: {d} mm (B × T × H)",
+    "Die Datei konnte nicht gelesen werden. Ist es eine echte STL-, 3MF- oder STEP-Datei?", "Maße: {d} mm (B × T × H)",
     "✓ passt aufs Druckbett", "✗ größer als Druckbereich ({bed} mm)", "Modell konnte nicht angezeigt werden.",
     "E-Mail", "Angaben gemäß § 5 DDG", "Kontakt", "Telefon", "Verantwortlich für den Inhalt", "Anschrift wie oben",
     "Privates, nicht-kommerzielles Angebot für einen geschlossenen Freundeskreis.",
@@ -501,7 +576,7 @@ Accès, rectification et suppression de tes données : un petit message à l'ate
 _COL = {"en": 0, "fr": 1}
 
 
-def t(lang, text, **kw):
+def t(lang, text, /, **kw):
     """Text in der Sprache lang; Platzhalter wie {name} werden mit kw gefüllt."""
     row = T.get(text)
     out = row[_COL[lang]] if row and lang in _COL else text

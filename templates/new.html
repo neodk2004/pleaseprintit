@@ -14,9 +14,9 @@
       <input id="url" type="url" name="url" maxlength="2000" placeholder="https://…" inputmode="url" value="{{ request.form.url }}">
       <p class="hint">{{ _('Egal woher: Printables, MakerWorld, Thingiverse, aber auch Instagram, TikTok, Etsy, Amazon …') }}</p></div>
     <div class="or-line">{{ _('oder') }}</div>
-    <label class="drop dropzone" for="model">{{ icon('upload') }}<b>{{ _('STL oder 3MF hierher ziehen') }}</b>
+    <label class="drop dropzone" for="model">{{ icon('upload') }}<b>{{ _('STL, 3MF oder STEP hierher ziehen') }}</b>
       <small>{{ _('oder klicken zum Auswählen · bis 100 MB') }}</small>
-      <input id="model" type="file" name="model" accept=".stl,.3mf"></label>
+      <input id="model" type="file" name="model" accept=".stl,.3mf,.step,.stp"></label>
     <p id="check" class="check" aria-live="polite"></p>
     {% if bed|select|list %}<p class="hint">{{ _('Druckbereich der Werkstatt: max. {dims} mm', dims=dec(fmt_dims(bed))) }}{% if not bed|min %} {{ _('(0 = beliebig)') }}{% endif %}</p>{% endif %}
     <input type="hidden" name="dims_x"><input type="hidden" name="dims_y"><input type="hidden" name="dims_z">

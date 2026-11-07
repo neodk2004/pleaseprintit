@@ -1,5 +1,5 @@
 // Neuer Auftrag: 3D-Datei schon im Browser ausmessen und gegen den Druckbereich prüfen; Ablagefeld.
-import { fits, fmt, measure, parseBed, parseModel, t } from './model.js';
+import { fits, fmt, kindOf, measure, parseBed, parseModel, t } from './model.js';
 
 const form = document.getElementById('order');
 const fileIn = form.elements.model;
@@ -23,8 +23,7 @@ fileIn.addEventListener('change', async () => {
   if (file.size > MAX) { say(t('✗ Die Datei ist größer als 100 MB.'), 'bad'); submit.disabled = true; return; }
   say(t('{name} wird ausgemessen …', { name: file.name }));
   try {
-    const kind = file.name.toLowerCase().endsWith('.3mf') ? '3mf' : 'stl';
-    const d = measure(parseModel(await file.arrayBuffer(), kind));
+    const d = measure(await parseModel(await file.arrayBuffer(), kindOf(file.name)));
     setDims(d);
     if (!bed.some((b) => b > 0)) return say(t('Maße: {d} mm', { d: fmt(d) }), 'ok');
     if (fits(d, bed)) return say(t('✓ Maße: {d} mm – passt aufs Druckbett', { d: fmt(d) }), 'ok');
@@ -33,7 +32,7 @@ fileIn.addEventListener('change', async () => {
     if (!admin) submit.disabled = true;
   } catch (err) {
     console.error(err);
-    say(t('Die Datei konnte nicht gelesen werden. Ist es eine echte STL- oder 3MF-Datei?'), 'bad');
+    say(t('Die Datei konnte nicht gelesen werden. Ist es eine echte STL-, 3MF- oder STEP-Datei?'), 'bad');
   }
 });
 

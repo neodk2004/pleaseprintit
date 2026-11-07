@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, badge, month_bars, euro with context %}
+{% block title %}{{ _('Statistik') }} · {% endblock %}
+{% block body %}
+<div class="pagehead rise"><div><p class="eyebrow">{{ _('Werkstatt · Statistik') }}</p><h1>{{ _('Statistik') }}</h1></div></div>
+
+{% set t = st.total %}
+{% if t.orders %}
+<dl class="kpis rise" style="--i:1">
+  <div><dt>{{ _('Aufträge') }}</dt><dd>{{ t.orders }}</dd></div>
+  <div><dt>{{ _('Gedruckte Teile') }}</dt><dd>{{ t.pieces }}</dd></div>
+  <div><dt>{{ _('Material') }}</dt><dd>{{ num(t.g / 1000, 2) }} kg</dd></div>
+  <div><dt>{{ _('Materialkosten') }}</dt><dd>{{ euro(t.eur) if t.eur is not none else '–' }}</dd></div>
+  <div><dt>{{ _('Ø Wartezeit') }}</dt><dd>{{ _('{n} Tage', n=num(st.wait, 1)) if st.wait is not none else '–' }}</dd></div>
+</dl>
+
+<section class="card rise" style="--i:2;margin-top:var(--s4)">
+  <h3>{{ icon('calendar') }} {{ _('Letzte 12 Monate') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Eingereicht zählt nach Datum des Auftrags, Gedruckt nach Datum des Drucks. Material und Kosten sind grob aus dem Modellvolumen geschätzt.') }}</p>
+  {{ month_bars(st) }}
+</section>
+
+<div class="stats-grid">
+  <section class="card rise" style="--i:3">
+    <h3>{{ icon('layers') }} {{ _('Nach Status') }}</h3>
+    <ul class="toplist">{% for s in statuses %}<li>{{ badge(s) }}<span class="mono">{{ t.status.get(s, 0) }}</span></li>{% endfor %}</ul>
+  </section>
+  <section class="card rise" style="--i:4">
+    <h3>{{ icon('spool') }} {{ _('Beliebteste Filamente') }}</h3>
+    {% if st.filaments %}<ul class="toplist">{% for name, n in st.filaments %}<li><span>{{ name }}</span><span class="mono">{{ n }}</span></li>{% endfor %}</ul>
+    {% else %}<p class="muted">{{ _('Noch keine Daten.') }}</p>{% endif %}
+  </section>
+  <section class="card rise" style="--i:5">
+    <h3>{{ icon('spool') }} {{ _('Beliebteste Farben') }}</h3>
+    {% if st.colors %}<ul class="toplist">{% for (f, c, hex), n in st.colors %}<li><span class="chip"><span class="swatch" style="background:{{ hex }}"></span>{{ f }} · {{ c }}</span><span class="mono">{{ n }}</span></li>{% endfor %}</ul>
+    {% else %}<p class="muted">{{ _('Noch keine Daten.') }}</p>{% endif %}
+  </section>
+  <section class="card rise" style="--i:6">
+    <h3>{{ icon('x-c') }} {{ _('Ablehnungsgründe') }}</h3>
+    {% if st.reasons %}<ul class="toplist">{% for r, n in st.reasons %}<li><span>{{ reason_short(r) if r else _('ohne Grund') }}</span><span class="mono">{{ n }}</span></li>{% endfor %}</ul>
+    {% else %}<p class="muted">{{ _('Noch nichts abgelehnt.') }}</p>{% endif %}
+  </section>
+</div>
+{% else %}
+<div class="card empty rise"><h2>{{ _('Noch keine Zahlen') }}</h2><p>{{ _('Sobald Aufträge eingehen, siehst du hier, was los ist.') }}</p></div>
+{% endif %}
+{% endblock %}

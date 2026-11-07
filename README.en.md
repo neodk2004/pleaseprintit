@@ -65,15 +65,18 @@ flowchart LR
 | | For your friends | For you |
 |---|---|---|
 | **1** | Open the invite link, choose a name and password | Create an invite link under **Freunde** (friends) and send it |
-| **2** | **Neuer Auftrag** (new request): paste a link or upload STL/3MF, pick filament, color and quantity | Review the queue with preview, weight and cost |
+| **2** | **Neuer Auftrag** (new request): paste a link or upload STL, 3MF or STEP, pick filament, color and quantity | Review the queue with preview, weight and cost |
 | **3** | Follow the status, optionally by e-mail | Plan, print, mark as done |
 
 ## Features
 
-- 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL/3MF file.
-- 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate.
+- 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL, 3MF or STEP file.
+- 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate. STEP files from CAD programs are read and measured right in the browser, too.
 - 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
 - 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. No payment feature, just so nobody has to guess.
+- ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
+- 📦 **Archive with search:** printed and rejected requests move to the archive after a configurable period or with a button (several at once). Find them again by title, file, friend or date range.
+- 📈 **Statistics:** requests, grams and material cost per month, popular filaments and colors, waiting time and rejection reasons for you. Every friend sees their own numbers on their profile.
 - 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
 - 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
 - ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
@@ -82,7 +85,7 @@ flowchart LR
 - 📄 **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.
 - 🍓 **Runs almost anywhere:** prebuilt image for x86 and ARM64, including a Raspberry Pi 4/5 with a 64-bit OS. About 50 MB of RAM when idle, SQLite instead of a database server, HTTPS optional.
 - 💾 **Daily backups** with a verification tool, the last 14 are kept.
-- 🔒 **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system.
+- 🔒 **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system. The STEP reader runs isolated in a Web Worker.
 
 ## Which tool is right for you?
 
@@ -216,7 +219,7 @@ With this variant, data and backups live in Docker volumes (`<stack>_data`, `<st
 ## How it works for your friends
 
 1. Open the personal invite link and choose a name and a password (at least 8 characters).
-2. Click **Neuer Auftrag** (new request), paste a model link **or** upload an STL/3MF file, choose filament and color (“Random” = you decide), set the quantity, done.
+2. Click **Neuer Auftrag** (new request), paste a model link **or** upload an STL, 3MF or STEP file, choose filament and color (“Random” = you decide), set the quantity, done.
 3. Follow the status: **Eingereicht** (submitted) → **Geplant** (planned) → **Gedruckt** (printed), or **Abgelehnt** (rejected) with a reason.
 4. Optional: add an e-mail address under **Profil** (profile) to get status updates and to be able to reset a forgotten password.
 

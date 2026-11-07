@@ -20,8 +20,11 @@
   <nav class="nav" aria-label="{{ _('Hauptmenü') }}">
     <span class="role">{{ _('Werkstatt') if g.admin else g.user.name }}</span>
     {% set ep = request.endpoint %}
-    <a href="{{ url_for('index') }}" aria-label="{{ _('Aufträge') }}"{% if ep in ('index', 'entry', 'new') %} aria-current="page"{% endif %}>{{ icon('layers') }}<span class="label">{{ _('Aufträge') }}</span></a>
+    {% set arch = g.admin and request.args.get('archiv') == '1' %}
+    <a href="{{ url_for('index') }}" aria-label="{{ _('Aufträge') }}"{% if ep in ('index', 'entry', 'new') and not arch %} aria-current="page"{% endif %}>{{ icon('layers') }}<span class="label">{{ _('Aufträge') }}</span></a>
     {% if g.admin %}
+    <a href="{{ url_for('index', archiv=1) }}" aria-label="{{ _('Archiv') }}"{% if arch %} aria-current="page"{% endif %}>{{ icon('archive') }}<span class="label">{{ _('Archiv') }}</span></a>
+    <a href="{{ url_for('stats_page') }}" aria-label="{{ _('Statistik') }}"{% if ep == 'stats_page' %} aria-current="page"{% endif %}>{{ icon('chart') }}<span class="label">{{ _('Statistik') }}</span></a>
     <a href="{{ url_for('users') }}" aria-label="{{ _('Freunde') }}"{% if ep == 'users' %} aria-current="page"{% endif %}>{{ icon('users') }}<span class="label">{{ _('Freunde') }}</span></a>
     <a href="{{ url_for('settings') }}" aria-label="{{ _('Einstellungen') }}"{% if ep == 'settings' %} aria-current="page"{% endif %}>{{ icon('sliders') }}<span class="label">{{ _('Einstellungen') }}</span></a>
     {% else %}

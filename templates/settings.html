@@ -2,9 +2,17 @@
 {% from "_macros.html" import icon with context %}
 {% block title %}{{ _('Einstellungen') }} · {% endblock %}
 {% block body %}
-<div class="pagehead rise"><div><p class="eyebrow">{{ _('Werkstatt · Einstellungen') }}</p><h1>{{ _('Drucker & Material') }}</h1></div></div>
+<div class="pagehead rise"><div><p class="eyebrow">{{ _('Werkstatt · Einstellungen') }}</p><h1>{{ _('Einstellungen') }}</h1></div></div>
+
+{# Tabs ohne JavaScript: ?tab=…; nach dem Speichern führt der Server zurück in denselben Tab #}
+<nav class="tabs rise" aria-label="{{ _('Bereiche der Einstellungen') }}">
+  {% for key, label, ic in [('drucker', _('Drucker'), 'ruler'), ('filamente', _('Filamente'), 'spool'),
+                             ('werkstatt', _('Werkstatt'), 'sliders'), ('rechtliches', _('Rechtliches'), 'info')] %}
+  <a class="tab" href="{{ url_for('settings', tab=key) }}"{% if tab == key %} aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>{% endfor %}
+</nav>
 
 <div class="settings-grid">
+{% if tab == 'drucker' %}
 <section class="card rise" style="--i:1">
   <h3>{{ icon('ruler') }} {{ _('Druckbereich') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('Größtes Modell, das dein Drucker schafft. Freunde können größere Dateien nicht einreichen (Drehen wird berücksichtigt). Leer = keine Grenze.') }}</p>
@@ -27,7 +35,28 @@
   </form>
 </section>
 
-<section class="card rise" style="--i:3">
+{% elif tab == 'werkstatt' %}
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('archive') }} {{ _('Archiv') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Gedruckte und abgelehnte Aufträge verschwinden nach so vielen Tagen aus der Warteschlange und liegen im Archiv, mit Suche. 0 = nie automatisch, nur per Knopf.') }}</p>
+  <form class="row" method="post" action="{{ url_for('save_bed') }}">
+    <label style="max-width:14rem">{{ _('Archivieren nach') }} <span class="unit"><input type="number" name="archive_days" min="0" max="3650" step="1"
+      value="{{ archive_days }}" inputmode="numeric"> {{ _('Tagen') }}</span></label>
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
+<section class="card rise" id="trinkgeld" style="--i:2">
+  <h3>{{ icon('heart') }} {{ _('Trinkgeld') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Freiwillig: Dein Link zu PayPal.me, Ko-fi oder Ähnlichem. Freunde sehen dann einen Knopf im Profil und bei gedruckten Aufträgen. Die App verarbeitet kein Geld. Leer = kein Knopf.') }}</p>
+  <form class="row" method="post" action="{{ url_for('save_tip') }}">
+    <span class="grow"><input type="url" name="tip_url" maxlength="300" value="{{ tip }}" placeholder="https://paypal.me/deinname" aria-label="{{ _('Trinkgeld-Link') }}"></span>
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
+{% elif tab == 'filamente' %}
+<section class="card rise" style="--i:1">
   <h3>{{ icon('spool') }} {{ _('Filamente und Farben') }}</h3>
   <p class="hint">{{ _('Freunde wählen daraus beim Einreichen. Jedes Filament hat automatisch „Random“: Dann entscheidest du die Farbe.') }}</p>
 
@@ -61,13 +90,19 @@
   <p class="muted">{{ _('Noch keine Filamente. Leg unten das erste an, z. B. „PLA“.') }}</p>
   {% endfor %}
 
+  {% if types %}
   <form class="row" method="post" action="{{ url_for('add_filament') }}" style="border-top:1px solid var(--line);padding-top:var(--s4);margin-top:var(--s2)">
-    <span class="grow"><input name="name" required maxlength="40" placeholder="{{ _('Neues Filament, z. B. PETG') }}" aria-label="{{ _('Filament-Name') }}"></span>
+    <span class="grow"><select name="name" required aria-label="{{ _('Filament-Sorte') }}">
+      <option value="">{{ _('Filament-Sorte wählen …') }}</option>
+      {% for t in types %}<option>{{ t }}</option>{% endfor %}</select></span>
     <button class="btn btn-primary">{{ icon('plus') }}{{ _('Filament') }}</button>
   </form>
+  <p class="hint">{{ _('Die Dichte wird passend zur Sorte vorausgefüllt. Trag noch deinen Preis pro kg ein.') }}</p>
+  {% endif %}
 </section>
 
-<section class="card rise" id="rechtliches" style="--i:4">
+{% else %}
+<section class="card rise" id="rechtliches" style="--i:1">
   <h3>{{ icon('info') }} {{ _('Impressum & Datenschutz') }}</h3>
   <p class="hint" style="margin-bottom:var(--s4)">{{ _('Öffentlich, verlinkt auf der Anmeldeseite und unten auf jeder Seite. Name, Anschrift und E-Mail stehen verschleiert im HTML und werden erst im Browser zusammengesetzt – Adress- und Mail-Sammler finden sie so nicht.') }}</p>
   <form method="post" action="{{ url_for('save_legal') }}">
@@ -86,5 +121,6 @@
     <button class="btn btn-primary">{{ _('Speichern') }}</button>
   </form>
 </section>
+{% endif %}
 </div>
 {% endblock %}

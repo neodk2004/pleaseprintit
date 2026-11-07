@@ -17,6 +17,17 @@
 {% macro picture(e, cls='picture') %}{% if e.image %}<img class="{{ cls }}" src="{{ url_for('image', name=e.image) }}" alt="{{ _('Vorschau') }}">
   {%- else %}<div class="{{ cls }}">{{ icon('cube') }}</div>{% endif %}{% endmacro %}
 
+{# Statistik: Balken pro Monat, Eingereicht und Gedruckt auf einer Skala; Zahl steht immer daneben #}
+{% macro month_bars(st) %}<table class="months">
+  <thead><tr><th scope="col">{{ _('Monat') }}</th><th scope="col">{{ _('Eingereicht') }}</th><th scope="col">{{ _('Gedruckt') }}</th>
+    {%- if g.admin %}<th scope="col" class="num">{{ _('Material') }}</th><th scope="col" class="num">{{ _('Kosten') }}</th>{% endif %}</tr></thead>
+  <tbody>{% for label, p in st.months %}<tr>
+    <th scope="row" class="mono">{{ label }}</th>
+    {%- for k in ('in', 'out') %}<td><span class="bar-cell" title="{{ label }} · {{ _('Eingereicht') if k == 'in' else _('Gedruckt') }}: {{ p[k] }}">
+      {% if p[k] %}<span class="bar{{ ' bar-out' if k == 'out' }}" style="width:{{ (p[k] / st.top * 100)|round(1) }}%"></span>{% endif %}<span class="mono">{{ p[k] }}</span></span></td>{% endfor %}
+    {%- if g.admin %}<td class="num mono">{{ num(p.g, 0) ~ ' g' if p.g else '–' }}</td><td class="num mono">{{ money(p.eur) if p.eur else '–' }}</td>{% endif %}
+  </tr>{% endfor %}</tbody></table>{% endmacro %}
+
 {% macro grams(c) %}≈ {{ num(c[0], 0) }} g{% endmacro %}
 {% macro euro(v) %}{{ money(v) }}{% endmacro %}
 

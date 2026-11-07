@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, grams, euro, langs with context %}
+{% from "_macros.html" import icon, grams, euro, langs, month_bars with context %}
 {% block title %}{{ _('Profil') }} · {% endblock %}
 {% block body %}
 <div style="max-width:36rem;margin:0 auto">
@@ -11,10 +11,24 @@
   {% if done[0] %}
   <p style="margin:0"><b>{{ _('1 Teil') if done[0] == 1 else _('{n} Teile', n=done[0]) }}</b>{% if done[1] %} · {{ grams(done) }}{% endif %}{% if done[2] %} · {{ _('Material ca.') }} <b>{{ euro(done[2]) }}</b>{% endif %}</p>
   <p class="muted" style="margin:.4em 0 0">{{ _('Grobe Schätzung ohne Strom und Druckzeit – falls du dich mal mit einer Rolle Filament oder einem Kaffee revanchieren magst.') }}</p>
+  {% if tip %}<p style="margin:var(--s3) 0 0"><a class="btn btn-sm" href="{{ tip }}" target="_blank" rel="noopener noreferrer">{{ icon('heart') }}{{ _('Trinkgeld geben') }} {{ icon('external') }}</a></p>{% endif %}
   {% else %}
   <p class="muted" style="margin:0">{{ _('Noch nichts gedruckt. Sobald ein Auftrag fertig ist, siehst du hier, was zusammengekommen ist.') }}</p>
   {% endif %}
 </section>
+
+{% if st.total.orders %}
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('chart') }} {{ _('Deine Statistik') }}</h3>
+  <dl class="kpis">
+    <div><dt>{{ _('Aufträge') }}</dt><dd>{{ st.total.orders }}</dd></div>
+    <div><dt>{{ _('Ø Wartezeit') }}</dt><dd>{{ _('{n} Tage', n=num(st.wait, 1)) if st.wait is not none else '–' }}</dd></div>
+    {% if st.filaments %}<div><dt>{{ _('Lieblings-Filament') }}</dt><dd>{{ st.filaments[0][0] }}</dd></div>{% endif %}
+  </dl>
+  <p class="label-t" style="margin-top:var(--s4)">{{ _('Letzte 6 Monate') }}</p>
+  {{ month_bars(st) }}
+</section>
+{% endif %}
 
 <section class="card rise" style="--i:1">
   <h3>{{ icon('mail') }} {{ _('Benachrichtigung per E-Mail') }}</h3>

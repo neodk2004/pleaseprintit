@@ -147,6 +147,30 @@ label,.label-t{display:block;font-weight:600;font-size:.9rem;margin:0 0 .35rem}
 .tab .n{font-family:var(--font-mono);font-size:.78rem;opacity:.7}
 
 .orders{list-style:none;margin:0;padding:0;display:grid;gap:var(--s3)}
+.orders li.select-row{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--s2)}
+.orders li.select-row>input{width:20px;height:20px;accent-color:var(--signal);cursor:pointer}
+.bulk{display:flex;justify-content:flex-end;margin:calc(-1 * var(--s3)) 0 var(--s3)}
+.filters.wide{grid-template-columns:2fr repeat(4,1fr) auto}
+
+/* Statistik */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:var(--s3);margin:0}
+.kpis div{padding:var(--s3);border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.kpis dt{font-size:.8rem;color:var(--ink-2)}
+.kpis dd{margin:.15rem 0 0;font:600 1.5rem/1.2 var(--font-display);color:var(--ink)}
+.months{width:100%;border-collapse:collapse;font-size:.88rem}
+.months th,.months td{padding:.35rem .5rem;text-align:left;border-bottom:1px solid var(--line);font-weight:400}
+.months thead th{font-size:.78rem;color:var(--ink-2)}
+.months .num{text-align:right;white-space:nowrap}
+.bar-cell{display:flex;align-items:center;gap:.5rem;min-width:6rem}
+.bar{display:block;height:10px;min-width:2px;border-radius:0 4px 4px 0;background:var(--signal)}
+.bar-out{background:var(--gedruckt)}
+.toplist{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
+.toplist li{display:flex;justify-content:space-between;gap:var(--s3);font-size:.9rem}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4);align-items:start}
+@media (max-width:900px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.stats-grid{grid-template-columns:1fr}}
+.stats-grid>.card,.stats-grid>.card+.card{margin:0}   /* sonst setzt .card + .card Abstand oben und verschiebt die Karten */
+@media (max-width:560px){.months .num{display:none}}
 .order{--rail:var(--line-strong);position:relative;display:grid;grid-template-columns:84px 1fr auto;gap:var(--s4);align-items:center;
   padding:var(--s3) var(--s4) var(--s3) var(--s3);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
   color:inherit;text-decoration:none;box-shadow:var(--shadow);overflow:hidden;

@@ -2,10 +2,31 @@
 import * as THREE from 'three';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { ThreeMFLoader } from 'three/addons/loaders/3MFLoader.js';
+import { readStep, volumeCm3 } from './step.js';
 
 const MATERIAL = new THREE.MeshStandardMaterial({ color: 0xf07a2a, roughness: 0.55 }); // Filament-Orange
 
-export function parseModel(buffer, kind) {
+/** Dateiart aus dem Namen, wie beim Upload (der Server prüft danach den Inhalt). */
+export function kindOf(name) {
+  const n = name.toLowerCase();
+  return n.endsWith('.3mf') ? '3mf' : n.endsWith('.step') || n.endsWith('.stp') ? 'step' : 'stl';
+}
+
+export async function parseModel(buffer, kind) {
+  if (kind === 'step') {
+    const meshes = await readStep(buffer);
+    const group = new THREE.Group();
+    for (const m of meshes) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(m.attributes.position.array, 3));
+      geo.setIndex(m.index.array);
+      if (m.attributes.normal) geo.setAttribute('normal', new THREE.Float32BufferAttribute(m.attributes.normal.array, 3));
+      else geo.computeVertexNormals();
+      group.add(new THREE.Mesh(geo, MATERIAL));
+    }
+    group.userData.volume = volumeCm3(meshes);
+    return group;
+  }
   if (kind === 'stl') {
     const geo = new STLLoader().parse(buffer);
     geo.computeVertexNormals();

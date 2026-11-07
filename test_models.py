@@ -73,4 +73,12 @@ with zipfile.ZipFile(p, "w") as z:
 assert abs(volume_cm3(p, "3mf") - 1) < 1e-6
 assert volume_cm3(os.path.join(d, "ok.3mf"), "3mf") == 0
 assert volume_cm3(os.path.join(d, "fremd.3mf"), "3mf") == 0
+
+# STEP: am Inhalt erkannt (auch mit BOM oder klein geschrieben); Volumen misst der Browser
+STEP = b"ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('x'),'2;1');\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n"
+assert model_kind(file("teil.step", STEP)) == "step"
+assert model_kind(file("bom.stp", b"\xef\xbb\xbf\r\n" + STEP.lower())) == "step"
+assert model_kind(file("falsch.step", b"ISO-10303-28;\n<xml/>")) is None, "STEP-XML (Teil 28) ist kein Teil 21"
+assert model_kind(file("text.step", b"Hallo ISO-10303-21;")) is None, "Kennung muss am Anfang stehen"
+assert volume_cm3(file("teil2.step", STEP), "step") is None
 print("OK")
