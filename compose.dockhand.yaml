@@ -15,7 +15,7 @@ services:
   app:
     <<: *hardening
     build: .
-    image: pleaseprintit-app
+    image: ghcr.io/neodk2004/pleaseprintit:latest
     ports:
       - "${PORT:-8080}:8000"
     environment:
@@ -39,7 +39,7 @@ services:
 
   backup:                         # tägliche Sicherung ins Volume „backups“, die letzten 14 bleiben
     <<: *hardening
-    image: pleaseprintit-app
+    image: ghcr.io/neodk2004/pleaseprintit:latest
     command: python backup.py
     environment:
       TZ: ${TZ:-Europe/Berlin}

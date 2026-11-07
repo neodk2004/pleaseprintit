@@ -30,7 +30,7 @@ python test_app.py && python test_models.py && python test_preview.py   # each p
 docker compose up -d --build                                            # run locally on :8080
 ```
 
-Tests set `SECRET_KEY`, `ADMIN_PASSWORD` and `DB_PATH` themselves and use a temp directory. CI (`.github/workflows/ci.yml`) runs the tests, validates both compose files and test-starts the Docker image.
+Tests set `SECRET_KEY`, `ADMIN_PASSWORD` and `DB_PATH` themselves and use a temp directory. CI (`.github/workflows/ci.yml`) runs the tests, validates both compose files and test-starts the Docker image on amd64 and arm64 (QEMU). On push to `main` (and `v*` tags) it then publishes a multi-arch image to `ghcr.io/neodk2004/pleaseprintit`, which both compose files reference (with `build: .` as fallback).
 
 ## Conventions
 
