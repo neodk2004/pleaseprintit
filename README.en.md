@@ -97,6 +97,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 | Built for | friends, one printer | small office, one printer | hobby up to print farm |
 | Request by link | Printables, MakerWorld, Thingiverse | Printables only (opt-in) | five sites incl. MakerWorld |
 | 3D preview | ✅ with build-plate check | ✅ | ✅ |
+| Open in slicer | ✅ Orca, Bambu Studio, Creality Print, no extra software | ✅ PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura, via a small helper app | – |
 | Material cost | ✅ per request and per friend | – | – |
 | Questions | rejection with a reason | ✅ comments on the request | notes |
 | Several printers | – | – | ✅ with auto-assignment |
