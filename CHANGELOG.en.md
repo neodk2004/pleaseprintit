@@ -4,6 +4,11 @@
 
 All notable changes to PleasePrintit. Versions follow [Semantic Versioning](https://semver.org/), the prebuilt image is available at `ghcr.io/neodk2004/pleaseprintit`.
 
+## [Unreleased]
+
+### Added
+- **“Open in slicer”:** buttons on a request open the 3D file directly in OrcaSlicer, Bambu Studio or Creality Print on your computer. Pick which buttons appear under Settings → Workshop. The slicer fetches the file via a signed link that is valid for one hour.
+
 ## [1.1.0] – 2026-11-07
 
 ### Added
@@ -46,5 +51,6 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/neodk2004/pleaseprintit/releases/tag/v1.0.0

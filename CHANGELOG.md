@@ -4,6 +4,11 @@
 
 Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioning](https://semver.org/lang/de/), das fertige Image gibt es unter `ghcr.io/neodk2004/pleaseprintit`.
 
+## [Unreleased]
+
+### Neu
+- **„In Slicer öffnen“:** Knöpfe im Auftrag öffnen die 3D-Datei direkt in OrcaSlicer, Bambu Studio oder Creality Print am PC. Welche Knöpfe erscheinen, wählst du in Einstellungen → Werkstatt. Der Slicer holt die Datei über einen signierten Link, der eine Stunde gilt.
+
 ## [1.1.0] – 2026-11-07
 
 ### Neu
@@ -46,5 +51,6 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/neodk2004/pleaseprintit/releases/tag/v1.0.0
