@@ -55,6 +55,15 @@
   </form>
 </section>
 
+<section class="card rise" id="slicer" style="--i:3">
+  <h3>{{ icon('external') }} {{ _('Slicer') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Knöpfe im Auftrag, die die 3D-Datei direkt in deinem Slicer am PC öffnen. Der Slicer muss installiert sein. Der Link gilt eine Stunde.') }}</p>
+  <form class="row" method="post" action="{{ url_for('save_slicers') }}">
+    {% for key, (name, _scheme) in slicers.items() %}<label><input type="checkbox" name="slicer" value="{{ key }}"{% if key in chosen %} checked{% endif %}> {{ name }}</label>
+    {% endfor %}<button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
 {% elif tab == 'filamente' %}
 <section class="card rise" style="--i:1">
   <h3>{{ icon('spool') }} {{ _('Filamente und Farben') }}</h3>

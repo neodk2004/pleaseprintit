@@ -8,8 +8,9 @@ import sqlite3
 import time
 from collections import Counter
 from datetime import date, datetime
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
+from itsdangerous import BadSignature, URLSafeTimedSerializer
 from flask import Flask, abort, g, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -338,12 +339,12 @@ MAX_VOLUME = 1_000_000   # cm³ = 1 m³; mehr kann kein Hobbydrucker
 
 # --- Anmeldung und Rechte -------------------------------------------------
 
-PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang"}
+PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang", "slicer_file"}
 PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne Anmeldung → Login, danach zurück
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ONLY = {"set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
-              "save_legal", "create_reset", "archive", "stats_page", "save_tip"}
+              "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers"}
 # Ablehnungsgründe: kurz für die Werkstatt (wird gespeichert) → ausformuliert für den Freund (Seite + Mail)
 REASONS = {
     "Zu komplex": "Das Modell ist für meinen Drucker leider zu komplex – zum Beispiel wegen vieler Stützstrukturen "
@@ -720,7 +721,8 @@ def entry(link_id):
         owner = con.execute("SELECT name FROM users WHERE id = ?", (e["user_id"],)).fetchone()
         return render_template("detail.html", e=e, owner=owner["name"] if owner else _("ich"), bed=bed(con),
                                cost=estimate(con, e), flow=flow(con, e), options=filament_options(con),
-                               can_resubmit=can_resubmit(e), tip=text_setting(con, "tip_url"))
+                               can_resubmit=can_resubmit(e), tip=text_setting(con, "tip_url"),
+                               slicers=slicer_links(con, e) if g.admin else [])
 
 
 NO_FILAMENT = "Filament nicht vorrätig"
@@ -854,6 +856,49 @@ def model_file(link_id):
         abort(404)
     return send_from_directory(MODELS, e["file"], mimetype="application/octet-stream",
                                as_attachment=download, download_name=e["file_name"])
+
+
+# --- „In Slicer öffnen“: Der Slicer holt die Datei selbst, ohne Anmeldung, über einen signierten Link ---
+
+# ponytail: nur Windows/Linux-Schemata; Bambu Studio auf dem Mac braucht bambustudioopen://
+SLICERS = {"orca": ("OrcaSlicer", "orcaslicer://open?file="),
+           "bambu": ("Bambu Studio", "bambustudio://open?file="),
+           "creality": ("Creality Print", "crealityprintlink://open?file=")}
+SLICER_MAX_AGE = 3600   # Sekunden, so lange gilt ein Link ab Aufruf der Auftragsseite
+slicer_signer = URLSafeTimedSerializer(app.secret_key, salt="slicer")
+
+
+def chosen_slicers(con):
+    return [k for k in text_setting(con, "slicers").split(",") if k in SLICERS]
+
+
+def slicer_links(con, e):
+    """[(Name, Link)] für die in den Einstellungen gewählten Slicer; nur mit 3D-Datei."""
+    if not e["file"]:
+        return []
+    url = public("slicer_file", token=slicer_signer.dumps(e["id"]), name=f"auftrag-{e['id']}.{kind(e)}")
+    return [(SLICERS[k][0], SLICERS[k][1] + quote(url, safe="")) for k in chosen_slicers(con)]
+
+
+@app.get("/slicer/<token>/<name>")
+def slicer_file(token, name):
+    """Öffentlich, aber nur mit gültigem, höchstens eine Stunde altem Link; liefert genau eine Datei."""
+    try:
+        link_id = slicer_signer.loads(token, max_age=SLICER_MAX_AGE)
+    except BadSignature:   # auch abgelaufen
+        abort(403)
+    with db() as con:
+        e = con.execute("SELECT file FROM links WHERE id = ?", (link_id,)).fetchone()
+    if not e or not e["file"]:
+        abort(404)
+    return send_from_directory(MODELS, e["file"], mimetype="application/octet-stream")
+
+
+@app.post("/settings/slicers")
+def save_slicers():
+    with db() as con:
+        put_setting(con, "slicers", ",".join(k for k in SLICERS if k in request.form.getlist("slicer")))
+    return redirect(url_for("settings", tab="werkstatt"))
 
 
 @app.post("/links/<int:link_id>/image")
@@ -1051,6 +1096,7 @@ def settings():
                                fill=setting(con, "fill", FILL), imp=impressum_data(con), imp_fields=IMPRESSUM,
                                archive_days=int(setting(con, "archive_days", ARCHIVE_DAYS)),
                                tip=text_setting(con, "tip_url"),
+                               slicers=SLICERS, chosen=chosen_slicers(con),
                                datenschutz=text_setting(con, "datenschutz"),
                                template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))
 

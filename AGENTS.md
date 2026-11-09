@@ -41,6 +41,7 @@ Tests set `SECRET_KEY`, `ADMIN_PASSWORD` and `DB_PATH` themselves and use a temp
 - **Always use SQL parameters** (`?`), never string formatting with user input.
 - **Security is a feature:** keep the CSP/HSTS headers, login throttling, invite-only signup, per-user limits (10 open orders, 500 MB files), content-based file checks and the SSRF guard in `preview.py`. Templates rely on Jinja2 autoescaping — don't use `|safe` on user data.
 - **STEP:** occt-import-js needs `eval` (embind) and WebAssembly. It runs only inside its Web Worker; `security_headers()` grants `'unsafe-eval' 'wasm-unsafe-eval'` to `/static/occt/` only. Never add eval to the page CSP. Python can't read STEP, so the order page measures the volume in the browser and posts it once to `/entry/<id>/measure`, which only accepts plausible values.
+- **Open in slicer:** `GET /slicer/<token>/<name>` is the only public file route on purpose, because the desktop slicer fetches the file without a session. The token is signed with `itsdangerous` (salt `slicer`) and valid for `SLICER_MAX_AGE` (1 hour), and only the admin's order page creates one. Keep it that way: never sign anything else with this serializer.
 - The container runs as uid 1000 with a read-only filesystem; only `/data` and `/backups` are writable.
 - Configuration comes from environment variables only (see `.env.example`). Never commit `.env`, secrets or real personal data; screenshots use demo data.
 - Add or extend a test in the matching `test_*.py` for any non-trivial change.

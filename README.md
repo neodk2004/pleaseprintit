@@ -72,6 +72,7 @@ flowchart LR
 
 - 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-, 3MF- oder STEP-Datei.
 - 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt. Auch STEP-Dateien aus CAD-Programmen werden direkt im Browser gelesen und vermessen.
+- 🖨️ **In Slicer öffnen:** Ein Klick im Auftrag öffnet die 3D-Datei direkt in OrcaSlicer, Bambu Studio oder Creality Print an deinem PC. Welche Knöpfe erscheinen, wählst du in den Einstellungen.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
 - 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Ganz ohne Bezahlfunktion, nur damit niemand raten muss.
 - ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.

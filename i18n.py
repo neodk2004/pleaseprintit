@@ -479,6 +479,15 @@ T = {
     "Archivieren nach": ("Archive after", "Archiver après"),
     "Tagen": ("days", "jours"),
 
+    # --- Slicer ---
+    "Slicer": ("Slicer", "Trancheur"),
+    "In {name} öffnen": ("Open in {name}", "Ouvrir dans {name}"),
+    "Knöpfe im Auftrag, die die 3D-Datei direkt in deinem Slicer am PC öffnen. Der Slicer muss installiert sein. Der Link gilt eine Stunde.":
+        ("Buttons on a request that open the 3D file directly in the slicer on your computer. The slicer must be "
+         "installed. The link is valid for one hour.",
+         "Des boutons sur la demande qui ouvrent le fichier 3D directement dans le trancheur de ton ordinateur. Le "
+         "trancheur doit être installé. Le lien est valable une heure."),
+
     # --- Trinkgeld ---
     "Trinkgeld": ("Tip", "Pourboire"),
     "Trinkgeld geben": ("Leave a tip", "Laisser un pourboire"),

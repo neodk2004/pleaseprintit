@@ -72,6 +72,7 @@ flowchart LR
 
 - 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL, 3MF or STEP file.
 - 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate. STEP files from CAD programs are read and measured right in the browser, too.
+- 🖨️ **Open in slicer:** one click on a request opens the 3D file directly in OrcaSlicer, Bambu Studio or Creality Print on your computer. Pick which buttons appear in the settings.
 - 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
 - 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. No payment feature, just so nobody has to guess.
 - ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.

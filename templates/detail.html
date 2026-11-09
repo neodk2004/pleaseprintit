@@ -97,6 +97,7 @@
     <div class="card">{{ specs() }}
       <div class="actions">
         {% if g.admin and kind(e) %}<a class="btn btn-primary btn-wide" href="{{ url_for('model_file', link_id=e.id, download=1) }}">{{ icon('download') }}{{ _('Datei herunterladen') }}</a>{% endif %}
+        {% for name, link in slicers %}<a class="btn btn-wide" href="{{ link }}">{{ icon('external') }}{{ _('In {name} öffnen', name=name) }}</a>{% endfor %}
         {% if e.url %}<a class="btn btn-wide" href="{{ e.url }}" rel="noopener noreferrer" target="_blank">{{ icon('external') }}{{ _('Link öffnen') }}</a>{% endif %}
         {% if tip and not g.admin and e.status == 'gedruckt' %}<a class="btn btn-wide" href="{{ tip }}" target="_blank" rel="noopener noreferrer">{{ icon('heart') }}{{ _('Trinkgeld geben') }} {{ icon('external') }}</a>{% endif %}
         {% if g.admin %}<form method="post" action="{{ url_for('archive') }}">

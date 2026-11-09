@@ -463,6 +463,27 @@ csp = client().get("/static/occt/occt-import-js-worker.js").headers["Content-Sec
 assert "'unsafe-eval'" in csp and "'wasm-unsafe-eval'" in csp, "nur der STEP-Worker darf eval"
 admin.post("/settings/bed", data={"bed_x": "", "bed_y": "", "bed_z": ""})
 
+# Slicer-Knöpfe: nur gewählte, nur Werkstatt, Link mit Signatur holt genau die Datei ohne Anmeldung
+assert "orcaslicer://" not in admin.get(f"/entry/{sid}").data.decode(), "ohne Auswahl keine Knöpfe"
+assert carl.post("/settings/slicers", data={"slicer": "orca"}).status_code == 403
+assert admin.post("/settings/slicers", data={"slicer": ["orca", "creality", "quatsch"]}).status_code == 302
+assert con.execute("SELECT value FROM settings WHERE key = 'slicers'").fetchone()[0] == "orca,creality"
+page = admin.get(f"/entry/{sid}").data.decode()
+assert "In OrcaSlicer öffnen" in page and "crealityprintlink://open?file=" in page and "bambustudio://" not in page
+assert "orcaslicer://" not in carl.get(f"/entry/{sid}").data.decode(), "Freunde sehen keine Slicer-Knöpfe"
+from urllib.parse import unquote, urlparse  # noqa: E402
+slicer_url = urlparse(unquote(page.split("orcaslicer://open?file=")[1].split('"')[0]))
+assert slicer_url.path.endswith(f"/auftrag-{sid}.step"), slicer_url
+assert anon.get(slicer_url.path).data == STEP, "Slicer braucht keine Anmeldung"
+tok = slicer_url.path.split("/")[2]
+assert anon.get(f"/slicer/{tok}x/a.stl").status_code == 403, "veränderter Link"
+assert anon.get(f"/slicer/{A.slicer_signer.dumps(sid + 1000)}/a.stl").status_code == 404
+real_max, A.SLICER_MAX_AGE = A.SLICER_MAX_AGE, -1
+assert anon.get(slicer_url.path).status_code == 403, "abgelaufen"
+A.SLICER_MAX_AGE = real_max
+assert 'value="orca" checked' in admin.get("/settings?tab=werkstatt").data.decode()
+admin.post("/settings/slicers", data={})
+
 # Einstellungen in Tabs: jeder Tab zeigt nur seinen Bereich; Speichern führt in denselben Tab zurück
 for tab, inside, outside in (("drucker", "bed_x", "tip_url"), ("filamente", "price_kg", "bed_x"),
                              ("werkstatt", "tip_url", "imp_name"), ("rechtliches", "imp_name", "price_kg"),
