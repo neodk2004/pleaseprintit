@@ -250,6 +250,7 @@ Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probes
 
 - 🐞 **Fehler gefunden oder eine Idee?** Einfach ein [Issue](https://github.com/neodk2004/pleaseprintit/issues) aufmachen, gern auf Deutsch oder Englisch.
 - 🔐 **Sicherheitslücke?** Bitte nicht öffentlich, sondern wie in [SECURITY.md](SECURITY.md) beschrieben melden.
+- 📝 **Was ist neu?** Alle Änderungen pro Version stehen in [CHANGELOG.md](CHANGELOG.md).
 - 🤖 **Mit KI-Agenten am Code arbeiten?** Aufbau, Befehle und Regeln stehen in [AGENTS.md](AGENTS.md).
 - ⭐ **Gefällt dir das Projekt?** Ein Stern hilft anderen, es zu finden. Wer mag, gibt auf [Ko-fi](https://ko-fi.com/E8R028M0YO) einen Kaffee aus.
 
