@@ -97,7 +97,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 | Gedacht für | Freundeskreis, ein Drucker | kleines Büro, ein Drucker | Hobby bis Druckfarm |
 | Wunsch per Link | Printables, MakerWorld, Thingiverse | nur Printables (abschaltbar) | fünf Seiten, u. a. MakerWorld |
 | 3D-Vorschau | ✅ mit Druckbett-Check | ✅ | ✅ |
-| In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | ✅ PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura, mit kleinem Hilfsprogramm | – |
+| In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | nur mit Hilfsprogramm, das man installieren muss (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
 | Materialkosten | ✅ pro Auftrag und pro Freund | – | – |
 | Rückfragen | Ablehnung mit Grund | ✅ Kommentare am Auftrag | Notizen |
 | Mehrere Drucker | – | – | ✅ mit Auto-Zuteilung |
