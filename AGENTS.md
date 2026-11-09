@@ -44,6 +44,7 @@ Tests set `SECRET_KEY`, `ADMIN_PASSWORD` and `DB_PATH` themselves and use a temp
 - The container runs as uid 1000 with a read-only filesystem; only `/data` and `/backups` are writable.
 - Configuration comes from environment variables only (see `.env.example`). Never commit `.env`, secrets or real personal data; screenshots use demo data.
 - Add or extend a test in the matching `test_*.py` for any non-trivial change.
+- **Changelog:** every user-visible change gets a line in both `CHANGELOG.md` (German) and `CHANGELOG.en.md` (English), first under `## [Unreleased]`. On a release, rename that section to `## [x.y.z] – YYYY-MM-DD` and add the compare link at the bottom, before tagging `vx.y.z`.
 
 ## Security issues
 
