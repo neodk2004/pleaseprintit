@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.15-slim
 WORKDIR /app
 RUN useradd -r -u 1000 app && mkdir /data /backups && chown app /data /backups
 COPY requirements.txt .
