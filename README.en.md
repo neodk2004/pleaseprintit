@@ -49,7 +49,11 @@ Built for a private circle of a handful up to about 50 people, self-hosted with 
   <img src="docs/auftraege.png" alt="Print queue with status, filament, weight and material cost" width="49%">
   <img src="docs/auftrag-3d.png" alt="Print request with rotatable 3D preview, progress and cost estimate in dark mode" width="49%">
 </p>
-<p align="center"><sub>Left: the print queue. Right: a request with 3D preview in dark mode. All names and models are demo data.</sub></p>
+<p align="center">
+  <img src="docs/rueckfragen.png" alt="A request as a friend sees it, with the position in the queue and questions to the workshop" width="49%">
+  <img src="docs/foto-nochmal.png" alt="A printed request with a photo of the finished print and a “Print again” button in dark mode" width="49%">
+</p>
+<p align="center"><sub>Top left: the print queue. Top right: a request with 3D preview. Bottom left: position in the queue and questions. Bottom right: photo of the finished print and “Print again”. All names, models and photos are demo data. The screenshots show the German interface.</sub></p>
 
 ## How it works
 

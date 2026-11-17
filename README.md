@@ -47,7 +47,11 @@ Gedacht für den privaten Kreis von einer Handvoll bis etwa 50 Leuten, selbst ge
   <img src="docs/auftraege.png" alt="Auftragsliste der Werkstatt mit Status, Filament, Gewicht und Materialkosten" width="49%">
   <img src="docs/auftrag-3d.png" alt="Auftrag mit drehbarer 3D-Vorschau, Fortschritt und Kostenschätzung im dunklen Design" width="49%">
 </p>
-<p align="center"><sub>Links: die Warteschlange der Werkstatt. Rechts: ein Auftrag mit 3D-Vorschau im dunklen Design. Alle Namen und Modelle sind Demodaten.</sub></p>
+<p align="center">
+  <img src="docs/rueckfragen.png" alt="Auftrag aus Sicht eines Freundes mit Platz in der Warteschlange und Rückfragen an die Werkstatt" width="49%">
+  <img src="docs/foto-nochmal.png" alt="Gedruckter Auftrag mit Foto vom fertigen Druck und Knopf „Nochmal drucken“ im dunklen Design" width="49%">
+</p>
+<p align="center"><sub>Oben links: die Warteschlange der Werkstatt. Oben rechts: ein Auftrag mit 3D-Vorschau. Unten links: Platz in der Warteschlange und Rückfragen. Unten rechts: Foto vom fertigen Druck und „Nochmal drucken“. Alle Namen, Modelle und Fotos sind Demodaten.</sub></p>
 
 > **In English:** PleasePrintit is a self-hosted **3D print request queue** for people who own a 3D printer and keep getting “can you print this for me?” messages. Friends join via invite link and submit print requests from Printables, MakerWorld or Thingiverse links or their own STL/3MF files, pick filament and color, and track the status (submitted → planned → printed). You get a sorted queue with an in-browser 3D model viewer, build-plate fit check, filament weight and cost estimate, e-mail notifications and daily backups. Runs as a hardened Docker container (Flask, SQLite, three.js) with a prebuilt multi-arch image (amd64 and arm64, so a Raspberry Pi works too) and deploys with Docker Compose or Dockhand. The user interface is available in German, English and French. **→ [Full English guide](README.en.md)**
 
