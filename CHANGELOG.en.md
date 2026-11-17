@@ -6,6 +6,8 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.3.0] – 2026-11-17
+
 ### Added
 - **E-mail to the workshop on new requests:** enter your address under Settings → Workshop. Empty = no e-mails.
 - **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. No more “which size?” in the group chat.
@@ -68,7 +70,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/neodk2004/pleaseprintit/releases/tag/v1.0.0

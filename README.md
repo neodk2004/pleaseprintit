@@ -106,7 +106,12 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 | 3D-Vorschau | ✅ mit Druckbett-Check | ✅ | ✅ |
 | In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | nur mit Hilfsprogramm, das man installieren muss (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
 | Materialkosten | ✅ pro Auftrag und pro Freund | – | – |
-| Rückfragen | ✅ Kommentare am Auftrag, interne Notiz | ✅ Kommentare am Auftrag | Notizen |
+| Rückfragen | ✅ Kommentare am Auftrag | ✅ Kommentare am Auftrag | – |
+| Interne Notiz nur für dich | ✅ | – | Notizen |
+| Mails | ✅ neuer Wunsch, Status, Rückfragen, pausierbar | ✅ neuer Wunsch, Status, Kommentare, abschaltbar | nur „fertig gedruckt“ |
+| Platz in der Warteschlange für Freunde | ✅ | – | – |
+| Foto vom fertigen Druck | ✅ im Auftrag und in der Mail | – | – |
+| Nochmal drucken | ✅ | ✅ | – |
 | Mehrere Drucker | – | – | ✅ mit Auto-Zuteilung |
 | Anmeldung | Einladung + Passwort | Einladung, Passkeys, SSO | Einladung, SSO, 2FA |
 | Raspberry Pi (ARM64) | ✅ | – (nur x86) | ✅ |

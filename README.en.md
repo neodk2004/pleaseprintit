@@ -106,7 +106,12 @@ There are now three free, self-hosted tools for print requests. They come in dif
 | 3D preview | ✅ with build-plate check | ✅ | ✅ |
 | Open in slicer | ✅ Orca, Bambu Studio, Creality Print, no extra software | only with a helper app you have to install (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
 | Material cost | ✅ per request and per friend | – | – |
-| Questions | ✅ comments on the request, internal note | ✅ comments on the request | notes |
+| Questions | ✅ comments on the request | ✅ comments on the request | – |
+| Internal note just for you | ✅ | – | notes |
+| E-mails | ✅ new request, status, questions, can be paused | ✅ new request, status, comments, can be turned off | only “ready to collect” |
+| Queue position for friends | ✅ | – | – |
+| Photo of the finished print | ✅ on the request and in the e-mail | – | – |
+| Print again | ✅ | ✅ | – |
 | Several printers | – | – | ✅ with auto-assignment |
 | Sign-in | invite + password | invite, passkeys, SSO | invite, SSO, 2FA |
 | Raspberry Pi (ARM64) | ✅ | – (x86 only) | ✅ |

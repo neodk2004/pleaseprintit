@@ -6,6 +6,8 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.3.0] – 2026-11-17
+
 ### Neu
 - **Mail an die Werkstatt bei neuem Druckwunsch:** Adresse in Einstellungen → Werkstatt eintragen. Leer = keine Mails.
 - **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die jeweils andere Seite bekommt eine Mail. Schluss mit „Welche Größe?“ im Chat.
@@ -68,7 +70,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/neodk2004/pleaseprintit/releases/tag/v1.0.0
