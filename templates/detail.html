@@ -9,6 +9,7 @@
   {{ badge(e.status) }}
 </div>
 {{ flowbar(flow) }}
+{% if place %}<p class="queue-place rise">{{ icon('clock') }} {{ _('Platz {n} in der Warteschlange', n=place) }}</p>{% endif %}
 
 {% macro specs() %}
 <dl class="specs">
@@ -26,6 +27,23 @@
 <div class="cost"><div><small>{{ _('Materialkosten (Schätzung)') }}</small><span class="big">{{ euro(cost[1]) }}</span></div>
   <small style="text-align:right">{{ _('grob aus dem Modellvolumen') }}</small></div>
 {% elif cost and g.admin %}<p class="hint">{{ _('Für einen Preis trag in den Einstellungen den Preis pro kg ein.') }} <a href="{{ url_for('settings') }}">{{ _('Einstellungen') }}</a></p>{% endif %}
+{% endmacro %}
+
+{% macro talk() %}
+<section class="card comments" id="kommentare" style="margin-top:var(--s4)">
+  <h3>{{ icon('mail') }} {{ _('Rückfragen') }}</h3>
+  {% for c in comments %}
+  <div class="comment{{ ' mine' if (c.user_id is none) == g.admin }}">
+    <p class="label-t">{{ c.name or _('Werkstatt') }} · <span class="mono">{{ c.at }}</span></p>
+    <p>{{ c.text }}</p>
+  </div>
+  {% else %}<p class="hint">{{ _('Noch keine Nachrichten. Fragen zum Auftrag kannst du hier stellen, die andere Seite bekommt eine Mail.') }}</p>{% endfor %}
+  <form method="post" action="{{ url_for('add_comment', link_id=e.id) }}" style="margin-top:var(--s3)">
+    <label for="ctext" class="sr-only">{{ _('Nachricht') }}</label>
+    <textarea id="ctext" name="text" maxlength="2000" required placeholder="{{ _('z. B. Geht das auch in Schwarz?') }}"></textarea>
+    <button class="btn btn-primary" style="margin-top:var(--s3)">{{ icon('check') }}{{ _('Senden') }}</button>
+  </form>
+</section>
 {% endmacro %}
 
 {% if e.status == 'abgelehnt' and not g.admin %}
@@ -51,6 +69,7 @@
     {% else %}
     <a class="btn" href="{{ url_for('new') }}" style="margin-top:var(--s4)">{{ icon('plus') }}{{ _('Neuen Wunsch einreichen') }}</a>
     {% endif %}
+    {{ talk() }}
   </div>
 </div>
 {% else %}
@@ -69,6 +88,9 @@
     {% else %}
       {{ picture(e) }}
     {% endif %}
+    {% if e.photo %}<figure class="card photo" style="margin-top:var(--s4)">
+      <img src="{{ url_for('image', name=e.photo) }}" alt="{{ _('Foto vom fertigen Druck') }}" loading="lazy">
+      <figcaption class="hint">{{ icon('image') }} {{ _('Foto vom fertigen Druck') }}</figcaption></figure>{% endif %}
 
     {% if g.admin %}
     <form class="card status" method="post" action="{{ url_for('set_status', link_id=e.id) }}" style="margin-top:var(--s4)">
@@ -91,6 +113,7 @@
       </div>
     </form>
     {% endif %}
+    {{ talk() }}
   </div>
 
   <aside class="rise" style="--i:2">
@@ -99,6 +122,9 @@
         {% if g.admin and kind(e) %}<a class="btn btn-primary btn-wide" href="{{ url_for('model_file', link_id=e.id, download=1) }}">{{ icon('download') }}{{ _('Datei herunterladen') }}</a>{% endif %}
         {% for name, link in slicers %}<a class="btn btn-wide" href="{{ link }}">{{ icon('external') }}{{ _('In {name} öffnen', name=name) }}</a>{% endfor %}
         {% if e.url %}<a class="btn btn-wide" href="{{ e.url }}" rel="noopener noreferrer" target="_blank">{{ icon('external') }}{{ _('Link öffnen') }}</a>{% endif %}
+        {% if can_repeat %}<form method="post" action="{{ url_for('repeat', link_id=e.id) }}" class="row">
+          <label style="flex:0 0 5.5rem">{{ _('Stückzahl') }} <input type="number" name="qty" min="1" max="{{ max_qty }}" value="{{ e.qty }}" inputmode="numeric" required></label>
+          <button class="btn btn-wide" style="flex:1;align-self:flex-end">{{ icon('rotate') }}{{ _('Nochmal drucken') }}</button></form>{% endif %}
         {% if tip and not g.admin and e.status == 'gedruckt' %}<a class="btn btn-wide" href="{{ tip }}" target="_blank" rel="noopener noreferrer">{{ icon('heart') }}{{ _('Trinkgeld geben') }} {{ icon('external') }}</a>{% endif %}
         {% if g.admin %}<form method="post" action="{{ url_for('archive') }}">
           <input type="hidden" name="id" value="{{ e.id }}"><input type="hidden" name="next" value="{{ url_for('entry', link_id=e.id) }}">
@@ -110,6 +136,19 @@
     </div>
 
     {% if g.admin %}
+    <form class="card" method="post" action="{{ url_for('save_note', link_id=e.id) }}">
+      <label for="note">{{ icon('file') }} {{ _('Interne Notiz') }} <small>{{ _('(sieht nur die Werkstatt)') }}</small></label>
+      <textarea id="note" name="note" maxlength="2000" placeholder="{{ _('z. B. 0,2 mm, mit Stützen, Platte 2') }}">{{ e.note or '' }}</textarea>
+      <button class="btn" style="margin-top:var(--s3)">{{ _('Speichern') }}</button>
+    </form>
+    <details class="card"{% if e.status == 'geplant' and not e.photo %} open{% endif %}>
+      <summary>{{ icon('image') }}{{ _('Foto ersetzen') if e.photo else _('Foto vom fertigen Druck') }}</summary>
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('save_photo', link_id=e.id) }}">
+        <label for="photo">{{ _('Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“.') }} <small>{{ _('(JPG, PNG, GIF oder WebP, bis 5 MB)') }}</small></label>
+        <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/gif,image/webp" required>
+        <button class="btn" style="margin-top:var(--s3)">{{ _('Foto hochladen') }}</button>
+      </form>
+    </details>
     <details class="card">
       <summary>{{ icon('upload') }}{{ _('3D-Datei ersetzen') if kind(e) else _('3D-Datei hinterlegen') }}</summary>
       <form method="post" enctype="multipart/form-data" action="{{ url_for('attach_model', link_id=e.id) }}">

@@ -28,6 +28,39 @@ T = {
     "Zurück": ("Back", "Retour"),
     "Rechtliches": ("Legal", "Informations légales"),
     "Speichern": ("Save", "Enregistrer"),
+    # --- Mail an die Werkstatt bei neuem Auftrag ---
+    "Benachrichtigung": ("Notification", "Notification"),
+    "Deine Adresse für eine Mail, sobald ein Freund einen Druckwunsch einreicht oder eine Rückfrage schreibt. Leer = keine Mails.":
+        ("Your address for an e-mail whenever a friend submits a print request or asks a question. Empty = no e-mails.",
+         "Ton adresse pour recevoir un e-mail dès qu'un ami envoie une demande d'impression ou pose une question. Vide = pas d'e-mails."),
+    "Mails pausieren (Adresse bleibt gespeichert)": ("Pause e-mails (address stays saved)",
+                                                     "Mettre les e-mails en pause (l'adresse reste enregistrée)"),
+    "Dafür muss der Mailversand in der .env eingerichtet sein.":
+        ("This requires e-mail sending to be set up in the .env file.",
+         "Pour cela, l'envoi d'e-mails doit être configuré dans le fichier .env."),
+    "Neuer Druckwunsch von {name}": ("New print request from {name}", "Nouvelle demande d'impression de {name}"),
+    # --- Rückfragen und interne Notiz am Auftrag ---
+    "Rückfragen": ("Questions", "Questions"),
+    "Nachricht": ("Message", "Message"),
+    "Senden": ("Send", "Envoyer"),
+    "Noch keine Nachrichten. Fragen zum Auftrag kannst du hier stellen, die andere Seite bekommt eine Mail.":
+        ("No messages yet. Ask questions about this request here; the other side gets an e-mail.",
+         "Pas encore de messages. Pose ici tes questions sur la demande ; l'autre côté reçoit un e-mail."),
+    "z. B. Geht das auch in Schwarz?": ("e.g. Could this be done in black?", "p. ex. C'est possible en noir ?"),
+    "Neuer Kommentar von {name}": ("New comment from {name}", "Nouveau commentaire de {name}"),
+    "Neue Nachricht von der Werkstatt": ("New message from the workshop", "Nouveau message de l'atelier"),
+    "Interne Notiz": ("Internal note", "Note interne"),
+    # --- Warteschlange, Nochmal drucken, Foto ---
+    "Platz {n} in der Warteschlange": ("Position {n} in the queue", "Position {n} dans la file d'attente"),
+    "Nochmal drucken": ("Print again", "Imprimer à nouveau"),
+    "Foto vom fertigen Druck": ("Photo of the finished print", "Photo de l'impression terminée"),
+    "Foto ersetzen": ("Replace photo", "Remplacer la photo"),
+    "Foto hochladen": ("Upload photo", "Téléverser la photo"),
+    "Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“.":
+        ("Your friend sees it on the request and gets it with the “Printed” e-mail.",
+         "Ton ami la voit dans la demande et la reçoit avec l'e-mail « Imprimé »."),
+    "(sieht nur die Werkstatt)": ("(only the workshop sees this)", "(visible uniquement par l'atelier)"),
+    "z. B. 0,2 mm, mit Stützen, Platte 2": ("e.g. 0.2 mm, with supports, plate 2", "p. ex. 0,2 mm, avec supports, plateau 2"),
     "(optional)": ("(optional)", "(facultatif)"),
     "oder": ("or", "ou"),
     "ich": ("me", "moi"),
@@ -245,9 +278,9 @@ T = {
         ("Nothing printed yet. Once a request is done, you’ll see the total here.",
          "Rien d’imprimé pour l’instant. Dès qu’une demande est terminée, tu verras le total ici."),
     "Benachrichtigung per E-Mail": ("Email notifications", "Notifications par e-mail"),
-    "Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert. Feld leeren = keine Mails mehr.":
-        ("Optional: add your address and you’ll get an email whenever a request’s status changes. Clear the field = no more emails.",
-         "Facultatif : indique ton adresse et tu recevras un e-mail à chaque changement de statut. Champ vide = plus d’e-mails."),
+    "Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert oder die Werkstatt dir schreibt. Feld leeren = keine Mails mehr.":
+        ("Optional: add your address and you’ll get an email whenever a request’s status changes or the workshop writes to you. Clear the field = no more emails.",
+         "Facultatif : indique ton adresse et tu recevras un e-mail à chaque changement de statut ou quand l’atelier t’écrit. Champ vide = plus d’e-mails."),
     "E-Mail-Adresse": ("Email address", "Adresse e-mail"),
     "du@beispiel.de": ("you@example.com", "toi@exemple.fr"),
     "Testmail schicken": ("Send test email", "Envoyer un e-mail de test"),

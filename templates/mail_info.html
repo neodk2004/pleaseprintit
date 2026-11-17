@@ -1,0 +1,32 @@
+{%- set FONT = "'Bahnschrift','Segoe UI',Roboto,Helvetica,Arial,sans-serif" -%}
+{%- set MONO = "Consolas,'SF Mono',Menlo,monospace" -%}
+<!doctype html>
+<html lang="{{ g.lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>{{ e.title }}</title></head>
+<body style="margin:0;padding:0;background:#f5f3ef;color:#17181a;font-family:{{ FONT }};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ef;padding:32px 12px;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+  <tr><td style="padding:0 4px 20px;">
+    <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+      <td><img src="cid:{{ cid }}" width="36" height="36" alt="" style="display:block;border-radius:9px;"></td>
+      <td style="padding-left:10px;font:600 18px {{ FONT }};color:#17181a;">Please<span style="color:#c2410c;">Print</span>it</td>
+    </tr></table></td></tr>
+  <tr><td style="background:#ffffff;border:1px solid #e2ddd4;border-radius:14px;padding:28px;">
+    <p style="margin:0 0 6px;font:500 12px {{ MONO }};letter-spacing:2px;text-transform:uppercase;color:#565a61;">{{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}</p>
+    <h1 style="margin:0 0 10px;font:600 24px/1.2 {{ FONT }};color:#17181a;">{{ e.title }}</h1>
+    <p style="margin:0 0 18px;font:16px/1.55 {{ FONT }};">{{ headline }}</p>
+    {% if comment %}<div style="background:#f5f3ef;border-left:4px solid #c2410c;border-radius:6px;padding:14px 16px;font:15px/1.55 {{ FONT }};white-space:pre-wrap;">{{ comment }}</div>
+    {% else %}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px dashed #cfc8bc;font:14px {{ FONT }};">
+      {% if e.filament %}<tr><td style="padding:10px 0 0;color:#565a61;">{{ _('Filament') }}</td><td align="right" style="padding:10px 0 0;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ e.color_hex or '#e8620f' }};vertical-align:middle;"></span> {{ e.filament }} · {{ color_name(e.color) }}</td></tr>{% endif %}
+      <tr><td style="padding:8px 0 0;color:#565a61;">{{ _('Stückzahl') }}</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">{{ _('{n} Stück', n=e.qty or 1) }}</td></tr>
+      {% if e.file_name %}<tr><td style="padding:8px 0 0;color:#565a61;">{{ _('Datei') }}</td><td align="right" style="padding:8px 0 0;font-family:{{ MONO }};">{{ e.file_name }}</td></tr>{% endif %}
+    </table>{% endif %}
+    <p style="margin:26px 0 0;"><a href="{{ url }}" style="display:inline-block;background:#c2410c;color:#ffffff;text-decoration:none;font:600 15px {{ FONT }};padding:13px 22px;border-radius:7px;">{{ _('Auftrag ansehen') }} →</a></p>
+  </td></tr>
+  {% if profile_url %}<tr><td style="padding:18px 8px 0;font:12px/1.5 {{ FONT }};color:#7c8087;" align="center">
+    {{ _('Du bekommst diese Mail, weil du in PleasePrintit eine E-Mail-Adresse hinterlegt hast.') }}<br>
+    {{ _('Keine Mails mehr? Adresse im Profil löschen:') }} <a href="{{ profile_url }}" style="color:#565a61;">{{ _('Profil') }}</a></td></tr>{% endif %}
+</table></td></tr></table>
+</body></html>

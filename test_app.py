@@ -265,6 +265,91 @@ assert friendly in m.get_body(("plain",)).get_content()
 ben.post("/me", data={"email": ""})
 admin.post(f"/entry/{w_id}/status", data={"status": "neu"})
 assert len(sent) == 2, "nach Löschen der Adresse keine Mails mehr"
+# Mail an die Werkstatt bei neuem Auftrag eines Freundes
+order = {"url": "https://www.printables.com/model/1", "title": "Haken", "choice": f"r:{pid}"}
+real_preview, A.preview = A.preview, lambda url: {"error": None, "title": None, "site": None, "image": None}   # kein Netzabruf im Test
+ben.post("/orders", data=order)
+assert len(sent) == 2, "ohne Adresse keine Werkstatt-Mail"
+assert ben.post("/settings/notify", data={"notify_email": "x@example.de"}).status_code == 403
+assert admin.post("/settings/notify", data={"notify_email": "kaputt"}).status_code == 400
+assert admin.post("/settings/notify", data={"notify_email": "werkstatt@example.de"}).headers["Location"].endswith("tab=werkstatt")
+assert 'value="werkstatt@example.de"' in admin.get("/settings?tab=werkstatt").data.decode()
+ben.post("/orders", data=order)
+m = sent[-1]
+assert len(sent) == 3 and m["To"] == "werkstatt@example.de" and "ben" in m["Subject"] and "Haken" in m["Subject"]
+assert "/entry/" in m.get_body(("plain",)).get_content() and "PETG" in m.get_body(("html",)).get_content()
+admin.post("/orders", data=order)
+assert len(sent) == 3, "eigene Aufträge der Werkstatt lösen keine Mail aus"
+# Rückfragen: Freund → Mail an die Werkstatt, Werkstatt → Mail an den Freund; fremde Aufträge tabu
+k_id = con.execute("SELECT MAX(id) FROM links WHERE user_id = (SELECT id FROM users WHERE name = 'ben')").fetchone()[0]
+assert anna.post(f"/entry/{k_id}/comment", data={"text": "fremd"}).status_code in (403, 404), "anna ist hier gesperrt"
+assert ben.post(f"/entry/{k_id}/comment", data={"text": "Geht das <b>in Schwarz</b>?"}).status_code == 302
+assert sent[-1]["To"] == "werkstatt@example.de" and "Kommentar" in sent[-1]["Subject"]
+assert "in Schwarz" in sent[-1].get_body(("plain",)).get_content()
+ben.post("/me", data={"email": "ben@example.org"})
+admin.post(f"/entry/{k_id}/comment", data={"text": "Klar!"})
+assert sent[-1]["To"] == "ben@example.org" and "Klar!" in sent[-1].get_body(("html",)).get_content()
+page = ben.get(f"/entry/{k_id}").data.decode()
+assert "&lt;b&gt;in Schwarz" in page and "Klar!" in page, "Kommentare sichtbar und escaped"
+n = len(sent)
+ben.post(f"/entry/{k_id}/comment", data={"text": "   "})
+assert len(sent) == n and con.execute("SELECT COUNT(*) FROM comments WHERE link_id = ?", (k_id,)).fetchone()[0] == 2
+# Interne Notiz: nur Werkstatt
+assert ben.post(f"/entry/{k_id}/note", data={"note": "x"}).status_code == 403
+admin.post(f"/entry/{k_id}/note", data={"note": "Platte 2"})
+assert "Platte 2" in admin.get(f"/entry/{k_id}").data.decode() and "Platte 2" not in ben.get(f"/entry/{k_id}").data.decode()
+# Mails pausieren: Adresse bleibt, aber nichts geht raus (beide Seiten)
+ben.post("/me", data={"email": "ben@example.org", "mute": "1"})
+admin.post("/settings/notify", data={"notify_email": "werkstatt@example.de", "mute": "1"})
+n = len(sent)
+admin.post(f"/entry/{k_id}/comment", data={"text": "Still?"})
+admin.post(f"/entry/{k_id}/status", data={"status": "geplant"})
+ben.post(f"/entry/{k_id}/comment", data={"text": "Ja"})
+assert len(sent) == n, "pausiert → keine Mails"
+assert 'name="mute" value="1" checked' in ben.get("/me").data.decode()
+assert 'name="mute" value="1" checked' in admin.get("/settings?tab=werkstatt").data.decode()
+assert con.execute("SELECT email FROM users WHERE name = 'ben'").fetchone()[0] == "ben@example.org"
+ben.post("/me", data={"email": "ben@example.org"})
+admin.post(f"/entry/{k_id}/comment", data={"text": "Wieder da"})
+assert len(sent) == n + 1, "ohne Haken wieder Mails"
+# Platz in der Warteschlange: Geplantes zuerst, dann Neues der Reihe nach; erledigt → kein Platz
+import re  # noqa: E402
+def place(c, i):
+    m = re.search(r"Platz (\d+) in der Warteschlange", c.get(f"/entry/{i}").data.decode())
+    return int(m.group(1)) if m else None
+r = ben.post("/orders", data={"model": (io.BytesIO(CUBE), "nochmal.stl"), "choice": f"r:{pid}"}, content_type="multipart/form-data")
+q1 = int(r.headers["Location"].rsplit("/", 1)[1])
+open_ = con.execute("SELECT COUNT(*) FROM links WHERE status IN ('neu', 'geplant') AND COALESCE(archived, '') = ''").fetchone()[0]
+assert place(ben, q1) == open_, "neuester Auftrag steht hinten"
+assert place(ben, k_id) < place(ben, q1)
+admin.post(f"/entry/{q1}/status", data={"status": "geplant"})
+assert place(ben, q1) <= con.execute("SELECT COUNT(*) FROM links WHERE status = 'geplant' AND COALESCE(archived, '') = ''").fetchone()[0]
+# Foto vom fertigen Druck: nur Werkstatt lädt hoch, Freund sieht es und bekommt es mit der Gedruckt-Mail
+PNG = b"\x89PNG\r\n\x1a\n" + b"\0" * 20
+assert ben.post(f"/entry/{q1}/photo", data={"photo": (io.BytesIO(PNG), "f.png")}, content_type="multipart/form-data").status_code == 403
+assert admin.post(f"/entry/{q1}/photo", data={"photo": (io.BytesIO(b"kein bild"), "f.png")}, content_type="multipart/form-data").status_code == 400
+admin.post(f"/entry/{q1}/photo", data={"photo": (io.BytesIO(PNG), "f.png")}, content_type="multipart/form-data")
+photo = con.execute("SELECT photo FROM links WHERE id = ?", (q1,)).fetchone()[0]
+assert photo and ben.get(f"/img/{photo}").data == PNG and anon.get(f"/img/{photo}").status_code == 403
+admin.post(f"/entry/{q1}/photo", data={"photo": (io.BytesIO(PNG), "g.png")}, content_type="multipart/form-data")
+assert not os.path.exists(os.path.join(A.IMAGES, photo)), "altes Foto wird ersetzt, nicht liegen gelassen"
+assert place(ben, q1) is not None and 'Nochmal drucken' not in ben.get(f"/entry/{q1}").data.decode()
+admin.post(f"/entry/{q1}/status", data={"status": "gedruckt"})
+att = [p for p in sent[-1].iter_attachments()]
+assert len(att) == 1 and att[0].get_content_type() == "image/png", "Foto hängt an der Gedruckt-Mail"
+assert place(ben, q1) is None
+# Nochmal drucken: nur eigener, gedruckter Auftrag; Datei wird kopiert (nicht verschoben)
+assert admin.post(f"/entry/{q1}/repeat", data={"qty": "1"}).status_code == 400, "nicht der Besitzer"
+assert ben.post(f"/entry/{k_id}/repeat", data={"qty": "1"}).status_code == 400, "noch nicht gedruckt"
+r = ben.post(f"/entry/{q1}/repeat", data={"qty": "2"})
+q2 = int(r.headers["Location"].rsplit("/", 1)[1])
+old, new = (A.db().execute("SELECT * FROM links WHERE id = ?", (i,)).fetchone() for i in (q1, q2))
+assert new["status"] == "neu" and new["qty"] == 2 and new["title"] == old["title"] and new["file"] != old["file"]
+assert all(os.path.exists(os.path.join(A.MODELS, x["file"])) for x in (old, new))
+assert ben.get(f"/models/{q2}/file").data == CUBE and new["filament"] == old["filament"]
+ben.post("/me", data={"email": ""})
+admin.post("/settings/notify", data={"notify_email": ""})
+A.preview = real_preview
 del os.environ["SMTP_HOST"]
 # --- Stückzahl und Neu-Einreichen mit anderem Filament ----------------------
 admin.post("/settings/bed", data={"bed_x": "", "bed_y": "", "bed_z": ""})

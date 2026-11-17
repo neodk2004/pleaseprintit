@@ -78,7 +78,10 @@ flowchart LR
 - ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
 - 📦 **Archive with search:** printed and rejected requests move to the archive after a configurable period or with a button (several at once). Find them again by title, file, friend or date range.
 - 📈 **Statistics:** requests, grams and material cost per month, popular filaments and colors, waiting time and rejection reasons for you. Every friend sees their own numbers on their profile.
-- 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications.
+- 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
+- 💬 **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. Plus an internal note only you can see.
+- 📬 **E-mail on new requests:** you're notified as soon as someone submits something.
+- 📸 **Photo of the finished print:** your friend sees it on the request and gets it with the “Printed” e-mail. With **“Print again”** they can reorder the same thing in one click.
 - 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
 - ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
 - 🌍 **German, English, French:** everyone picks their language at the bottom of the page or in their profile. It applies to the whole app and to status emails, which are always sent in the recipient’s language.
@@ -99,7 +102,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 | 3D preview | ✅ with build-plate check | ✅ | ✅ |
 | Open in slicer | ✅ Orca, Bambu Studio, Creality Print, no extra software | only with a helper app you have to install (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
 | Material cost | ✅ per request and per friend | – | – |
-| Questions | rejection with a reason | ✅ comments on the request | notes |
+| Questions | ✅ comments on the request, internal note | ✅ comments on the request | notes |
 | Several printers | – | – | ✅ with auto-assignment |
 | Sign-in | invite + password | invite, passkeys, SSO | invite, SSO, 2FA |
 | Raspberry Pi (ARM64) | ✅ | – (x86 only) | ✅ |

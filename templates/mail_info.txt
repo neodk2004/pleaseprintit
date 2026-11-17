@@ -1,0 +1,16 @@
+PleasePrintit – {{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}
+
+{{ headline }}
+
+{{ e.title }}
+{% if comment %}
+„{{ comment }}“
+{% else %}{% if e.filament %}{{ _('Filament') }}: {{ e.filament }} · {{ color_name(e.color) }}
+{% endif %}{{ _('Stückzahl') }}: {{ e.qty or 1 }}
+{% if e.url %}Link: {{ e.url }}
+{% endif %}{% if e.file_name %}{{ _('Datei') }}: {{ e.file_name }}
+{% endif %}{% endif %}
+{{ _('Auftrag ansehen') }}: {{ url }}
+{% if profile_url %}
+{{ _('Keine Mails mehr? Adresse im Profil löschen:') }} {{ profile_url }}
+{% endif %}

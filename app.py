@@ -4,6 +4,7 @@ import json
 import os
 import re
 import secrets
+import shutil
 import sqlite3
 import time
 from collections import Counter
@@ -62,12 +63,16 @@ def db():
         CREATE TABLE IF NOT EXISTS filaments (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE COLLATE NOCASE);
         CREATE TABLE IF NOT EXISTS colors (id INTEGER PRIMARY KEY, name TEXT NOT NULL, hex TEXT NOT NULL,
             filament_id INTEGER NOT NULL REFERENCES filaments(id) ON DELETE CASCADE);
+        CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY, link_id INTEGER NOT NULL,
+            user_id INTEGER, text TEXT NOT NULL, at TEXT NOT NULL);   -- user_id NULL = Werkstatt
     """)
     con.execute("PRAGMA foreign_keys = ON")
     if "email" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
         con.execute("ALTER TABLE users ADD COLUMN email TEXT")   # freiwillig, für Status-Mails
     if "lang" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
         con.execute("ALTER TABLE users ADD COLUMN lang TEXT")    # de/en/fr: Oberfläche und Status-Mails
+    if "mute" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
+        con.execute("ALTER TABLE users ADD COLUMN mute INTEGER NOT NULL DEFAULT 0")   # 1 = Mails pausiert
     fcols = {r["name"] for r in con.execute("PRAGMA table_info(filaments)")}
     for col in ("density", "price_kg"):   # g/cm³ und €/kg für die Kostenschätzung
         if col not in fcols:
@@ -81,7 +86,8 @@ def db():
                      ("created", "TEXT"), ("user_id", "INTEGER"), ("status", "TEXT NOT NULL DEFAULT 'neu'"),
                      ("size", "INTEGER NOT NULL DEFAULT 0"), ("filament", "TEXT"), ("color", "TEXT"),
                      ("color_hex", "TEXT"), ("dims", "TEXT"), ("reason", "TEXT"), ("volume", "REAL"),
-                     ("qty", "INTEGER NOT NULL DEFAULT 1"), ("successor", "INTEGER"), ("archived", "TEXT")):
+                     ("qty", "INTEGER NOT NULL DEFAULT 1"), ("successor", "INTEGER"), ("archived", "TEXT"),
+                     ("note", "TEXT"), ("photo", "TEXT")):   # note: interne Notiz; photo: Bild vom fertigen Druck
         if col not in cols:
             con.execute(f"ALTER TABLE links ADD COLUMN {col} {typ}")
     return con
@@ -114,6 +120,8 @@ def insert(con, **fields):
     cur = con.execute(f"INSERT INTO links ({', '.join(fields)}) VALUES ({', '.join('?' * len(fields))})",
                       tuple(fields.values()))
     log_status(con, cur.lastrowid, "neu")
+    if not g.admin:
+        notify_workshop(con, get_entry(con, cur.lastrowid))
     return cur.lastrowid
 
 
@@ -140,6 +148,17 @@ def get_entry(con, link_id):
     if not row or (not g.admin and row["user_id"] != g.user["id"]):
         abort(404)
     return row
+
+
+def queue_place(con, e):
+    """Platz in der Warteschlange: Geplantes kommt vor Neuem, sonst der Reihe nach. None, wenn nicht offen.
+    ponytail: ohne Prioritäten, die Werkstatt plant in der Reihenfolge, in der sie auf „Geplant“ setzt."""
+    if e["status"] not in ("neu", "geplant") or e["archived"]:
+        return None
+    ahead = ("status = 'geplant' AND id < ?" if e["status"] == "geplant"
+             else "(status = 'geplant' OR (status = 'neu' AND id < ?))")
+    return 1 + con.execute(f"SELECT COUNT(*) FROM links WHERE COALESCE(archived, '') = '' AND {ahead}",
+                           (e["id"],)).fetchone()[0]
 
 
 def save_image(con, link_id, data, ext):
@@ -344,7 +363,8 @@ PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ONLY = {"set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
-              "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers"}
+              "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify",
+              "save_note", "save_photo"}
 # Ablehnungsgründe: kurz für die Werkstatt (wird gespeichert) → ausformuliert für den Freund (Seite + Mail)
 REASONS = {
     "Zu komplex": "Das Modell ist für meinen Drucker leider zu komplex – zum Beispiel wegen vieler Stützstrukturen "
@@ -719,19 +739,26 @@ def entry(link_id):
             con.execute("UPDATE links SET volume = ? WHERE id = ?", (v, link_id))
             e = get_entry(con, link_id)
         owner = con.execute("SELECT name FROM users WHERE id = ?", (e["user_id"],)).fetchone()
-        return render_template("detail.html", e=e, owner=owner["name"] if owner else _("ich"), bed=bed(con),
+        return render_template("detail.html", e=e, place=queue_place(con, e), can_repeat=owns(e) and e["status"] == "gedruckt", owner=owner["name"] if owner else _("ich"), bed=bed(con),
                                cost=estimate(con, e), flow=flow(con, e), options=filament_options(con),
                                can_resubmit=can_resubmit(e), tip=text_setting(con, "tip_url"),
-                               slicers=slicer_links(con, e) if g.admin else [])
+                               slicers=slicer_links(con, e) if g.admin else [],
+                               comments=con.execute("SELECT c.*, u.name FROM comments c LEFT JOIN users u "
+                                                    "ON u.id = c.user_id WHERE c.link_id = ? ORDER BY c.id",
+                                                    (link_id,)).fetchall())
 
 
 NO_FILAMENT = "Filament nicht vorrätig"
 
 
+def owns(e):
+    """Gehört der Auftrag dem, der gerade angemeldet ist? (Werkstatt: ihre eigenen Aufträge)"""
+    return bool((e["user_id"] is None) if g.admin else (g.user and e["user_id"] == g.user["id"]))
+
+
 def can_resubmit(e):
     """Nur der Besitzer, nur bei 'Filament nicht vorrätig', nur einmal."""
-    mine = (e["user_id"] is None) if g.admin else (g.user and e["user_id"] == g.user["id"])
-    return bool(mine and e["status"] == "abgelehnt" and e["reason"] == NO_FILAMENT and not e["successor"])
+    return owns(e) and e["status"] == "abgelehnt" and e["reason"] == NO_FILAMENT and not e["successor"]
 
 
 @app.post("/entry/<int:link_id>/resubmit")
@@ -759,6 +786,48 @@ def resubmit(link_id):
         con.execute("UPDATE links SET file = NULL, size = 0, image = NULL, successor = ? WHERE id = ?",
                     (new_id, link_id))
     return redirect(url_for("entry", link_id=new_id))
+
+
+@app.post("/entry/<int:link_id>/repeat")
+def repeat(link_id):
+    """Gedruckten Auftrag noch einmal bestellen: neuer Auftrag mit Kopie von Datei und Bild."""
+    with db() as con:
+        old = get_entry(con, link_id)
+        if not (owns(old) and old["status"] == "gedruckt"):
+            abort(400)
+        if err := limit_error(con, old["size"] if old["file"] else 0):
+            abort(400, err)
+        file = None
+        if old["file"]:
+            file = secrets.token_hex(16) + "." + old["file"].rsplit(".", 1)[1]
+            shutil.copyfile(os.path.join(MODELS, old["file"]), os.path.join(MODELS, file))
+        new_id = insert(con, title=old["title"], url=old["url"], site=old["site"], file=file,
+                        file_name=old["file_name"], size=old["size"] if file else 0, dims=old["dims"],
+                        volume=old["volume"], qty=parse_qty(request.form), filament=old["filament"],
+                        color=old["color"], color_hex=old["color_hex"])
+        if old["image"]:
+            with open(os.path.join(IMAGES, old["image"]), "rb") as f:
+                save_image(con, new_id, f.read(), old["image"].rsplit(".", 1)[1])
+    return redirect(url_for("entry", link_id=new_id))
+
+
+@app.post("/entry/<int:link_id>/photo")
+def save_photo(link_id):
+    """Foto vom fertigen Druck; der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“."""
+    f = request.files.get("photo")
+    data = f.read(MAX_IMAGE + 1) if f else b""
+    ext = image_ext(data)
+    if not ext or len(data) > MAX_IMAGE:
+        abort(400, _("Nur JPG, PNG, GIF oder WebP bis 5 MB."))
+    with db() as con:
+        old = get_entry(con, link_id)["photo"]
+        name = f"{link_id}-foto-{secrets.token_hex(4)}.{ext}"   # neuer Name: Browser zeigen nicht das alte Bild
+        with open(os.path.join(IMAGES, name), "wb") as out:
+            out.write(data)
+        con.execute("UPDATE links SET photo = ? WHERE id = ?", (name, link_id))
+        if old:
+            os.remove(os.path.join(IMAGES, old))
+    return redirect(url_for("entry", link_id=link_id))
 
 
 @app.post("/entry/<int:link_id>/status")
@@ -791,18 +860,86 @@ def status_mail(con, e, to, lang):
     with in_lang(lang):
         ctx = {"e": e, "flow": flow(con, e), "cost": estimate(con, e), "url": public("entry", link_id=e["id"]),
                "profile_url": public("profile")}
-        return mail.build(to, f"#{e['id']:04d} {title}: {status_label(e['status'])}",
-                          render_template("mail_status.txt", **ctx),
-                          lambda cid: render_template("mail_status.html", cid=cid, **ctx))
+        msg = mail.build(to, f"#{e['id']:04d} {title}: {status_label(e['status'])}",
+                         render_template("mail_status.txt", **ctx),
+                         lambda cid: render_template("mail_status.html", cid=cid, **ctx))
+    if e["status"] == "gedruckt" and e["photo"]:   # Foto vom fertigen Druck als Anhang
+        ext = e["photo"].rsplit(".", 1)[1]
+        with open(os.path.join(IMAGES, e["photo"]), "rb") as f:
+            msg.add_attachment(f.read(), "image", "jpeg" if ext == "jpg" else ext, filename=f"druck-{e['id']}.{ext}")
+    return msg
 
 
 def notify(con, e):
     """Status-Mail an den Freund, falls er eine Adresse hinterlegt hat."""
     if not (mail.configured() and e["user_id"]):
         return
-    u = con.execute("SELECT email, lang FROM users WHERE id = ? AND active = 1", (e["user_id"],)).fetchone()
-    if u and u["email"]:
+    if u := friend_address(con, e):
         mail.send(status_mail(con, e, u["email"], u["lang"]))
+
+
+def friend_address(con, e):
+    """Adresse und Sprache des Freundes, falls er eine hat und Mails nicht pausiert."""
+    return con.execute("SELECT email, lang FROM users WHERE id = ? AND active = 1 AND mute = 0 "
+                       "AND email IS NOT NULL", (e["user_id"],)).fetchone()
+
+
+def info_mail(e, to, lang, headline, comment=None, friend=False):
+    """Kurze Mail zu einem Auftrag; headline() wird erst in der Sprache des Empfängers aufgerufen."""
+    title = " ".join(e["title"].split())
+    with in_lang(lang):
+        ctx = {"e": e, "headline": headline(), "comment": comment, "url": public("entry", link_id=e["id"]),
+               "profile_url": public("profile") if friend else None}
+        return mail.build(to, f"#{e['id']:04d} {title}: {ctx['headline']}", render_template("mail_info.txt", **ctx),
+                          lambda cid: render_template("mail_info.html", cid=cid, **ctx))
+
+
+def notify_workshop(con, e, headline=None, comment=None):
+    """Mail an die Werkstatt, wenn ein Freund etwas einreicht oder schreibt (Adresse in Einstellungen → Werkstatt)."""
+    to = text_setting(con, "notify_email")
+    if to and mail.configured() and not text_setting(con, "notify_mute"):
+        name = g.user["name"]
+        mail.send(info_mail(e, to, text_setting(con, "notify_lang"),
+                            headline or (lambda: _("Neuer Druckwunsch von {name}", name=name)), comment))
+
+
+@app.post("/entry/<int:link_id>/comment")
+def add_comment(link_id):
+    """Rückfrage oder Antwort am Auftrag; die jeweils andere Seite bekommt eine Mail."""
+    text = request.form.get("text", "").strip()[:2000]
+    with db() as con:
+        e = get_entry(con, link_id)
+        if text:
+            con.execute("INSERT INTO comments (link_id, user_id, text, at) VALUES (?, ?, ?, ?)",
+                        (link_id, None if g.admin else g.user["id"], text, now(con)))
+            if not g.admin:
+                name = g.user["name"]
+                notify_workshop(con, e, lambda: _("Neuer Kommentar von {name}", name=name), text)
+            elif mail.configured() and e["user_id"]:
+                if u := friend_address(con, e):
+                    mail.send(info_mail(e, u["email"], u["lang"], lambda: _("Neue Nachricht von der Werkstatt"),
+                                        text, friend=True))
+    return redirect(url_for("entry", link_id=link_id) + "#kommentare")
+
+
+@app.post("/entry/<int:link_id>/note")
+def save_note(link_id):
+    with db() as con:
+        get_entry(con, link_id)
+        con.execute("UPDATE links SET note = ? WHERE id = ?", (request.form.get("note", "").strip()[:2000] or None, link_id))
+    return redirect(url_for("entry", link_id=link_id))
+
+
+@app.post("/settings/notify")
+def save_notify():
+    email = request.form.get("notify_email", "").strip()[:200]
+    if email and not EMAIL_RE.match(email):
+        abort(400, _("Das sieht nicht wie eine E-Mail-Adresse aus."))
+    with db() as con:
+        put_setting(con, "notify_email", email)
+        put_setting(con, "notify_mute", "1" if request.form.get("mute") else "")
+        put_setting(con, "notify_lang", g.lang)   # Mails an die Werkstatt in der Sprache, in der sie eingestellt wurde
+    return redirect(url_for("settings", tab="werkstatt"))
 
 
 @app.post("/entry/<int:link_id>/model")
@@ -916,7 +1053,7 @@ def replace_image(link_id):
 @app.get("/img/<name>")
 def image(name):
     with db() as con:
-        e = con.execute("SELECT id FROM links WHERE image = ?", (name,)).fetchone()
+        e = con.execute("SELECT id FROM links WHERE image = ? OR photo = ?", (name, name)).fetchone()
         if not e:
             abort(404)
         get_entry(con, e["id"])  # Rechte prüfen
@@ -935,10 +1072,11 @@ def profile():
         if email and not EMAIL_RE.match(email):
             err = _("Das sieht nicht wie eine E-Mail-Adresse aus.")
         else:
+            mute = 1 if request.form.get("mute") else 0
             with db() as con:
-                con.execute("UPDATE users SET email = ? WHERE id = ?", (email or None, g.user["id"]))
+                con.execute("UPDATE users SET email = ?, mute = ? WHERE id = ?", (email or None, mute, g.user["id"]))
             msg = _("Gespeichert.") if email else _("E-Mail-Adresse gelöscht – du bekommst keine Mails mehr.")
-            g.user = dict(g.user, email=email or None)
+            g.user = dict(g.user, email=email or None, mute=mute)
     with db() as con:
         ctx = mine(con)
     return render_template("profile.html", msg=msg, error=err, mail_on=mail.configured(), **ctx), 400 if err else 200
@@ -1095,8 +1233,9 @@ def settings():
                                types=[t for t in FILAMENT_TYPES if t.lower() not in have],
                                fill=setting(con, "fill", FILL), imp=impressum_data(con), imp_fields=IMPRESSUM,
                                archive_days=int(setting(con, "archive_days", ARCHIVE_DAYS)),
-                               tip=text_setting(con, "tip_url"),
-                               slicers=SLICERS, chosen=chosen_slicers(con),
+                               tip=text_setting(con, "tip_url"), notify_email=text_setting(con, "notify_email"),
+                               notify_mute=text_setting(con, "notify_mute"),
+                               mail_on=mail.configured(), slicers=SLICERS, chosen=chosen_slicers(con),
                                datenschutz=text_setting(con, "datenschutz"),
                                template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))
 

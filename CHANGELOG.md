@@ -6,6 +6,21 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+### Neu
+- **Mail an die Werkstatt bei neuem Druckwunsch:** Adresse in Einstellungen → Werkstatt eintragen. Leer = keine Mails.
+- **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die jeweils andere Seite bekommt eine Mail. Schluss mit „Welche Größe?“ im Chat.
+- **Interne Notiz:** ein Textfeld am Auftrag, das nur die Werkstatt sieht, z. B. für Druckeinstellungen.
+- **Platz in der Warteschlange:** Freunde sehen „Platz 3 in der Warteschlange“. Geplantes zählt vor Neuem.
+- **Nochmal drucken:** Gedruckte Aufträge lassen sich mit einem Klick erneut bestellen. Datei, Bild und Filament werden übernommen.
+- **Foto vom fertigen Druck:** Die Werkstatt lädt ein Foto hoch. Der Freund sieht es im Auftrag und bekommt es als Anhang der Mail „Gedruckt“.
+- **Mails pausieren:** Freunde (Profil) und Werkstatt (Einstellungen) können Mails abschalten, ohne die Adresse zu löschen.
+
+### Behoben
+- gunicorn 27 meldete beim Start `Control server error: Read-only file system`. Die nicht benötigte Steuer-Schnittstelle ist jetzt abgeschaltet (`--no-control-socket`).
+
+### Sicherheit
+- gunicorn 26.2.0 → 27.0.0 (strengere Prüfung von HTTP-Anfragen).
+
 ## [1.2.0] – 2026-11-09
 
 ### Neu

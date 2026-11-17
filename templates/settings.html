@@ -46,6 +46,16 @@
   </form>
 </section>
 
+<section class="card rise" id="benachrichtigung" style="--i:2">
+  <h3>{{ icon('mail') }} {{ _('Benachrichtigung') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Deine Adresse für eine Mail, sobald ein Freund einen Druckwunsch einreicht oder eine Rückfrage schreibt. Leer = keine Mails.') }}{% if not mail_on %} {{ _('Dafür muss der Mailversand in der .env eingerichtet sein.') }}{% endif %}</p>
+  <form class="row" method="post" action="{{ url_for('save_notify') }}">
+    <span class="grow"><input type="email" name="notify_email" maxlength="200" value="{{ notify_email }}" placeholder="werkstatt@example.de" aria-label="{{ _('E-Mail-Adresse') }}"></span>
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+    <label style="flex-basis:100%"><input type="checkbox" name="mute" value="1"{% if notify_mute %} checked{% endif %}> {{ _('Mails pausieren (Adresse bleibt gespeichert)') }}</label>
+  </form>
+</section>
+
 <section class="card rise" id="trinkgeld" style="--i:2">
   <h3>{{ icon('heart') }} {{ _('Trinkgeld') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('Freiwillig: Dein Link zu PayPal.me, Ko-fi oder Ähnlichem. Freunde sehen dann einen Knopf im Profil und bei gedruckten Aufträgen. Die App verarbeitet kein Geld. Leer = kein Knopf.') }}</p>

@@ -78,7 +78,10 @@ flowchart LR
 - ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
 - 📦 **Archiv mit Suche:** Gedruckte und abgelehnte Aufträge wandern nach einer einstellbaren Frist oder per Knopf (auch mehrere auf einmal) ins Archiv. Dort findest du sie über die Suche nach Titel, Datei oder Freund und über einen Zeitraum wieder.
 - 📈 **Statistik:** Für dich Aufträge, Gramm und Materialkosten pro Monat, beliebte Filamente und Farben, Wartezeit und Ablehnungsgründe. Jeder Freund sieht seine eigenen Zahlen im Profil.
-- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail.
+- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
+- 💬 **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die andere Seite bekommt eine Mail. Dazu eine interne Notiz, die nur du siehst.
+- 📬 **Mail bei neuem Wunsch:** Du bekommst Bescheid, sobald jemand etwas einreicht.
+- 📸 **Foto vom fertigen Druck:** Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“. Mit **„Nochmal drucken“** bestellt er dasselbe mit einem Klick erneut.
 - 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
 - ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
 - 🌍 **Deutsch, Englisch, Französisch:** Jeder wählt seine Sprache unten auf der Seite oder im Profil. Sie gilt für die ganze App und für die Status-Mails, die immer in der Sprache des Empfängers rausgehen.
@@ -99,7 +102,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 | 3D-Vorschau | ✅ mit Druckbett-Check | ✅ | ✅ |
 | In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | nur mit Hilfsprogramm, das man installieren muss (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
 | Materialkosten | ✅ pro Auftrag und pro Freund | – | – |
-| Rückfragen | Ablehnung mit Grund | ✅ Kommentare am Auftrag | Notizen |
+| Rückfragen | ✅ Kommentare am Auftrag, interne Notiz | ✅ Kommentare am Auftrag | Notizen |
 | Mehrere Drucker | – | – | ✅ mit Auto-Zuteilung |
 | Anmeldung | Einladung + Passwort | Einladung, Passkeys, SSO | Einladung, SSO, 2FA |
 | Raspberry Pi (ARM64) | ✅ | – (nur x86) | ✅ |

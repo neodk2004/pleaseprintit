@@ -33,11 +33,12 @@
 <section class="card rise" style="--i:1">
   <h3>{{ icon('mail') }} {{ _('Benachrichtigung per E-Mail') }}</h3>
   {% if mail_on %}
-  <p class="muted">{{ _('Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert. Feld leeren = keine Mails mehr.') }}</p>
+  <p class="muted">{{ _('Freiwillig: Trag deine Adresse ein, dann bekommst du eine Mail, sobald sich der Status eines Auftrags ändert oder die Werkstatt dir schreibt. Feld leeren = keine Mails mehr.') }}</p>
   <form method="post">
     <div class="row"><div class="grow"><label for="email">{{ _('E-Mail-Adresse') }}</label>
       <input id="email" type="email" name="email" maxlength="200" autocomplete="email" value="{{ request.form.email if error else (g.user.email or '') }}" placeholder="{{ _('du@beispiel.de') }}"></div>
       <button class="btn btn-primary">{{ _('Speichern') }}</button></div>
+    <label style="margin-top:var(--s3)"><input type="checkbox" name="mute" value="1"{% if g.user.mute %} checked{% endif %}> {{ _('Mails pausieren (Adresse bleibt gespeichert)') }}</label>
   </form>
   {% if g.user.email %}<form method="post" action="{{ url_for('test_mail') }}" style="margin-top:var(--s3)">
     <button class="btn btn-sm">{{ icon('mail') }}{{ _('Testmail schicken') }}</button></form>{% endif %}

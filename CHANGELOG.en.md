@@ -6,6 +6,21 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+### Added
+- **E-mail to the workshop on new requests:** enter your address under Settings → Workshop. Empty = no e-mails.
+- **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. No more “which size?” in the group chat.
+- **Internal note:** a text field on each request that only the workshop sees, e.g. for print settings.
+- **Position in the queue:** friends see “Position 3 in the queue”. Planned requests count before new ones.
+- **Print again:** printed requests can be ordered again with one click. File, image and filament are copied.
+- **Photo of the finished print:** the workshop uploads a photo. The friend sees it on the request and gets it attached to the “Printed” e-mail.
+- **Pause e-mails:** friends (profile) and the workshop (settings) can turn e-mails off without deleting their address.
+
+### Fixed
+- gunicorn 27 logged `Control server error: Read-only file system` on startup. The unused control socket is now disabled (`--no-control-socket`).
+
+### Security
+- gunicorn 26.2.0 → 27.0.0 (stricter HTTP request validation).
+
 ## [1.2.0] – 2026-11-09
 
 ### Added

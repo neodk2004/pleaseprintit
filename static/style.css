@@ -442,3 +442,12 @@ textarea{min-height:8rem;resize:vertical;line-height:1.5;font-size:.92rem}
 .legal-blocks p{margin:0}
 .legal-blocks > p.muted{margin-top:var(--s4)}
 @media (max-width:560px){.label-sm{display:none}}
+/* Rückfragen am Auftrag: eigene Nachrichten mit Signalfarbe, Zeilenumbrüche bleiben */
+.comment{border-left:3px solid var(--line-strong);padding:var(--s2) var(--s3);margin-bottom:var(--s3);background:var(--surface-2);border-radius:var(--r-sm)}
+.comment.mine{border-left-color:var(--signal)}
+.comment p:last-child{white-space:pre-wrap;overflow-wrap:anywhere}
+/* Platz in der Warteschlange und Foto vom fertigen Druck */
+.queue-place{display:flex;align-items:center;gap:var(--s2);margin:calc(-1 * var(--s2)) 0 var(--s4);color:var(--ink-2);font-weight:600}
+.photo{padding:var(--s3);margin-left:0;margin-right:0}
+.photo img{display:block;width:100%;height:auto;max-height:28rem;object-fit:contain;border-radius:var(--r-sm)}
+.photo figcaption{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s2)}

@@ -8,4 +8,4 @@ COPY templates ./templates
 COPY app.py preview.py models.py backup.py mail.py i18n.py ./
 USER app
 EXPOSE 8000
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "--timeout", "120", "--no-control-socket", "app:app"]
