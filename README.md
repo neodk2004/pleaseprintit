@@ -74,19 +74,79 @@ flowchart LR
 
 ## Funktionen
 
+**Auf einen Blick.** Darunter steht, wer was sieht, und zum Aufklappen jede Funktion im Detail.
+
+<table>
+<tr>
+<td align="center" width="33%">🔗<br><b>Link oder Datei</b><br><sub>Printables, MakerWorld, STL, 3MF, STEP</sub></td>
+<td align="center" width="33%">🧊<br><b>3D-Vorschau</b><br><sub>Drehen, Maße, passt aufs Bett?</sub></td>
+<td align="center" width="33%">🖨️<br><b>In Slicer öffnen</b><br><sub>Orca, Bambu Studio, Creality</sub></td>
+</tr>
+<tr>
+<td align="center" width="33%">📊<br><b>Klarer Status</b><br><sub>Ablauf-Leiste, Platz in der Warteschlange</sub></td>
+<td align="center" width="33%">💬<br><b>Rückfragen</b><br><sub>Direkt am Auftrag, mit Mail</sub></td>
+<td align="center" width="33%">📸<br><b>Foto + Nochmal drucken</b><br><sub>Bild vom fertigen Druck</sub></td>
+</tr>
+<tr>
+<td align="center" width="33%">🪙<br><b>Vorab zahlen</b><br><sub>Haken oder Guthaben, optional</sub></td>
+<td align="center" width="33%">📦<br><b>Archiv &amp; Statistik</b><br><sub>Suche, Gramm, Kosten pro Monat</sub></td>
+<td align="center" width="33%">🌍<br><b>DE · EN · FR</b><br><sub>App und Status-Mails</sub></td>
+</tr>
+</table>
+
+### Wer sieht was?
+
+| 🧑‍🤝‍🧑 Für deine Freunde | 🛠️ Für dich (Werkstatt) |
+|---|---|
+| Link einfügen oder 3D-Datei hochladen, Filament, Farbe und Stückzahl wählen | Warteschlange mit Vorschau, Gewicht und Kosten, Filter und Suche |
+| 3D-Vorschau und Prüfung, ob das Modell aufs Druckbett passt | Datei per Klick im Slicer öffnen, interne Notiz nur für dich |
+| Status verfolgen, **Platz in der Warteschlange**, Mails auf Wunsch (pausierbar) | Status setzen, ablehnen mit Grund in einem Klick, Mail bei neuem Wunsch |
+| **Rückfragen** am Auftrag stellen und beantworten | Rückfragen beantworten, die andere Seite bekommt eine Mail |
+| Foto vom fertigen Druck sehen, **Nochmal drucken** mit einem Klick | Foto hochladen (geht mit der Mail „Gedruckt“ raus) |
+| „Für dich gedruckt“ im Profil, optional Guthaben und Preis sehen | Vorab zahlen pro Freund, Guthaben aufladen, Statistik, Archiv |
+
+### Alle Funktionen im Detail
+
+<details open>
+<summary><b>📥 Wünsche einreichen</b></summary>
+
 - 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-, 3MF- oder STEP-Datei.
 - 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt. Auch STEP-Dateien aus CAD-Programmen werden direkt im Browser gelesen und vermessen.
-- 🖨️ **In Slicer öffnen:** Ein Klick im Auftrag öffnet die 3D-Datei direkt in OrcaSlicer, Bambu Studio oder Creality Print an deinem PC. Welche Knöpfe erscheinen, wählst du in den Einstellungen.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
-- 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Nur damit niemand raten muss.
-- ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
+
+</details>
+
+<details>
+<summary><b>🛠️ Werkstatt-Alltag</b></summary>
+
+- 🖨️ **In Slicer öffnen:** Ein Klick im Auftrag öffnet die 3D-Datei direkt in OrcaSlicer, Bambu Studio oder Creality Print an deinem PC. Welche Knöpfe erscheinen, wählst du in den Einstellungen.
 - 📦 **Archiv mit Suche:** Gedruckte und abgelehnte Aufträge wandern nach einer einstellbaren Frist oder per Knopf (auch mehrere auf einmal) ins Archiv. Dort findest du sie über die Suche nach Titel, Datei oder Freund und über einen Zeitraum wieder.
 - 📈 **Statistik:** Für dich Aufträge, Gramm und Materialkosten pro Monat, beliebte Filamente und Farben, Wartezeit und Ablehnungsgründe. Jeder Freund sieht seine eigenen Zahlen im Profil.
-- 🪙 **Vorab zahlen (optional):** Du schaltest es pro Freund ein, wenn Filament-Kosten vor dem Druck beglichen werden sollen. Zwei Wege: ein Haken „bezahlt“ pro Auftrag oder ein Guthaben-Konto, das du aufladest und von dem jeder Auftrag bezahlt wird (abgelehnte werden zurückgebucht). Der Preis ist Filamentkosten plus Aufschlag in Prozent für Strom, Verschleiß und Ausschuss. Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen. Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
+
+</details>
+
+<details>
+<summary><b>📣 Status und Kontakt</b></summary>
+
 - 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund, als Ablauf-Leiste mit Sechsecken und einem Filament-Faden, der von Schritt zu Schritt dicker wird. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
 - 💬 **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die andere Seite bekommt eine Mail. Dazu eine interne Notiz, die nur du siehst.
 - 📬 **Mail bei neuem Wunsch:** Du bekommst Bescheid, sobald jemand etwas einreicht.
 - 📸 **Foto vom fertigen Druck:** Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“. Mit **„Nochmal drucken“** bestellt er dasselbe mit einem Klick erneut.
+
+</details>
+
+<details>
+<summary><b>💶 Geld</b></summary>
+
+- 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Nur damit niemand raten muss.
+- ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
+- 🪙 **Vorab zahlen (optional):** Du schaltest es pro Freund ein, wenn Filament-Kosten vor dem Druck beglichen werden sollen. Zwei Wege: ein Haken „bezahlt“ pro Auftrag oder ein Guthaben-Konto, das du aufladest und von dem jeder Auftrag bezahlt wird (abgelehnte werden zurückgebucht). Der Preis ist Filamentkosten plus Aufschlag in Prozent für Strom, Verschleiß und Ausschuss. Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen. Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
+
+</details>
+
+<details>
+<summary><b>🔒 Betrieb und Sicherheit</b></summary>
+
 - 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
 - ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
 - 🌍 **Deutsch, Englisch, Französisch:** Jeder wählt seine Sprache unten auf der Seite oder im Profil. Sie gilt für die ganze App und für die Status-Mails, die immer in der Sprache des Empfängers rausgehen.
@@ -96,27 +156,36 @@ flowchart LR
 - 💾 **Tägliche Sicherung** mit Prüffunktion, die letzten 14 bleiben liegen.
 - 🔒 **Sicher eingestellt:** Schutz gegen SSRF beim Abruf von Vorschauen, CSP- und HSTS-Header, Bremse gegen Passwort-Raten, Container ohne Sonderrechte und mit schreibgeschütztem System. Der STEP-Leser läuft abgeschottet in einem Web Worker.
 
+</details>
+
 ## Welches Tool passt zu dir?
 
-Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie sind unterschiedlich groß, und jedes hat seinen Platz:
+Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie sind unterschiedlich groß, und jedes hat seinen Platz.
 
-| | **PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
+✅ ja · 🟡 mit Einschränkung · ➖ nicht vorhanden (bzw. in der README nicht erwähnt)
+
+| | **🟧 PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
 |---|---|---|---|
-| Gedacht für | Freundeskreis, ein Drucker | kleines Büro, ein Drucker | Hobby bis Druckfarm |
-| Wunsch per Link | Printables, MakerWorld, Thingiverse | nur Printables (abschaltbar) | fünf Seiten, u. a. MakerWorld |
+| **🎯 Gedacht für** | **Freundeskreis**, ein Drucker | kleines Büro, ein Drucker | Hobby bis Druckfarm |
+| **📥 Einreichen und vorbereiten** | | | |
+| Wunsch per Link | Printables, MakerWorld, Thingiverse | 🟡 nur Printables (abschaltbar) | fünf Seiten, u. a. MakerWorld |
 | 3D-Vorschau | ✅ mit Druckbett-Check | ✅ | ✅ |
-| In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | nur mit Hilfsprogramm, das man installieren muss (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
-| Materialkosten | ✅ pro Auftrag und pro Freund | – | – |
-| Rückfragen | ✅ Kommentare am Auftrag | ✅ Kommentare am Auftrag | – |
-| Interne Notiz nur für dich | ✅ | – | Notizen |
-| Mails | ✅ neuer Wunsch, Status, Rückfragen, pausierbar | ✅ neuer Wunsch, Status, Kommentare, abschaltbar | nur „fertig gedruckt“ |
-| Platz in der Warteschlange für Freunde | ✅ | – | – |
-| Foto vom fertigen Druck | ✅ im Auftrag und in der Mail | – | – |
-| Nochmal drucken | ✅ | ✅ | – |
-| Mehrere Drucker | – | – | ✅ mit Auto-Zuteilung |
+| In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | 🟡 nur mit Hilfsprogramm, das man installieren muss (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | ➖ |
+| **💬 Zusammenarbeit** | | | |
+| Rückfragen am Auftrag | ✅ | ✅ | ➖ |
+| Interne Notiz nur für dich | ✅ | ➖ | 🟡 Notizen |
+| Mails | ✅ neuer Wunsch, Status, Rückfragen, pausierbar | ✅ neuer Wunsch, Status, Kommentare, abschaltbar | 🟡 nur „fertig gedruckt“ |
+| Platz in der Warteschlange für Freunde | ✅ | ➖ | ➖ |
+| Foto vom fertigen Druck | ✅ im Auftrag und in der Mail | ➖ | ➖ |
+| Nochmal drucken | ✅ | ✅ | ➖ |
+| **💶 Kosten und Planung** | | | |
+| Materialkosten | ✅ pro Auftrag und pro Freund | ➖ | ➖ |
+| Vorab zahlen (Haken oder Guthaben) | ✅ optional, pro Freund | ➖ | ➖ |
+| Mehrere Drucker | ➖ | ➖ | ✅ mit Auto-Zuteilung |
+| **🔒 Betrieb** | | | |
 | Anmeldung | Einladung + Passwort | Einladung, Passkeys, SSO | Einladung, SSO, 2FA |
-| Raspberry Pi (ARM64) | ✅ | – (nur x86) | ✅ |
-| Server-Bedarf | SQLite, ~50 MB RAM | Postgres, ~1 GB RAM, HTTPS Pflicht | SQLite oder Postgres |
+| Raspberry Pi (ARM64) | ✅ | 🟡 nur x86 | ✅ |
+| Server-Bedarf | **SQLite, ~50 MB RAM** | Postgres, ~1 GB RAM, HTTPS Pflicht | SQLite oder Postgres |
 | Oberfläche | Deutsch, Englisch, Französisch | Englisch | Englisch, Französisch, Deutsch |
 | Lizenz | MIT | AGPL-3.0 | AGPL-3.0 |
 
@@ -124,9 +193,11 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 
 **Was PleasePrintit bewusst nicht hat:** Single Sign-on, eine Programmierschnittstelle, mehrere Drucker, echte Bezahlabwicklung (Zahlungsdienste, Bankdaten). Das hält die App klein: wenige Python-Dateien, die man an einem Abend durchgelesen hat, und ein Start mit einem Befehl.
 
-- **Du druckst für Freunde und Familie** und willst wissen, was es kostet? → PleasePrintit.
-- **Ein Drucker im Büro**, ihr wollt am Auftrag diskutieren und habt schon SSO? → PrettyPleasePrint.
-- **Mehrere Drucker oder eine kleine Druckfarm?** → STL Quest.
+| Du … | Dann passt |
+|---|---|
+| 🧑‍🤝‍🧑 druckst für **Freunde und Familie** und willst wissen, was es kostet | **PleasePrintit** |
+| 🏢 hast **einen Drucker im Büro**, willst am Auftrag diskutieren und hast schon SSO | **PrettyPleasePrint** |
+| 🏭 betreibst **mehrere Drucker oder eine kleine Druckfarm** | **STL Quest** |
 
 ## Starten
 

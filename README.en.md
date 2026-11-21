@@ -74,19 +74,79 @@ flowchart LR
 
 ## Features
 
+**At a glance.** Below you see who sees what, and every feature in detail (click to expand).
+
+<table>
+<tr>
+<td align="center" width="33%">🔗<br><b>Link or file</b><br><sub>Printables, MakerWorld, STL, 3MF, STEP</sub></td>
+<td align="center" width="33%">🧊<br><b>3D preview</b><br><sub>Rotate, size, fits the bed?</sub></td>
+<td align="center" width="33%">🖨️<br><b>Open in slicer</b><br><sub>Orca, Bambu Studio, Creality</sub></td>
+</tr>
+<tr>
+<td align="center" width="33%">📊<br><b>Clear status</b><br><sub>Progress bar, queue position</sub></td>
+<td align="center" width="33%">💬<br><b>Questions</b><br><sub>Right on the request, with e-mail</sub></td>
+<td align="center" width="33%">📸<br><b>Photo + Print again</b><br><sub>Picture of the finished print</sub></td>
+</tr>
+<tr>
+<td align="center" width="33%">🪙<br><b>Pay in advance</b><br><sub>Tick or credit, optional</sub></td>
+<td align="center" width="33%">📦<br><b>Archive &amp; statistics</b><br><sub>Search, grams, cost per month</sub></td>
+<td align="center" width="33%">🌍<br><b>DE · EN · FR</b><br><sub>App and status e-mails</sub></td>
+</tr>
+</table>
+
+### Who sees what?
+
+| 🧑‍🤝‍🧑 For your friends | 🛠️ For you (workshop) |
+|---|---|
+| Paste a link or upload a 3D file, pick filament, color and quantity | Queue with preview, weight and cost, filter and search |
+| 3D preview and a check whether the model fits the print bed | Open the file in your slicer with one click, internal note only you see |
+| Follow the status, **queue position**, e-mails if wanted (can be paused) | Set the status, reject with a reason in one click, e-mail on a new request |
+| Ask and answer **questions** on the request | Answer questions, the other side gets an e-mail |
+| See the photo of the finished print, **print again** with one click | Upload a photo (goes out with the “Printed” e-mail) |
+| “Printed for you” on the profile, optionally see credit and price | Pay in advance per friend, top up credit, statistics, archive |
+
+### All features in detail
+
+<details open>
+<summary><b>📥 Submitting requests</b></summary>
+
 - 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL, 3MF or STEP file.
 - 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate. STEP files from CAD programs are read and measured right in the browser, too.
-- 🖨️ **Open in slicer:** one click on a request opens the 3D file directly in OrcaSlicer, Bambu Studio or Creality Print on your computer. Pick which buttons appear in the settings.
 - 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
-- 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. Just so nobody has to guess.
-- ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
+
+</details>
+
+<details>
+<summary><b>🛠️ Workshop routine</b></summary>
+
+- 🖨️ **Open in slicer:** one click on a request opens the 3D file directly in OrcaSlicer, Bambu Studio or Creality Print on your computer. Pick which buttons appear in the settings.
 - 📦 **Archive with search:** printed and rejected requests move to the archive after a configurable period or with a button (several at once). Find them again by title, file, friend or date range.
 - 📈 **Statistics:** requests, grams and material cost per month, popular filaments and colors, waiting time and rejection reasons for you. Every friend sees their own numbers on their profile.
-- 🪙 **Pay in advance (optional):** switch it on per friend when filament costs should be settled before printing. Two ways: a “paid” tick per request, or a credit account you top up that every request is paid from (rejected ones are refunded). The price is filament cost plus a percentage surcharge for power, wear and failed prints. Without payment a request cannot be set to “planned”. The money changes hands outside the app (cash, PayPal); it only calculates and remembers the status.
+
+</details>
+
+<details>
+<summary><b>📣 Status and contact</b></summary>
+
 - 📊 **Clear status:** submitted → planned → printed, or rejected with a reason, shown as a progress bar of hexagons with a filament thread that gets thicker from step to step. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
 - 💬 **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. Plus an internal note only you can see.
 - 📬 **E-mail on new requests:** you're notified as soon as someone submits something.
 - 📸 **Photo of the finished print:** your friend sees it on the request and gets it with the “Printed” e-mail. With **“Print again”** they can reorder the same thing in one click.
+
+</details>
+
+<details>
+<summary><b>💶 Money</b></summary>
+
+- 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. Just so nobody has to guess.
+- ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
+- 🪙 **Pay in advance (optional):** switch it on per friend when filament costs should be settled before printing. Two ways: a “paid” tick per request, or a credit account you top up that every request is paid from (rejected ones are refunded). The price is filament cost plus a percentage surcharge for power, wear and failed prints. Without payment a request cannot be set to “planned”. The money changes hands outside the app (cash, PayPal); it only calculates and remembers the status.
+
+</details>
+
+<details>
+<summary><b>🔒 Operation and security</b></summary>
+
 - 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
 - ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
 - 🌍 **German, English, French:** everyone picks their language at the bottom of the page or in their profile. It applies to the whole app and to status emails, which are always sent in the recipient’s language.
@@ -96,27 +156,36 @@ flowchart LR
 - 💾 **Daily backups** with a verification tool, the last 14 are kept.
 - 🔒 **Secure by default:** SSRF protection when fetching previews, CSP and HSTS headers, brute-force throttling on logins, container without extra privileges and with a read-only file system. The STEP reader runs isolated in a Web Worker.
 
+</details>
+
 ## Which tool is right for you?
 
-There are now three free, self-hosted tools for print requests. They come in different sizes, and each has its place:
+There are now three free, self-hosted tools for print requests. They come in different sizes, and each has its place.
 
-| | **PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
+✅ yes · 🟡 with limits · ➖ not available (or not mentioned in the README)
+
+| | **🟧 PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
 |---|---|---|---|
-| Built for | friends, one printer | small office, one printer | hobby up to print farm |
-| Request by link | Printables, MakerWorld, Thingiverse | Printables only (opt-in) | five sites incl. MakerWorld |
+| **🎯 Built for** | **friends**, one printer | small office, one printer | hobby up to print farm |
+| **📥 Submit and prepare** | | | |
+| Request by link | Printables, MakerWorld, Thingiverse | 🟡 Printables only (opt-in) | five sites incl. MakerWorld |
 | 3D preview | ✅ with build-plate check | ✅ | ✅ |
-| Open in slicer | ✅ Orca, Bambu Studio, Creality Print, no extra software | only with a helper app you have to install (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | – |
-| Material cost | ✅ per request and per friend | – | – |
-| Questions | ✅ comments on the request | ✅ comments on the request | – |
-| Internal note just for you | ✅ | – | notes |
-| E-mails | ✅ new request, status, questions, can be paused | ✅ new request, status, comments, can be turned off | only “ready to collect” |
-| Queue position for friends | ✅ | – | – |
-| Photo of the finished print | ✅ on the request and in the e-mail | – | – |
-| Print again | ✅ | ✅ | – |
-| Several printers | – | – | ✅ with auto-assignment |
+| Open in slicer | ✅ Orca, Bambu Studio, Creality Print, no extra software | 🟡 only with a helper app you have to install (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | ➖ |
+| **💬 Working together** | | | |
+| Questions on the request | ✅ | ✅ | ➖ |
+| Internal note just for you | ✅ | ➖ | 🟡 notes |
+| E-mails | ✅ new request, status, questions, can be paused | ✅ new request, status, comments, can be turned off | 🟡 only “ready to collect” |
+| Queue position for friends | ✅ | ➖ | ➖ |
+| Photo of the finished print | ✅ on the request and in the e-mail | ➖ | ➖ |
+| Print again | ✅ | ✅ | ➖ |
+| **💶 Cost and planning** | | | |
+| Material cost | ✅ per request and per friend | ➖ | ➖ |
+| Pay in advance (tick or credit) | ✅ optional, per friend | ➖ | ➖ |
+| Several printers | ➖ | ➖ | ✅ with auto-assignment |
+| **🔒 Operation** | | | |
 | Sign-in | invite + password | invite, passkeys, SSO | invite, SSO, 2FA |
-| Raspberry Pi (ARM64) | ✅ | – (x86 only) | ✅ |
-| Server needs | SQLite, ~50 MB RAM | Postgres, ~1 GB RAM, HTTPS required | SQLite or Postgres |
+| Raspberry Pi (ARM64) | ✅ | 🟡 x86 only | ✅ |
+| Server needs | **SQLite, ~50 MB RAM** | Postgres, ~1 GB RAM, HTTPS required | SQLite or Postgres |
 | UI language | German, English, French | English | English, French, German |
 | License | MIT | AGPL-3.0 | AGPL-3.0 |
 
@@ -124,9 +193,11 @@ There are now three free, self-hosted tools for print requests. They come in dif
 
 **What PleasePrintit deliberately leaves out:** single sign-on, an API, multiple printers, real payment processing (payment services, bank details). That keeps it small: a handful of Python files you can read in an evening, started with one command.
 
-- **Printing for friends and family** and want to know what it costs? → PleasePrintit.
-- **One printer in an office**, you want to discuss requests and already have SSO? → PrettyPleasePrint.
-- **Several printers or a small print farm?** → STL Quest.
+| You … | Then pick |
+|---|---|
+| 🧑‍🤝‍🧑 print for **friends and family** and want to know what it costs | **PleasePrintit** |
+| 🏢 have **one printer in an office**, want to discuss requests and already have SSO | **PrettyPleasePrint** |
+| 🏭 run **several printers or a small print farm** | **STL Quest** |
 
 ## Getting started
 
