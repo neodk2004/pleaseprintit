@@ -271,16 +271,36 @@ label,.label-t{display:block;font-weight:600;font-size:.9rem;margin:0 0 .35rem}
 .order .aside{display:flex;align-items:center;gap:var(--s2)}
 
 /* Ablauf (Status-Workflow) */
-.flow{list-style:none;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;margin:0 0 var(--s5);padding:0;counter-reset:f}
-.flow li{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;font-size:.85rem}
-.flow li::before{content:"";position:absolute;top:15px;left:-50%;right:50%;height:2px;background:var(--line-strong)}
+/* Ablauf-Leiste: Sechsecke mit Filament-Faden. Der Faden wird je Schritt dicker (--k = Nummer des Schritts). */
+.flow{list-style:none;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;margin:0 0 var(--s5);padding:var(--s3) 0 0}
+.flow li{--w:calc(1px + var(--k) * 5px);position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;font-size:.85rem}
+.flow li::before{content:"";position:absolute;top:calc(1.75rem - var(--w) / 2);left:-50%;right:50%;height:var(--w);border-radius:3px;
+  background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);transform-origin:left}
 .flow li:first-child::before{display:none}
-.flow li.done::before{background:var(--gedruckt)} .flow li.stop::before{background:var(--abgelehnt)}
-.flow li .icon{position:relative;z-index:1;width:32px;height:32px;padding:7px;border-radius:50%;stroke-width:2.5;background:var(--surface-2);color:var(--ink-3);border:2px solid var(--line-strong)}
-.flow li.done .icon{background:var(--gedruckt);border-color:var(--gedruckt);color:var(--surface)}
-.flow li.stop .icon{background:var(--abgelehnt);border-color:var(--abgelehnt);color:var(--surface)}
-.flow li.off{opacity:.55}
+.flow li.done::before,.flow li.stop::before{box-shadow:none;background:repeating-linear-gradient(180deg,var(--brand) 0 2px,#ff9a55 2px 3px,var(--brand) 3px 4px)}
+.flow li.stop::before{background:repeating-linear-gradient(180deg,var(--abgelehnt) 0 2px,#ff8a8a 2px 3px,var(--abgelehnt) 3px 4px)}
+.flow .hex,.flow .hex>span{clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.flow .hex{position:relative;z-index:1;display:grid;place-items:center;width:3.1rem;height:3.5rem;background:var(--line-strong);color:var(--ink-3);font:700 1.05rem var(--font-mono)}
+.flow .hex>span{display:grid;place-items:center;width:calc(100% - 6px);height:calc(100% - 6px);background:var(--surface)}
+.flow .hex .icon{width:1.2em;height:1.2em;stroke-width:2.6}
+.flow li.done .hex{background:var(--brand)}
+.flow li.done .hex>span{background:var(--brand);color:var(--on-signal)}
+.flow li.cur .hex>span{background:var(--surface);color:var(--brand)}
+.flow li.stop .hex{background:var(--abgelehnt)}
+.flow li.stop .hex>span{background:var(--abgelehnt);color:var(--surface)}
+.flow li.off{opacity:.6}
 .flow small{display:block;color:var(--ink-2);font-family:var(--font-mono);font-size:.72rem}
+@keyframes flow-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes flow-pop{from{transform:scale(.3) rotate(-30deg);opacity:0}60%{transform:scale(1.15)}to{transform:none;opacity:1}}
+@keyframes flow-glow{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px var(--brand))}}
+@keyframes flow-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:no-preference){
+  /* Nacheinander: Faden wächst zum Schritt, das Sechseck poppt auf, dann erscheint der Text */
+  .flow li.done::before,.flow li.stop::before{animation:flow-fill .4s var(--ease-out) calc((var(--k) - 1) * .45s + .1s) both}
+  .flow .hex{animation:flow-pop .45s var(--ease-out) calc(var(--k) * .45s) both}
+  .flow li.cur .hex{animation:flow-pop .45s var(--ease-out) calc(var(--k) * .45s) both,flow-glow 2s ease-in-out calc(var(--k) * .45s + .6s) infinite}
+  .flow .lbl{animation:flow-fade .4s ease calc(var(--k) * .45s + .15s) both}
+}
 /* Abgelehnt: Vorschau + Grund */
 .reject{display:grid;grid-template-columns:250px 1fr;gap:var(--s5);align-items:start}
 @media (max-width:640px){.reject{grid-template-columns:1fr}.reject .preview{max-width:250px}}
@@ -354,7 +374,7 @@ form.status .segmented button{width:100%}
 
 /* Freunde */
 .people{list-style:none;margin:0;padding:0}
-.people li{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.people li{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--line)}
 .people li:last-child{border-bottom:0}
 .people li.off{opacity:.5}
 .avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;flex:none;background:var(--signal-soft);color:var(--signal);font:600 1rem var(--font-display)}
@@ -451,3 +471,36 @@ textarea{min-height:8rem;resize:vertical;line-height:1.5;font-size:.92rem}
 .photo{padding:var(--s3);margin-left:0;margin-right:0}
 .photo img{display:block;width:100%;height:auto;max-height:28rem;object-fit:contain;border-radius:var(--r-sm)}
 .photo figcaption{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s2)}
+
+.payrow{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);padding-left:3rem}
+.pay .big{font-size:1.5rem;margin-right:var(--s3)}
+
+/* ---------- Icon-Animationen (gleiche Bewegungen wie auf der Webseite, nach lucide-animated.com, MIT) ----------
+   Die Icons stammen aus einem Sprite (<use>): animiert wird das ganze Icon, wenn Knopf, Link, Tab oder Auftrag berührt wird. */
+.icon{transform-origin:center}
+@keyframes ic-draw{from{stroke-dasharray:1;stroke-dashoffset:1}to{stroke-dasharray:1;stroke-dashoffset:0}}
+@keyframes ic-tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
+@keyframes ic-spin{to{transform:rotate(360deg)}}
+@keyframes ic-turn{to{transform:rotate(90deg)}}
+@keyframes ic-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes ic-down{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@keyframes ic-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+@keyframes ic-ext{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-2px)}}
+@keyframes ic-pop{0%{transform:scale(1)}40%{transform:scale(1.25) rotate(-12deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes ic-shake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-1px) rotate(-8deg)}75%{transform:translateX(1px) rotate(8deg)}}
+@keyframes ic-flip{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.1)}}
+@keyframes ic-paper{0%{transform:translateY(-4px);opacity:.3}100%{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-link,.i-ruler,.i-search,.i-calendar,.i-moon,.i-scale,.i-sliders){animation:ic-tilt .5s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-plus){animation:ic-turn .35s ease-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-spool,.i-rotate,.i-clock){animation:ic-spin .7s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-cube,.i-layers,.i-inbox,.i-upload){animation:ic-up .5s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-download,.i-archive){animation:ic-down .5s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-go,.i-logout){animation:ic-nudge .45s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) .i-external{animation:ic-ext .45s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-users,.i-user,.i-info,.i-image,.i-heart,.i-mail,.i-x,.i-x-c){animation:ic-pop .5s ease-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) .i-trash{animation:ic-shake .4s ease-in-out 2}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) .i-coin{animation:ic-flip .6s ease-in-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) .i-file{animation:ic-paper .5s ease-out}
+  :is(a,button,summary,label,.tab):is(:hover,:focus-visible) :is(.i-check,.i-check-c,.i-chart){animation:ic-draw .5s ease-out both}
+}

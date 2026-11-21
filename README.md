@@ -78,11 +78,12 @@ flowchart LR
 - 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt. Auch STEP-Dateien aus CAD-Programmen werden direkt im Browser gelesen und vermessen.
 - 🖨️ **In Slicer öffnen:** Ein Klick im Auftrag öffnet die 3D-Datei direkt in OrcaSlicer, Bambu Studio oder Creality Print an deinem PC. Welche Knöpfe erscheinen, wählst du in den Einstellungen.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
-- 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Ganz ohne Bezahlfunktion, nur damit niemand raten muss.
+- 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Nur damit niemand raten muss.
 - ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
 - 📦 **Archiv mit Suche:** Gedruckte und abgelehnte Aufträge wandern nach einer einstellbaren Frist oder per Knopf (auch mehrere auf einmal) ins Archiv. Dort findest du sie über die Suche nach Titel, Datei oder Freund und über einen Zeitraum wieder.
 - 📈 **Statistik:** Für dich Aufträge, Gramm und Materialkosten pro Monat, beliebte Filamente und Farben, Wartezeit und Ablehnungsgründe. Jeder Freund sieht seine eigenen Zahlen im Profil.
-- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
+- 🪙 **Vorab zahlen (optional):** Du schaltest es pro Freund ein, wenn Filament-Kosten vor dem Druck beglichen werden sollen. Zwei Wege: ein Haken „bezahlt“ pro Auftrag oder ein Guthaben-Konto, das du aufladest und von dem jeder Auftrag bezahlt wird (abgelehnte werden zurückgebucht). Der Preis ist Filamentkosten plus Aufschlag in Prozent für Strom, Verschleiß und Ausschuss. Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen. Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
+- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund, als Ablauf-Leiste mit Sechsecken und einem Filament-Faden, der von Schritt zu Schritt dicker wird. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
 - 💬 **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die andere Seite bekommt eine Mail. Dazu eine interne Notiz, die nur du siehst.
 - 📬 **Mail bei neuem Wunsch:** Du bekommst Bescheid, sobald jemand etwas einreicht.
 - 📸 **Foto vom fertigen Druck:** Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“. Mit **„Nochmal drucken“** bestellt er dasselbe mit einem Klick erneut.
@@ -121,7 +122,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 
 <sub>Stand November 2026, nach den Angaben in den READMEs der Projekte. Etwas falsch? Bitte ein Issue aufmachen.</sub>
 
-**Was PleasePrintit bewusst nicht hat:** Single Sign-on, eine Programmierschnittstelle, mehrere Drucker, Bezahlfunktionen. Das hält die App klein: wenige Python-Dateien, die man an einem Abend durchgelesen hat, und ein Start mit einem Befehl.
+**Was PleasePrintit bewusst nicht hat:** Single Sign-on, eine Programmierschnittstelle, mehrere Drucker, echte Bezahlabwicklung (Zahlungsdienste, Bankdaten). Das hält die App klein: wenige Python-Dateien, die man an einem Abend durchgelesen hat, und ein Start mit einem Befehl.
 
 - **Du druckst für Freunde und Familie** und willst wissen, was es kostet? → PleasePrintit.
 - **Ein Drucker im Büro**, ihr wollt am Auftrag diskutieren und habt schon SSO? → PrettyPleasePrint.

@@ -6,6 +6,12 @@
 <div class="pagehead rise"><div><p class="eyebrow">{{ _('Profil') }}</p><h1>{{ _('Hallo {name}', name=g.user.name) }}</h1></div></div>
 {% if msg %}<p class="ok-msg" role="status">{{ icon('check') }}{{ msg }}</p>{% endif %}
 
+{% if credit %}<section class="card rise" style="--i:1">
+  <h3>{{ icon('coin') }} {{ _('Dein Guthaben') }}</h3>
+  <p style="margin:0"><b class="mono" style="font-size:1.4rem">{{ euro(balance) }}</b></p>
+  <p class="hint">{{ _('Aufladen lässt du es bei der Werkstatt. Jeder Auftrag wird davon bezahlt, abgelehnte bekommst du zurück.') }}</p>
+  {% if rows %}<ul class="invites">{% for r in rows %}<li><span class="mono grow">{{ r.at }}</span><span>{{ _(r.note) if r.note in ('Auftrag', 'Aufladung', 'Korrektur', 'Rückerstattung') else r.note }}{% if r.link_id %} #{{ '%04d'|format(r.link_id) }}{% endif %}</span><b class="mono">{{ ('+' if r.amount > 0 else '') ~ euro(r.amount) }}</b></li>{% endfor %}</ul>{% endif %}
+</section>{% endif %}
 <section class="card rise" style="--i:1">
   <h3>{{ icon('coin') }} {{ _('Für dich gedruckt') }}</h3>
   {% if done[0] %}

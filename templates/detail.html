@@ -29,6 +29,30 @@
 {% elif cost and g.admin %}<p class="hint">{{ _('Für einen Preis trag in den Einstellungen den Preis pro kg ein.') }} <a href="{{ url_for('settings') }}">{{ _('Einstellungen') }}</a></p>{% endif %}
 {% endmacro %}
 
+{% macro payment() %}{% if pay %}
+<section class="card pay" style="margin-top:var(--s4)">
+  <h3>{{ icon('coin') }} {{ _('Vorab bezahlen') }}</h3>
+  {% if pay.price is none %}
+    <p class="hint">{{ _('Der Preis steht noch nicht fest. Die Werkstatt legt ihn fest.') }}</p>
+  {% else %}
+    <p style="margin:0"><span class="big mono">{{ euro(pay.price) }}</span>
+      <span class="badge {{ 's-gedruckt' if pay.paid or not pay.needs else 's-neu' }}">{{ _('bezahlt') if pay.paid else (_('kostenlos') if not pay.needs else _('offen')) }}</span></p>
+  {% endif %}
+  {% if pay.needs and not g.admin %}<p class="hint">
+    {% if pay.mode == 'credit' %}{{ _('Der Preis wird von deinem Guthaben abgebucht ({balance} da). Reicht es nicht, lass es bei der Werkstatt aufladen.', balance=money(pay.balance)) if pay.price is not none else '' }}
+    {% else %}{{ _('Bitte zahl den Betrag an die Werkstatt, bevor gedruckt wird. Sie setzt den Haken, sobald er angekommen ist.') }}{% endif %}</p>{% endif %}
+  {% if g.admin %}
+    {% if pay.mode == 'order' %}<form method="post" action="{{ url_for('set_paid', link_id=e.id) }}" style="margin-top:var(--s3)">
+      {% if pay.paid %}<button class="btn btn-sm" name="paid" value="0">{{ _('Haken zurücknehmen') }}</button>
+      {% else %}<button class="btn btn-primary btn-sm" name="paid" value="1">{{ icon('check') }}{{ _('Als bezahlt markieren') }}</button>{% endif %}</form>
+    {% elif pay.mode == 'credit' and pay.needs %}<p class="hint">{{ _('Wird automatisch abgebucht, sobald das Guthaben reicht ({balance} da).', balance=money(pay.balance)) }}</p>{% endif %}
+    {% if not pay.paid %}<form class="row" method="post" action="{{ url_for('set_price', link_id=e.id) }}" style="margin-top:var(--s3)">
+      <label>{{ _('Preis festlegen') }} <span class="unit"><input type="number" name="price" min="0" max="10000" step="0.01" inputmode="decimal" value="{{ e.price if e.price is not none else '' }}" placeholder="{{ _('automatisch') }}"> €</span></label>
+      <button class="btn btn-sm">{{ _('Speichern') }}</button></form>
+    <p class="hint">{{ _('Leer = automatisch aus Filamentkosten und Aufschlag. 0 = kostenlos.') }}</p>{% endif %}
+  {% endif %}
+</section>{% endif %}{% endmacro %}
+
 {% macro talk() %}
 <section class="card comments" id="kommentare" style="margin-top:var(--s4)">
   <h3>{{ icon('mail') }} {{ _('Rückfragen') }}</h3>
@@ -135,6 +159,7 @@
       </div>
     </div>
 
+    {{ payment() }}
     {% if g.admin %}
     <form class="card" method="post" action="{{ url_for('save_note', link_id=e.id) }}">
       <label for="note">{{ icon('file') }} {{ _('Interne Notiz') }} <small>{{ _('(sieht nur die Werkstatt)') }}</small></label>

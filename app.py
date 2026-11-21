@@ -65,6 +65,8 @@ def db():
             filament_id INTEGER NOT NULL REFERENCES filaments(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY, link_id INTEGER NOT NULL,
             user_id INTEGER, text TEXT NOT NULL, at TEXT NOT NULL);   -- user_id NULL = Werkstatt
+        CREATE TABLE IF NOT EXISTS ledger (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, amount REAL NOT NULL,
+            link_id INTEGER, note TEXT, at TEXT NOT NULL);   -- Guthaben-Konto: Summe der Beträge = Kontostand
     """)
     con.execute("PRAGMA foreign_keys = ON")
     if "email" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
@@ -73,6 +75,8 @@ def db():
         con.execute("ALTER TABLE users ADD COLUMN lang TEXT")    # de/en/fr: Oberfläche und Status-Mails
     if "mute" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
         con.execute("ALTER TABLE users ADD COLUMN mute INTEGER NOT NULL DEFAULT 0")   # 1 = Mails pausiert
+    if "prepay" not in {r["name"] for r in con.execute("PRAGMA table_info(users)")}:
+        con.execute("ALTER TABLE users ADD COLUMN prepay INTEGER NOT NULL DEFAULT 0")   # 1 = zahlt vorab (siehe pay_mode)
     fcols = {r["name"] for r in con.execute("PRAGMA table_info(filaments)")}
     for col in ("density", "price_kg"):   # g/cm³ und €/kg für die Kostenschätzung
         if col not in fcols:
@@ -87,7 +91,9 @@ def db():
                      ("size", "INTEGER NOT NULL DEFAULT 0"), ("filament", "TEXT"), ("color", "TEXT"),
                      ("color_hex", "TEXT"), ("dims", "TEXT"), ("reason", "TEXT"), ("volume", "REAL"),
                      ("qty", "INTEGER NOT NULL DEFAULT 1"), ("successor", "INTEGER"), ("archived", "TEXT"),
-                     ("note", "TEXT"), ("photo", "TEXT")):   # note: interne Notiz; photo: Bild vom fertigen Druck
+                     ("note", "TEXT"), ("photo", "TEXT"), ("price", "REAL"), ("paid", "INTEGER NOT NULL DEFAULT 0")):
+        # note: interne Notiz; photo: Bild vom fertigen Druck; price: festgehaltener Preis in €, NULL = wird berechnet
+        # paid: 1 = bezahlt (Haken der Werkstatt oder vom Guthaben abgebucht)
         if col not in cols:
             con.execute(f"ALTER TABLE links ADD COLUMN {col} {typ}")
     return con
@@ -120,6 +126,7 @@ def insert(con, **fields):
     cur = con.execute(f"INSERT INTO links ({', '.join(fields)}) VALUES ({', '.join('?' * len(fields))})",
                       tuple(fields.values()))
     log_status(con, cur.lastrowid, "neu")
+    settle(con, cur.lastrowid)
     if not g.admin:
         notify_workshop(con, get_entry(con, cur.lastrowid))
     return cur.lastrowid
@@ -217,6 +224,86 @@ def printed(con, user_id):
             if c[1] is not None:
                 eur = (eur or 0) + c[1]
     return n, grams, eur
+
+
+# --- Vorab zahlen: Preis, Bezahlt-Haken (Modus „order“) oder Guthaben-Konto (Modus „credit“) ----------------
+# Die App wickelt kein Geld ab: Gezahlt wird außerhalb (bar, PayPal …), die Werkstatt bestätigt es nur.
+MARKUP = 30   # Standard-Aufschlag in % auf die Filamentkosten für Strom, Verschleiß und Ausschuss
+
+
+def pay_mode(con):
+    """'' = aus, 'order' = Haken pro Auftrag, 'credit' = Guthaben pro Freund."""
+    m = text_setting(con, "pay_mode")
+    return m if m in ("order", "credit") else ""
+
+
+def price_of(con, e):
+    """Preis in € (Filament + Aufschlag) oder None, wenn nicht berechenbar. Ein festgehaltener Preis gewinnt.
+    ponytail: nur nach Gewicht, nicht nach Druckzeit – lange, leichte Teile sind zu billig."""
+    if e["price"] is not None:
+        return e["price"]
+    if e["file"] and kind(e) == "step":   # STEP-Volumen misst der Browser des Freundes (manipulierbar): Preis legt die Werkstatt fest
+        return None
+    c = estimate(con, e)
+    return round(c[1] * (1 + setting(con, "pay_markup", MARKUP) / 100), 2) if c and c[1] is not None else None
+
+
+def balance(con, uid):
+    return round(con.execute("SELECT COALESCE(SUM(amount), 0) FROM ledger WHERE user_id = ?", (uid,)).fetchone()[0], 2)
+
+
+def ledger(con, uid, amount, link_id=None, note=None):
+    con.execute("INSERT INTO ledger (user_id, amount, link_id, note, at) VALUES (?, ?, ?, ?, ?)",
+                (uid, amount, link_id, note, now(con)))
+
+
+def needs_pay(con, e):
+    """Fehlt noch die Zahlung? Nur bei eingeschaltetem Modus und Freunden mit „Vorab zahlen“.
+    Ohne berechenbaren Preis zählt es als offen, bis die Werkstatt einen Preis festlegt (0 = kostenlos)."""
+    if not pay_mode(con) or e["paid"] or not e["user_id"]:
+        return False
+    u = con.execute("SELECT prepay FROM users WHERE id = ?", (e["user_id"],)).fetchone()
+    p = price_of(con, e)
+    return bool(u and u["prepay"]) and (p is None or p > 0)
+
+
+def settle(con, link_id):
+    """Guthaben-Modus: den Preis vom Konto abbuchen, sobald das Guthaben reicht."""
+    e = con.execute("SELECT * FROM links WHERE id = ?", (link_id,)).fetchone()
+    if pay_mode(con) != "credit" or e["status"] not in ("neu", "geplant") or not needs_pay(con, e):
+        return
+    p = price_of(con, e)
+    if p is not None and balance(con, e["user_id"]) >= p:
+        ledger(con, e["user_id"], -p, link_id, "Auftrag")
+        con.execute("UPDATE links SET paid = 1, price = ? WHERE id = ?", (p, link_id))
+
+
+def settle_all(con, uid):
+    """Nach Aufladen oder Einschalten: offene Aufträge der Reihe nach bezahlen, solange das Guthaben reicht."""
+    for (lid,) in con.execute("SELECT id FROM links WHERE user_id = ? AND status IN ('neu', 'geplant') "
+                              "AND paid = 0 ORDER BY id", (uid,)).fetchall():
+        settle(con, lid)
+
+
+def refund(con, link_id):
+    """Abgelehnt: vom Konto Abgebuchtes zurückbuchen. (Beim Haken-Modus erstattet die Werkstatt selbst.)"""
+    held = -round(con.execute("SELECT COALESCE(SUM(amount), 0) FROM ledger WHERE link_id = ?", (link_id,)).fetchone()[0], 2)
+    if held > 0:
+        uid = con.execute("SELECT user_id FROM links WHERE id = ?", (link_id,)).fetchone()[0]
+        ledger(con, uid, held, link_id, "Rückerstattung")
+        con.execute("UPDATE links SET paid = 0 WHERE id = ?", (link_id,))
+
+
+def pay_info(con, e):
+    """Zahlungsstand eines Auftrags für die Anzeige; None, wenn für diesen Auftrag nichts zu zahlen ist."""
+    mode = pay_mode(con)
+    if not mode or not e["user_id"]:
+        return None
+    u = con.execute("SELECT prepay FROM users WHERE id = ?", (e["user_id"],)).fetchone()
+    if not (u and u["prepay"]):
+        return None
+    return {"mode": mode, "price": price_of(con, e), "paid": bool(e["paid"]), "needs": needs_pay(con, e),
+            "balance": balance(con, e["user_id"]) if mode == "credit" else None}
 
 
 def parse_at(s):
@@ -364,7 +451,7 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ONLY = {"set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
               "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify",
-              "save_note", "save_photo"}
+              "save_note", "save_photo", "set_price", "set_paid", "toggle_prepay", "add_credit", "save_pay"}
 # Ablehnungsgründe: kurz für die Werkstatt (wird gespeichert) → ausformuliert für den Freund (Seite + Mail)
 REASONS = {
     "Zu komplex": "Das Modell ist für meinen Drucker leider zu komplex – zum Beispiel wegen vieler Stützstrukturen "
@@ -626,10 +713,12 @@ def index():
         entries = con.execute(sql, args).fetchall()
         people = con.execute("SELECT id, name FROM users ORDER BY name").fetchall() if g.admin else []
         costs = {e["id"]: estimate(con, e) for e in entries}
+        pays = {e["id"]: pay_info(con, e) for e in entries}
         scope = (f"COALESCE(archived, '') {'!=' if arch else '='} ''", ()) if g.admin else ("user_id = ?", (g.user["id"],))
         counts = dict(con.execute(f"SELECT status, COUNT(*) FROM links WHERE {scope[0]} GROUP BY status",
                                   scope[1]).fetchall())
-    return render_template("list.html", entries=entries, people=people, f=f, costs=costs, counts=counts, arch=arch)
+    return render_template("list.html", entries=entries, people=people, f=f, costs=costs, counts=counts, arch=arch,
+                           pays=pays)
 
 
 @app.post("/archive")
@@ -644,7 +733,9 @@ def archive():
 
 def new_page(error=None, code=200):
     with db() as con:
-        return render_template("new.html", error=error, options=filament_options(con), bed=bed(con)), code
+        prepay = pay_mode(con) if g.user and g.user["prepay"] else ""
+        return render_template("new.html", error=error, options=filament_options(con), bed=bed(con), prepay=prepay,
+                               balance=balance(con, g.user["id"]) if prepay == "credit" else None), code
 
 
 @app.get("/new")
@@ -740,7 +831,7 @@ def entry(link_id):
             e = get_entry(con, link_id)
         owner = con.execute("SELECT name FROM users WHERE id = ?", (e["user_id"],)).fetchone()
         return render_template("detail.html", e=e, place=queue_place(con, e), can_repeat=owns(e) and e["status"] == "gedruckt", owner=owner["name"] if owner else _("ich"), bed=bed(con),
-                               cost=estimate(con, e), flow=flow(con, e), options=filament_options(con),
+                               cost=estimate(con, e), flow=flow(con, e), options=filament_options(con), pay=pay_info(con, e),
                                can_resubmit=can_resubmit(e), tip=text_setting(con, "tip_url"),
                                slicers=slicer_links(con, e) if g.admin else [],
                                comments=con.execute("SELECT c.*, u.name FROM comments c LEFT JOIN users u "
@@ -844,6 +935,12 @@ def set_status(link_id):
     with db() as con:
         old = get_entry(con, link_id)
         con.execute("UPDATE links SET status = ?, reason = ? WHERE id = ?", (status, reason or None, link_id))
+        if status == "abgelehnt":
+            refund(con, link_id)
+        else:
+            settle(con, link_id)
+            if status in ("geplant", "gedruckt") and needs_pay(con, get_entry(con, link_id)):   # abort macht alles rückgängig
+                abort(400, _("Noch nicht bezahlt: Erst die Zahlung bestätigen, das Guthaben aufladen oder einen Preis festlegen."))
         if old["status"] != status:
             con.execute("UPDATE links SET archived = NULL WHERE id = ?", (link_id,))   # Frist beginnt neu
             log_status(con, link_id, status)
@@ -957,6 +1054,7 @@ def attach_model(link_id):
             os.remove(os.path.join(MODELS, old["file"]))
         if not old["image"]:
             add_thumbnail(con, link_id, m)
+        settle(con, link_id)
     return redirect(url_for("entry", link_id=link_id))
 
 
@@ -979,6 +1077,7 @@ def measure(link_id):
         d = parse_dims(request.form)
         con.execute("UPDATE links SET volume = ?, dims = ? WHERE id = ?",
                     (v, e["dims"] or (fmt_dims(d) if d else None), link_id))
+        settle(con, link_id)
     return "", 204
 
 
@@ -1084,8 +1183,11 @@ def profile():
 
 def mine(con):
     """Zahlen fürs Profil: „Für dich gedruckt“ und die eigene Statistik."""
+    credit = pay_mode(con) == "credit" and g.user["prepay"]
     return {"done": printed(con, g.user["id"]), "st": stats(con, g.user["id"], months=6),
-            "tip": text_setting(con, "tip_url")}
+            "tip": text_setting(con, "tip_url"), "credit": credit, "balance": balance(con, g.user["id"]),
+            "rows": con.execute("SELECT * FROM ledger WHERE user_id = ? ORDER BY id DESC LIMIT 20",
+                                (g.user["id"],)).fetchall() if credit else []}
 
 
 @app.post("/me/test")
@@ -1101,6 +1203,83 @@ def test_mail():
         ctx = mine(con)
     return render_template("profile.html", mail_on=True, **ctx, error=fail and _("Versand fehlgeschlagen. Die Werkstatt schaut nach."),
                            msg=None if fail else _("Testmail an {to} ist raus.", to=g.user["email"])), 502 if fail else 200
+
+
+@app.post("/entry/<int:link_id>/price")
+def set_price(link_id):
+    """Preis von Hand festlegen (0 = kostenlos); leer = wieder automatisch berechnen."""
+    v = request.form.get("price", "").strip().replace(",", ".")
+    try:
+        price = round(min(max(float(v), 0), 10_000), 2) if v else None
+    except ValueError:
+        abort(400)
+    with db() as con:
+        if get_entry(con, link_id)["paid"]:
+            abort(400, _("Schon bezahlt: Der Preis lässt sich nicht mehr ändern."))
+        con.execute("UPDATE links SET price = ? WHERE id = ?", (price, link_id))
+        settle(con, link_id)
+    return redirect(url_for("entry", link_id=link_id))
+
+
+@app.post("/entry/<int:link_id>/paid")
+def set_paid(link_id):
+    """Modus „order“: Die Werkstatt bestätigt, dass die Zahlung angekommen ist (oder nimmt den Haken zurück)."""
+    with db() as con:
+        e = get_entry(con, link_id)
+        if pay_mode(con) != "order":
+            abort(400)
+        if request.form.get("paid") == "1":
+            p = price_of(con, e)
+            if p is None:
+                abort(400, _("Erst einen Preis festlegen."))
+            con.execute("UPDATE links SET paid = 1, price = ? WHERE id = ?", (p, link_id))
+        else:
+            con.execute("UPDATE links SET paid = 0 WHERE id = ?", (link_id,))
+    return redirect(url_for("entry", link_id=link_id))
+
+
+@app.post("/users/<int:uid>/prepay")
+def toggle_prepay(uid):
+    with db() as con:
+        con.execute("UPDATE users SET prepay = 1 - prepay WHERE id = ?", (uid,))
+        settle_all(con, uid)
+    return redirect(url_for("users"))
+
+
+@app.post("/users/<int:uid>/credit")
+def add_credit(uid):
+    """Guthaben aufladen (Betrag positiv) oder korrigieren (negativ). Das Konto kann nicht ins Minus."""
+    try:
+        amount = round(float(request.form.get("amount", "").strip().replace(",", ".")), 2)
+    except ValueError:
+        abort(400)
+    if not amount or abs(amount) > 1000:
+        abort(400)
+    with db() as con:
+        if not con.execute("SELECT 1 FROM users WHERE id = ?", (uid,)).fetchone():
+            abort(404)
+        if balance(con, uid) + amount < 0:
+            abort(400, _("Das Guthaben kann nicht unter 0 fallen."))
+        ledger(con, uid, amount, None, request.form.get("note", "").strip()[:100] or ("Aufladung" if amount > 0 else "Korrektur"))
+        settle_all(con, uid)
+    return redirect(url_for("users"))
+
+
+@app.post("/settings/pay")
+def save_pay():
+    mode = request.form.get("pay_mode", "")
+    if mode not in ("", "order", "credit"):
+        abort(400)
+    try:
+        markup = max(0.0, min(float(request.form.get("pay_markup", "").strip().replace(",", ".") or MARKUP), 500.0))
+    except ValueError:
+        abort(400)
+    with db() as con:
+        put_setting(con, "pay_mode", mode)
+        put_setting(con, "pay_markup", str(markup))
+        for (uid,) in con.execute("SELECT id FROM users WHERE prepay = 1").fetchall():
+            settle_all(con, uid)
+    return redirect(url_for("settings", tab="werkstatt"))
 
 
 # --- Freunde verwalten (nur Administrator) -----------------------------------
@@ -1125,7 +1304,9 @@ def users():
                              "AND (julianday('now') - julianday(r.created)) * 24 < ? ORDER BY r.created DESC",
                              (RESET_HOURS,)).fetchall()
         done = {p["id"]: printed(con, p["id"]) for p in people}
-    return render_template("users.html", people=people, done=done, invites=invites, days=INVITE_DAYS,
+        balances = {p["id"]: balance(con, p["id"]) for p in people}
+        mode = pay_mode(con)
+    return render_template("users.html", people=people, done=done, balances=balances, mode=mode, invites=invites, days=INVITE_DAYS,
                            mail_on=mail.configured(), resets=resets, reset_hours=RESET_HOURS)
 
 
@@ -1234,7 +1415,8 @@ def settings():
                                fill=setting(con, "fill", FILL), imp=impressum_data(con), imp_fields=IMPRESSUM,
                                archive_days=int(setting(con, "archive_days", ARCHIVE_DAYS)),
                                tip=text_setting(con, "tip_url"), notify_email=text_setting(con, "notify_email"),
-                               notify_mute=text_setting(con, "notify_mute"),
+                               notify_mute=text_setting(con, "notify_mute"), pay_mode=pay_mode(con),
+                               pay_markup=setting(con, "pay_markup", MARKUP),
                                mail_on=mail.configured(), slicers=SLICERS, chosen=chosen_slicers(con),
                                datenschutz=text_setting(con, "datenschutz"),
                                template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))

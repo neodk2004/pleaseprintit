@@ -564,6 +564,71 @@ T = {
     "Sobald Aufträge eingehen, siehst du hier, was los ist.":
         ("As soon as requests come in, you’ll see what’s going on here.",
          "Dès que des demandes arrivent, tu verras ici ce qui se passe."),
+    # --- Vorab zahlen (Haken pro Auftrag oder Guthaben-Konto) ---
+    "Vorab zahlen": ("Pay in advance", "Payer d'avance"),
+    "Vorab bezahlen": ("Pay in advance", "Payer d'avance"),
+    "Vorab zahlen: an": ("Pay in advance: on", "Payer d'avance : oui"),
+    "Vorab zahlen: aus": ("Pay in advance: off", "Payer d'avance : non"),
+    "Optional: Freunde zahlen die Filament-Kosten vor dem Druck. Die App rechnet nur und merkt sich den Stand – das Geld läuft außerhalb (bar, PayPal …). Eingeschaltet wird es danach pro Freund auf der Freunde-Seite.":
+        ("Optional: friends pay the filament cost before printing. The app only calculates and remembers the status – the money changes hands outside it (cash, PayPal …). It is then switched on per friend on the Friends page.",
+         "Facultatif : les amis paient le filament avant l'impression. L'application ne fait que calculer et retenir l'état – l'argent passe en dehors (espèces, PayPal …). On l'active ensuite pour chaque ami sur la page Amis."),
+    "Aus": ("Off", "Désactivé"),
+    "Pro Auftrag bezahlen": ("Pay per request", "Payer par demande"),
+    "(Freund sieht den Preis, du setzt den Haken „bezahlt“)":
+        ("(friend sees the price, you tick “paid”)", "(l'ami voit le prix, tu coches « payé »)"),
+    "Guthaben-Konto": ("Credit account", "Compte crédit"),
+    "(du lädst Guthaben auf, Aufträge werden davon bezahlt)":
+        ("(you top up credit, requests are paid from it)", "(tu recharges le crédit, les demandes en sont payées)"),
+    "Aufschlag für Strom, Verschleiß und Ausschuss": ("Surcharge for power, wear and failed prints",
+                                                       "Supplément pour électricité, usure et échecs"),
+    "Richtwert 30 %. Preis = Filamentkosten × (1 + Aufschlag). Die Filamentkosten kommen aus dem Preis pro kg unter „Filamente“. Ohne Volumen oder Preis pro kg legst du den Preis am Auftrag selbst fest.":
+        ("Rule of thumb 30 %. Price = filament cost × (1 + surcharge). The filament cost comes from the price per kg under “Filaments”. Without volume or price per kg you set the price on the request yourself.",
+         "Valeur indicative 30 %. Prix = coût du filament × (1 + supplément). Le coût du filament vient du prix au kg sous « Filaments ». Sans volume ni prix au kg, tu fixes le prix sur la demande."),
+    "Guthaben": ("Credit", "Crédit"),
+    "Dein Guthaben": ("Your credit", "Ton crédit"),
+    "Aufladen": ("Top up", "Recharger"),
+    "Betrag in Euro": ("Amount in euros", "Montant en euros"),
+    "Aufladen lässt du es bei der Werkstatt. Jeder Auftrag wird davon bezahlt, abgelehnte bekommst du zurück.":
+        ("You top it up at the workshop. Every request is paid from it; rejected ones are refunded.",
+         "Tu le fais recharger à l'atelier. Chaque demande en est payée ; les refusées sont remboursées."),
+    "Aufladung": ("Top-up", "Recharge"),
+    "Korrektur": ("Correction", "Correction"),
+    "Rückerstattung": ("Refund", "Remboursement"),
+    "bezahlt": ("paid", "payé"),
+    "offen": ("open", "en attente"),
+    "kostenlos": ("free", "gratuit"),
+    "€ offen": ("€ open", "€ en attente"),
+    "Preis festlegen": ("Set price", "Fixer le prix"),
+    "automatisch": ("automatic", "automatique"),
+    "Leer = automatisch aus Filamentkosten und Aufschlag. 0 = kostenlos.":
+        ("Empty = automatic from filament cost and surcharge. 0 = free.",
+         "Vide = automatique d'après le coût du filament et le supplément. 0 = gratuit."),
+    "Als bezahlt markieren": ("Mark as paid", "Marquer comme payé"),
+    "Haken zurücknehmen": ("Undo tick", "Annuler la coche"),
+    "Der Preis steht noch nicht fest. Die Werkstatt legt ihn fest.":
+        ("The price is not set yet. The workshop will set it.", "Le prix n'est pas encore fixé. L'atelier le fixera."),
+    "Bitte zahl den Betrag an die Werkstatt, bevor gedruckt wird. Sie setzt den Haken, sobald er angekommen ist.":
+        ("Please pay the amount to the workshop before printing. It ticks the box once the money has arrived.",
+         "Merci de payer le montant à l'atelier avant l'impression. Il coche la case dès que l'argent est arrivé."),
+    "Der Preis wird von deinem Guthaben abgebucht ({balance} da). Reicht es nicht, lass es bei der Werkstatt aufladen.":
+        ("The price is deducted from your credit ({balance} available). If it is not enough, have it topped up at the workshop.",
+         "Le prix est déduit de ton crédit ({balance} disponible). S'il ne suffit pas, fais-le recharger à l'atelier."),
+    "Wird automatisch abgebucht, sobald das Guthaben reicht ({balance} da).":
+        ("Charged automatically as soon as the credit is enough ({balance} available).",
+         "Débité automatiquement dès que le crédit suffit ({balance} disponible)."),
+    "Du zahlst vorab: Der Preis wird von deinem Guthaben abgebucht. Dein Guthaben: {balance}.":
+        ("You pay in advance: the price is deducted from your credit. Your credit: {balance}.",
+         "Tu paies d'avance : le prix est déduit de ton crédit. Ton crédit : {balance}."),
+    "Du zahlst vorab: Nach dem Einreichen siehst du den Preis. Gedruckt wird, sobald die Werkstatt die Zahlung bestätigt hat.":
+        ("You pay in advance: after submitting you will see the price. Printing starts once the workshop has confirmed the payment.",
+         "Tu paies d'avance : après l'envoi tu vois le prix. L'impression commence dès que l'atelier a confirmé le paiement."),
+    "Noch nicht bezahlt: Erst die Zahlung bestätigen, das Guthaben aufladen oder einen Preis festlegen.":
+        ("Not paid yet: first confirm the payment, top up the credit or set a price.",
+         "Pas encore payé : confirme d'abord le paiement, recharge le crédit ou fixe un prix."),
+    "Schon bezahlt: Der Preis lässt sich nicht mehr ändern.":
+        ("Already paid: the price can no longer be changed.", "Déjà payé : le prix ne peut plus être modifié."),
+    "Erst einen Preis festlegen.": ("Set a price first.", "Fixe d'abord un prix."),
+    "Das Guthaben kann nicht unter 0 fallen.": ("The credit cannot drop below 0.", "Le crédit ne peut pas passer sous 0."),
 }
 
 # Texte, die static/*.js braucht; base.html legt sie für die gewählte Sprache als JSON in die Seite

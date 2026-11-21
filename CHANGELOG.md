@@ -6,6 +6,19 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.4.0] – 2026-11-21
+
+### Neu
+- **Vorab zahlen (optional):** In Einstellungen → Werkstatt wählst du den Modus: aus, **Haken pro Auftrag** oder **Guthaben-Konto**. Eingeschaltet wird es pro Freund auf der Freunde-Seite. Der Preis ist Filamentkosten plus ein Aufschlag in Prozent (Startwert 30 %) für Strom, Verschleiß und Ausschuss; ohne Volumen oder Preis pro kg legst du ihn am Auftrag selbst fest.
+  - Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen.
+  - Beim Guthaben bucht die App beim Einreichen ab, sobald es reicht, und bucht abgelehnte Aufträge zurück. Freunde sehen Kontostand und Verlauf im Profil.
+  - Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
+- **Neue Ablauf-Leiste:** Sechsecke mit einem Filament-Faden, der von Schritt zu Schritt dicker wird. Die Schritte erscheinen nacheinander mit Animation.
+- **Animierte Icons:** Alle Icons bewegen sich beim Überfahren von Knöpfen, Links und Tabs. Mit „Bewegung reduzieren“ im System bleibt alles ruhig.
+
+### Sicherheit
+- Bei STEP-Dateien kommt das Volumen vom Browser des Freundes. Der Preis wird daraus nie berechnet, die Werkstatt legt ihn fest.
+
 ## [1.3.0] – 2026-11-17
 
 ### Neu
@@ -70,7 +83,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.0.0...v1.1.0

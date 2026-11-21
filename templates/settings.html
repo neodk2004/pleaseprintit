@@ -56,6 +56,21 @@
   </form>
 </section>
 
+<section class="card rise" id="vorab" style="--i:2">
+  <h3>{{ icon('coin') }} {{ _('Vorab zahlen') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s4)">{{ _('Optional: Freunde zahlen die Filament-Kosten vor dem Druck. Die App rechnet nur und merkt sich den Stand – das Geld läuft außerhalb (bar, PayPal …). Eingeschaltet wird es danach pro Freund auf der Freunde-Seite.') }}</p>
+  <form method="post" action="{{ url_for('save_pay') }}">
+    <div class="field">
+      <label><input type="radio" name="pay_mode" value=""{% if not pay_mode %} checked{% endif %}> {{ _('Aus') }}</label>
+      <label><input type="radio" name="pay_mode" value="order"{% if pay_mode == 'order' %} checked{% endif %}> {{ _('Pro Auftrag bezahlen') }} <small>{{ _('(Freund sieht den Preis, du setzt den Haken „bezahlt“)') }}</small></label>
+      <label><input type="radio" name="pay_mode" value="credit"{% if pay_mode == 'credit' %} checked{% endif %}> {{ _('Guthaben-Konto') }} <small>{{ _('(du lädst Guthaben auf, Aufträge werden davon bezahlt)') }}</small></label>
+    </div>
+    <label>{{ _('Aufschlag für Strom, Verschleiß und Ausschuss') }} <span class="unit"><input type="number" name="pay_markup" min="0" max="500" step="1" value="{{ pay_markup|int if pay_markup == pay_markup|int else pay_markup }}" inputmode="decimal"> %</span></label>
+    <p class="hint">{{ _('Richtwert 30 %. Preis = Filamentkosten × (1 + Aufschlag). Die Filamentkosten kommen aus dem Preis pro kg unter „Filamente“. Ohne Volumen oder Preis pro kg legst du den Preis am Auftrag selbst fest.') }}</p>
+    <button class="btn btn-primary" style="margin-top:var(--s3)">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
 <section class="card rise" id="trinkgeld" style="--i:2">
   <h3>{{ icon('heart') }} {{ _('Trinkgeld') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('Freiwillig: Dein Link zu PayPal.me, Ko-fi oder Ähnlichem. Freunde sehen dann einen Knopf im Profil und bei gedruckten Aufträgen. Die App verarbeitet kein Geld. Leer = kein Knopf.') }}</p>

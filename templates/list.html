@@ -46,7 +46,7 @@
   {% if g.admin %}<input type="checkbox" name="id" value="{{ e.id }}" form="bulk" aria-label="{{ _('Auftrag {nr} auswählen', nr='%04d'|format(e.id)) }}">{% endif %}
   <a class="order" data-s="{{ e.status }}" href="{{ url_for('entry', link_id=e.id) }}">
     {{ thumb(e) }}
-    <span style="min-width:0"><span class="order-head">{{ nr(e) }}{{ badge(e.status) }}{% if e.filament %}{{ filament_chip(e) }}{% endif %}</span>
+    <span style="min-width:0"><span class="order-head">{{ nr(e) }}{{ badge(e.status) }}{% set p = pays[e.id] %}{% if p and (p.needs or p.paid) %}<span class="chip">{{ icon('coin') }}{{ _('bezahlt') if p.paid else _('€ offen') }}</span>{% endif %}{% if e.filament %}{{ filament_chip(e) }}{% endif %}</span>
       <span class="order-title">{{ e.title }}</span>
       <span class="meta">
         {%- if g.admin %}<span>{{ icon('users') }}{{ e.user_name or _('ich') }}</span>{% endif %}

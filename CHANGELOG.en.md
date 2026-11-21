@@ -6,6 +6,19 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.4.0] – 2026-11-21
+
+### Added
+- **Pay in advance (optional):** under Settings → Workshop choose the mode: off, **tick per request** or **credit account**. It is switched on per friend on the Friends page. The price is filament cost plus a percentage surcharge (default 30 %) for power, wear and failed prints; without volume or price per kg you set it on the request yourself.
+  - Without payment a request cannot be set to “planned”.
+  - With credit the app deducts when a request is submitted as soon as the balance is enough, and refunds rejected requests. Friends see balance and history on their profile.
+  - The money changes hands outside the app (cash, PayPal); it only calculates and remembers the status.
+- **New progress bar:** hexagons with a filament thread that gets thicker from step to step. The steps appear one after another with an animation.
+- **Animated icons:** all icons move when you hover buttons, links and tabs. With “reduce motion” set in the system everything stays still.
+
+### Security
+- For STEP files the volume comes from the friend's browser. The price is never calculated from it; the workshop sets it.
+
 ## [1.3.0] – 2026-11-17
 
 ### Added
@@ -70,7 +83,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.0.0...v1.1.0

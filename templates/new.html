@@ -6,6 +6,9 @@
 <a class="back" href="{{ url_for('index') }}">{{ icon('back') }}{{ _('Alle Aufträge') if g.admin else _('Meine Aufträge') }}</a>
 <div class="pagehead rise"><div><p class="eyebrow">{{ _('Neuer Auftrag') }}</p><h1>{{ _('Was soll gedruckt werden?') }}</h1></div></div>
 
+{% if prepay %}<p class="hint rise" style="margin-bottom:var(--s4)">{{ icon('coin') }}
+  {% if prepay == 'credit' %}{{ _('Du zahlst vorab: Der Preis wird von deinem Guthaben abgebucht. Dein Guthaben: {balance}.', balance=money(balance)) }}
+  {% else %}{{ _('Du zahlst vorab: Nach dem Einreichen siehst du den Preis. Gedruckt wird, sobald die Werkstatt die Zahlung bestätigt hat.') }}{% endif %}</p>{% endif %}
 <form id="order" class="steps" method="post" enctype="multipart/form-data" action="{{ url_for('create_order') }}"
       data-bed="{{ bed|join(',') }}" data-admin="{{ 1 if g.admin else 0 }}">
   <section class="card rise" style="--i:1">

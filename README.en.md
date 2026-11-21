@@ -78,11 +78,12 @@ flowchart LR
 - 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate. STEP files from CAD programs are read and measured right in the browser, too.
 - 🖨️ **Open in slicer:** one click on a request opens the 3D file directly in OrcaSlicer, Bambu Studio or Creality Print on your computer. Pick which buttons appear in the settings.
 - 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
-- 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. No payment feature, just so nobody has to guess.
+- 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. Just so nobody has to guess.
 - ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
 - 📦 **Archive with search:** printed and rejected requests move to the archive after a configurable period or with a button (several at once). Find them again by title, file, friend or date range.
 - 📈 **Statistics:** requests, grams and material cost per month, popular filaments and colors, waiting time and rejection reasons for you. Every friend sees their own numbers on their profile.
-- 📊 **Clear status:** submitted → planned → printed, or rejected with a reason. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
+- 🪙 **Pay in advance (optional):** switch it on per friend when filament costs should be settled before printing. Two ways: a “paid” tick per request, or a credit account you top up that every request is paid from (rejected ones are refunded). The price is filament cost plus a percentage surcharge for power, wear and failed prints. Without payment a request cannot be set to “planned”. The money changes hands outside the app (cash, PayPal); it only calculates and remembers the status.
+- 📊 **Clear status:** submitted → planned → printed, or rejected with a reason, shown as a progress bar of hexagons with a filament thread that gets thicker from step to step. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
 - 💬 **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. Plus an internal note only you can see.
 - 📬 **E-mail on new requests:** you're notified as soon as someone submits something.
 - 📸 **Photo of the finished print:** your friend sees it on the request and gets it with the “Printed” e-mail. With **“Print again”** they can reorder the same thing in one click.
@@ -121,7 +122,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 
 <sub>As of November 2026, based on each project's README. Something wrong? Please open an issue.</sub>
 
-**What PleasePrintit deliberately leaves out:** single sign-on, an API, multiple printers, payments. That keeps it small: a handful of Python files you can read in an evening, started with one command.
+**What PleasePrintit deliberately leaves out:** single sign-on, an API, multiple printers, real payment processing (payment services, bank details). That keeps it small: a handful of Python files you can read in an evening, started with one command.
 
 - **Printing for friends and family** and want to know what it costs? → PleasePrintit.
 - **One printer in an office**, you want to discuss requests and already have SSO? → PrettyPleasePrint.

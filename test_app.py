@@ -579,4 +579,100 @@ for path, data, tab in (("/settings/bed", {"fill": "50"}, "drucker"), ("/setting
                         ("/settings/tip", {"tip_url": ""}, "werkstatt"), ("/settings/filaments", {"name": "ASA"}, "filamente"),
                         ("/settings/legal", {}, "rechtliches")):
     assert admin.post(path, data=data).headers["Location"].endswith(f"/settings?tab={tab}"), path
+# Vorab zahlen: Haken pro Auftrag (order) und Guthaben-Konto (credit), pro Freund einschaltbar
+admin.post(f"/settings/filaments/{pid}/price", data={"price_kg": "20", "density": "1.27"})
+admin.post("/users/invite")
+dora = client()
+assert dora.post(f"/invite/{token()}", data={"name": "dora", "password": "dorapasswort"}).status_code == 302
+
+
+def sql(q, *a):
+    with sqlite3.connect(A.DB) as c:
+        return c.execute(q, a).fetchall()
+
+
+did = sql("SELECT id FROM users WHERE name = 'dora'")[0][0]
+
+
+def pay_order(c, volume=100):
+    """Neuer Auftrag; 100 cm³ PETG = 63,5 g = 1,27 € Filament, mit 30 % Aufschlag 1,65 €."""
+    lid = int(c.post("/orders", data={"url": "http://127.0.0.1/pay", "choice": f"r:{pid}"}).headers["Location"].rsplit("/", 1)[1])
+    sql("UPDATE links SET volume = ? WHERE id = ?", volume, lid)
+    return lid
+
+
+def status(lid, s):
+    return admin.post(f"/entry/{lid}/status", data={"status": s}).status_code
+
+
+def paid(lid):
+    return sql("SELECT paid FROM links WHERE id = ?", lid)[0][0]
+
+
+def bal():
+    return round(sql("SELECT COALESCE(SUM(amount), 0) FROM ledger WHERE user_id = ?", did)[0][0], 2)
+
+
+o0 = pay_order(dora)
+assert status(o0, "geplant") == 302 and status(o0, "gedruckt") == 302, "Modus aus: nichts ändert sich"
+for path in ("/settings/pay", f"/users/{did}/prepay", f"/users/{did}/credit", f"/entry/{o0}/paid", f"/entry/{o0}/price"):
+    assert dora.post(path, data={"pay_mode": "order", "amount": "5", "price": "0"}).status_code == 403, path
+assert admin.post("/settings/pay", data={"pay_mode": "quatsch"}).status_code == 400
+
+# Modus „order“, nur Freunde mit Schalter
+assert admin.post("/settings/pay", data={"pay_mode": "order", "pay_markup": "30"}).status_code == 302
+oa = pay_order(dora)
+assert paid(oa) == 0 and status(oa, "geplant") == 302 and status(oa, "gedruckt") == 302, "Schalter aus: Freund zahlt nichts"
+admin.post(f"/users/{did}/prepay")
+assert "Vorab zahlen: an" in admin.get("/users").data.decode()
+o1 = pay_order(dora)
+assert "1,65 €" in dora.get(f"/entry/{o1}").data.decode() and "€ offen" in admin.get("/").data.decode()
+assert status(o1, "geplant") == 400 and sql("SELECT status FROM links WHERE id = ?", o1)[0][0] == "neu", "ohne Zahlung nicht geplant"
+assert admin.post(f"/entry/{o1}/paid", data={"paid": "1"}).status_code == 302 and paid(o1) == 1
+assert status(o1, "geplant") == 302
+assert admin.post(f"/entry/{o1}/price", data={"price": "9"}).status_code == 400, "bezahlt: Preis fest"
+o2 = pay_order(dora)
+admin.post(f"/entry/{o2}/price", data={"price": "0"})
+assert status(o2, "geplant") == 302, "Preis 0 = kostenlos"
+o3 = pay_order(dora, volume=None)   # kein Volumen, also kein Preis
+assert status(o3, "geplant") == 400 and admin.post(f"/entry/{o3}/paid", data={"paid": "1"}).status_code == 400
+admin.post(f"/entry/{o3}/price", data={"price": "2,50"})
+admin.post(f"/entry/{o3}/paid", data={"paid": "1"})
+assert status(o3, "geplant") == 302 and sql("SELECT price FROM links WHERE id = ?", o3)[0][0] == 2.5
+assert admin.post(f"/entry/{o1}/paid", data={"paid": "0"}).status_code == 302 and paid(o1) == 0
+
+# Modus „credit“
+admin.post("/settings/pay", data={"pay_mode": "credit", "pay_markup": "30"})
+assert admin.post(f"/entry/{o1}/paid", data={"paid": "1"}).status_code == 400, "Haken nur im Modus order"
+o4 = pay_order(dora)
+assert paid(o4) == 0 and status(o4, "geplant") == 400
+assert admin.post(f"/users/{did}/credit", data={"amount": "1"}).status_code == 302 and paid(o4) == 0 and bal() == 1.0
+assert admin.post(f"/users/{did}/credit", data={"amount": "abc"}).status_code == 400
+assert admin.post(f"/users/{did}/credit", data={"amount": "-5"}).status_code == 400, "nicht unter 0"
+admin.post(f"/users/{did}/credit", data={"amount": "5"})   # 6,00: o1 (älter) und o4 werden der Reihe nach bezahlt
+assert paid(o1) == 1 and paid(o4) == 1 and bal() == round(6 - 2 * 1.65, 2), bal()
+assert status(o4, "geplant") == 302
+page = dora.get("/me").data.decode()
+assert "Dein Guthaben" in page and "2,70 €" in page, "Profil zeigt Guthaben"
+assert status(o4, "abgelehnt") == 302 and paid(o4) == 0 and bal() == round(6 - 1.65, 2), "abgelehnt: Geld zurück"
+assert status(o4, "abgelehnt") == 302 and bal() == round(6 - 1.65, 2), "nicht doppelt erstatten"
+real_volume, A.volume_cm3 = A.volume_cm3, lambda *a: 100.0   # Datei mit Volumen: Preis steht schon beim Einreichen fest
+o5 = int(dora.post("/orders", data={"model": (io.BytesIO(STL), "p.stl"), "choice": f"r:{pid}"}).headers["Location"].rsplit("/", 1)[1])
+A.volume_cm3 = real_volume
+assert paid(o5) == 1 and bal() == round(6 - 2 * 1.65, 2), "wird beim Einreichen abgebucht"
+assert status(o4, "neu") == 302 and paid(o4) == 1 and bal() == round(6 - 3 * 1.65, 2), "wieder geöffnet: neu abgebucht"
+os_ = int(dora.post("/orders", data={"model": (io.BytesIO(STEP), "m.step"), "choice": f"r:{pid}"}).headers["Location"].rsplit("/", 1)[1])
+dora.post(f"/entry/{os_}/measure", data={"volume": "0.001"})   # Freund meldet ein winziges Volumen, um den Preis zu drücken
+assert paid(os_) == 0 and status(os_, "geplant") == 400, "STEP: Preis nie aus dem Browser-Volumen"
+admin.post("/settings/pay", data={"pay_mode": ""})
+assert status(o4, "geplant") == 302 and "Dein Guthaben" not in dora.get("/me").data.decode(), "Modus aus"
+# Ablauf-Leiste: zuletzt erreichter Schritt ist „cur“, erledigte zeigen ein Häkchen
+fid_ = int(admin.post("/orders", data={"url": "http://127.0.0.1/flow", "choice": f"r:{pid}"}).headers["Location"].rsplit("/", 1)[1])
+page = admin.get(f"/entry/{fid_}").data.decode()
+assert page.count('class="done cur"') == 1 and page.count('class="off"') == 2, "neu: Schritt 1 aktuell"
+admin.post(f"/entry/{fid_}/status", data={"status": "gedruckt"})
+page = admin.get(f"/entry/{fid_}").data.decode()
+assert " cur" not in page.split('class="flow')[1].split("</ol>")[0] and page.count('class="done"') >= 3, "gedruckt: alle erledigt"
+admin.post(f"/entry/{fid_}/status", data={"status": "abgelehnt"})
+assert 'class="stop"' in admin.get(f"/entry/{fid_}").data.decode()
 print("OK")
