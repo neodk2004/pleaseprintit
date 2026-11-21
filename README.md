@@ -164,7 +164,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 
 ✅ ja · 🟡 mit Einschränkung · ➖ nicht vorhanden (bzw. in der README nicht erwähnt)
 
-| | **🟧 PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
+| | <img src="static/logo.svg" alt="" height="22" align="absmiddle"> **PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
 |---|---|---|---|
 | **🎯 Gedacht für** | **Freundeskreis**, ein Drucker | kleines Büro, ein Drucker | Hobby bis Druckfarm |
 | **📥 Einreichen und vorbereiten** | | | |

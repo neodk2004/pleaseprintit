@@ -164,7 +164,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 
 ✅ yes · 🟡 with limits · ➖ not available (or not mentioned in the README)
 
-| | **🟧 PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
+| | <img src="static/logo.svg" alt="" height="22" align="absmiddle"> **PleasePrintit** | [PrettyPleasePrint](https://github.com/danileau/prettypleaseprint) | [STL Quest](https://github.com/richardsolomou/stl.quest) |
 |---|---|---|---|
 | **🎯 Built for** | **friends**, one printer | small office, one printer | hobby up to print farm |
 | **📥 Submit and prepare** | | | |
