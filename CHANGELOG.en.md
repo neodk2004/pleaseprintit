@@ -6,6 +6,16 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.5.0] – 2026-11-22
+
+### New
+- **Shipping:** After “Printed” there are two new steps, **On its way** and **Delivered**, with a status email to the friend. When you set “On its way” you can enter a **tracking number or tracking link**. It appears in the email and on the request, and a link becomes clickable. Pick-ups keep the existing steps only.
+- **Negotiate the price:** The workshop sends an offer, the friend accepts or makes a counteroffer, and the workshop accepts it or sends a new offer. Until the price is agreed, nothing is planned, printed or charged. Both sides get an email.
+- **Adjustable open-request limit:** In Settings → Workshop you set how many requests a friend may have open at once. The default is now **50** instead of 10.
+- **Status emails in the new design:** The progress bar in the emails now shows hexagons with the filament thread, like in the app, including the shipping steps.
+
+Thanks to @dexxfm for the ideas on shipping and price negotiation.
+
 ## [1.4.0] – 2026-11-21
 
 ### Added
@@ -83,7 +93,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...v1.2.0

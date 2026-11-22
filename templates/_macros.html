@@ -1,6 +1,6 @@
 {% macro icon(name, label=None, cls='') %}<svg class="icon i-{{ name }} {{ cls }}" {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true"{% endif %}><use href="#i-{{ name }}"/></svg>{% endmacro %}
 
-{% set STATUS_ICON = {'neu': 'inbox', 'geplant': 'calendar', 'gedruckt': 'check-c', 'abgelehnt': 'x-c'} %}
+{% set STATUS_ICON = {'neu': 'inbox', 'geplant': 'calendar', 'gedruckt': 'check-c', 'unterwegs': 'truck', 'zugestellt': 'package-check', 'abgelehnt': 'x-c'} %}
 {% macro badge(status) %}<span class="badge s-{{ status }}">{{ icon(STATUS_ICON[status]) }}{{ status_label(status) }}</span>{% endmacro %}
 
 {% macro nr(e) %}<span class="nr">#{{ '%04d'|format(e.id) }}</span>{% endmacro %}

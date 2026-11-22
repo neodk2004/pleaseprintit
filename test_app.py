@@ -99,7 +99,12 @@ assert ben.post("/orders", data={"url": "http://127.0.0.1/a"}).status_code == 30
 assert ben.post("/orders", data={"url": "http://127.0.0.1/b"}).status_code == 302
 assert ben.post("/orders", data={"url": "http://127.0.0.1/c"}).status_code == 400
 assert admin.post("/orders", data={"url": "http://127.0.0.1/d"}).status_code == 302  # Werkstatt ohne Limit
-A.MAX_OPEN = 10
+A.MAX_OPEN = 50
+assert A.MAX_OPEN == 50, "Standard-Limit 50"
+admin.post("/settings/bed", data={"max_open": "1"})   # einstellbar in Einstellungen → Werkstatt
+assert ben.post("/orders", data={"url": "http://127.0.0.1/e"}).status_code == 400, "Limit aus den Einstellungen"
+assert anna.post("/settings/bed", data={"max_open": "99"}).status_code == 403, "nur Werkstatt"
+admin.post("/settings/bed", data={"max_open": ""})   # leer = Standard
 
 # Speicherlimit
 A.MAX_STORAGE = len(STL) + 10
@@ -675,4 +680,45 @@ page = admin.get(f"/entry/{fid_}").data.decode()
 assert " cur" not in page.split('class="flow')[1].split("</ol>")[0] and page.count('class="done"') >= 3, "gedruckt: alle erledigt"
 admin.post(f"/entry/{fid_}/status", data={"status": "abgelehnt"})
 assert 'class="stop"' in admin.get(f"/entry/{fid_}").data.decode()
+# Versand (Issue #14): Unterwegs und Zugestellt hängen sich hinter „Gedruckt“, nur bei verschickten Aufträgen
+admin.post(f"/entry/{fid_}/status", data={"status": "gedruckt"})
+assert admin.get(f"/entry/{fid_}").data.decode().count("<li ") == 3, "Abholen: Leiste bleibt bei 3 Schritten"
+admin.post(f"/entry/{fid_}/status", data={"status": "unterwegs"})
+page = admin.get(f"/entry/{fid_}").data.decode()
+assert page.count("<li ") == 5 and page.count('class="done cur"') == 1, "unterwegs: 5 Schritte, Zustellung steht aus"
+admin.post(f"/entry/{fid_}/status", data={"status": "zugestellt"})
+assert admin.get(f"/entry/{fid_}").data.decode().count('class="done"') >= 4
+assert anna.post(f"/entry/{fid_}/status", data={"status": "zugestellt"}).status_code in (403, 404), "nur die Werkstatt"
+# Preis aushandeln (Issue #13): Angebot → Gegenvorschlag → Annahme; vorher wird nicht gedruckt
+dn = int(dora.post("/orders", data={"url": "http://127.0.0.1/deal", "choice": f"r:{pid}"}).headers["Location"].rsplit("/", 1)[1])
+assert dora.post(f"/entry/{dn}/price", data={"price": "5", "offer": "1"}).status_code == 403, "Angebot nur von der Werkstatt"
+assert admin.post(f"/entry/{dn}/price", data={"price": "", "offer": "1"}).status_code == 400, "Angebot braucht Preis"
+admin.post(f"/entry/{dn}/price", data={"price": "40", "offer": "1"})
+assert "Angebot der Werkstatt" in dora.get(f"/entry/{dn}").data.decode() and "40,00" in dora.get(f"/entry/{dn}").data.decode()
+assert status(dn, "geplant") == 400, "offenes Angebot: nicht drucken"
+assert admin.post(f"/entry/{dn}/deal", data={"act": "accept"}).status_code == 400, "Werkstatt kann ihr eigenes Angebot nicht annehmen"
+assert dora.post(f"/entry/{dn}/deal", data={"act": "counter", "price": "30"}).status_code == 302
+assert "Gegenvorschlag: 30,00" in admin.get(f"/entry/{dn}").data.decode() and status(dn, "geplant") == 400
+assert dora.post(f"/entry/{dn}/deal", data={"act": "accept"}).status_code == 400, "Freund kann seinen Gegenvorschlag nicht annehmen"
+assert admin.post(f"/entry/{dn}/deal", data={"act": "accept"}).status_code == 302
+assert sql("SELECT deal, price FROM links WHERE id = ?", dn)[0] == ("agreed", 30.0)
+assert status(dn, "geplant") == 302, "abgemacht: es darf gedruckt werden"
+assert anna.post(f"/entry/{dn}/deal", data={"act": "accept"}).status_code == 404, "fremde Aufträge unsichtbar"
+# Sendungsnummer: wird beim Setzen auf „Unterwegs“ gespeichert und steht in Mail und Auftrag; Freunde können sie nicht setzen
+ben.post("/me", data={"email": "ben@example.org"})
+os.environ["SMTP_HOST"] = "smtp.example.org"
+n_sent = len(sent)
+assert ben.post(f"/entry/{w_id}/status", data={"status": "unterwegs", "tracking": "x"}).status_code == 403
+admin.post(f"/entry/{w_id}/status", data={"status": "unterwegs", "tracking": " JJD0001 <b> "})
+m = sent[-1]
+assert len(sent) == n_sent + 1 and "Unterwegs" in m["Subject"]
+assert "JJD0001 &lt;b&gt;" in m.get_body(("html",)).get_content() and "JJD0001 <b>" in m.get_body(("plain",)).get_content()
+assert "JJD0001 &lt;b&gt;" in ben.get(f"/entry/{w_id}").data.decode(), "Freund sieht die Nummer, HTML maskiert"
+admin.post(f"/entry/{w_id}/status", data={"status": "zugestellt"})   # ohne Feld: Nummer bleibt
+assert sql("SELECT tracking FROM links WHERE id = ?", w_id)[0][0] == "JJD0001 <b>"
+admin.post(f"/entry/{w_id}/status", data={"status": "unterwegs", "tracking": "https://track.example/1"})
+assert 'href="https://track.example/1"' in ben.get(f"/entry/{w_id}").data.decode(), "Link wird klickbar"
+admin.post(f"/entry/{w_id}/status", data={"status": "unterwegs", "tracking": "javascript:alert(1)"})
+assert "href=\"javascript" not in ben.get(f"/entry/{w_id}").data.decode(), "nur http(s) wird zum Link"
+del os.environ["SMTP_HOST"]
 print("OK")

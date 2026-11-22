@@ -46,6 +46,16 @@
   </form>
 </section>
 
+<section class="card rise" style="--i:1">
+  <h3>{{ icon('layers') }} {{ _('Limit offener Aufträge') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('So viele Aufträge darf ein Freund gleichzeitig offen haben (neu oder geplant). Die Werkstatt hat kein Limit.') }}</p>
+  <form class="row" method="post" action="{{ url_for('save_bed') }}">
+    <label style="max-width:14rem">{{ _('Offene Aufträge pro Freund') }} <input type="number" name="max_open" min="1" max="1000" step="1"
+      value="{{ max_open }}" inputmode="numeric"></label>
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
 <section class="card rise" id="benachrichtigung" style="--i:2">
   <h3>{{ icon('mail') }} {{ _('Benachrichtigung') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('Deine Adresse für eine Mail, sobald ein Freund einen Druckwunsch einreicht oder eine Rückfrage schreibt. Leer = keine Mails.') }}{% if not mail_on %} {{ _('Dafür muss der Mailversand in der .env eingerichtet sein.') }}{% endif %}</p>

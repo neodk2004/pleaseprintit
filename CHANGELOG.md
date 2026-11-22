@@ -6,6 +6,16 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.5.0] – 2026-11-22
+
+### Neu
+- **Versand:** Nach „Gedruckt“ gibt es die Schritte **Unterwegs** und **Zugestellt**, mit Status-Mail an den Freund. Beim Setzen auf „Unterwegs“ trägst du eine **Sendungsnummer oder einen Verfolgungs-Link** ein. Sie steht in der Mail und im Auftrag, ein Link wird klickbar. Wer abholt, sieht weiter nur die bisherigen Schritte.
+- **Preis aushandeln:** Die Werkstatt schickt ein Angebot, der Freund nimmt an oder macht einen Gegenvorschlag, die Werkstatt nimmt ihn an oder schickt ein neues Angebot. Bis der Preis abgemacht ist, wird nicht geplant, gedruckt oder abgebucht. Beide Seiten bekommen eine Mail.
+- **Limit offener Aufträge einstellbar:** In Einstellungen → Werkstatt legst du fest, wie viele Aufträge ein Freund gleichzeitig offen haben darf. Der Standard ist jetzt **50** statt 10.
+- **Status-Mails im neuen Design:** Die Ablauf-Leiste in den Mails zeigt Sechsecke mit dem Filament-Faden wie in der App, auch mit den Versand-Schritten.
+
+Danke an @dexxfm für die Ideen zu Versand und Preisabsprache.
+
 ## [1.4.0] – 2026-11-21
 
 ### Neu
@@ -83,7 +93,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.1.0...v1.2.0

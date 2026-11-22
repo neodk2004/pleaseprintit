@@ -83,12 +83,12 @@ flowchart LR
 <td align="center" width="33%">🖨️<br><b>In Slicer öffnen</b><br><sub>Orca, Bambu Studio, Creality</sub></td>
 </tr>
 <tr>
-<td align="center" width="33%">📊<br><b>Klarer Status</b><br><sub>Ablauf-Leiste, Platz in der Warteschlange</sub></td>
+<td align="center" width="33%">📊<br><b>Klarer Status &amp; Versand</b><br><sub>Ablauf-Leiste, Sendungsnummer</sub></td>
 <td align="center" width="33%">💬<br><b>Rückfragen</b><br><sub>Direkt am Auftrag, mit Mail</sub></td>
 <td align="center" width="33%">📸<br><b>Foto + Nochmal drucken</b><br><sub>Bild vom fertigen Druck</sub></td>
 </tr>
 <tr>
-<td align="center" width="33%">🪙<br><b>Vorab zahlen</b><br><sub>Haken oder Guthaben, optional</sub></td>
+<td align="center" width="33%">🪙<br><b>Vorab zahlen &amp; Preis aushandeln</b><br><sub>Haken, Guthaben oder Angebot</sub></td>
 <td align="center" width="33%">📦<br><b>Archiv &amp; Statistik</b><br><sub>Suche, Gramm, Kosten pro Monat</sub></td>
 <td align="center" width="33%">🌍<br><b>DE · EN · FR</b><br><sub>App und Status-Mails</sub></td>
 </tr>
@@ -128,7 +128,8 @@ flowchart LR
 <details>
 <summary><b>📣 Status und Kontakt</b></summary>
 
-- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt, oder Abgelehnt mit Grund, als Ablauf-Leiste mit Sechsecken und einem Filament-Faden, der von Schritt zu Schritt dicker wird. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
+- 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt (bei Versand weiter Unterwegs → Zugestellt, mit Sendungsnummer), oder Abgelehnt mit Grund, als Ablauf-Leiste mit Sechsecken und einem Filament-Faden, der von Schritt zu Schritt dicker wird. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
+- 📦 **Versand mit Sendungsnummer:** Nach „Gedruckt“ folgen **Unterwegs** und **Zugestellt**. Beim Setzen auf „Unterwegs“ trägst du eine Sendungsnummer oder einen Verfolgungs-Link ein, der Freund bekommt ihn in der Mail und sieht ihn im Auftrag und kann die Lieferung selbst verfolgen. Wer abholt, sieht die Schritte nicht.
 - 💬 **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die andere Seite bekommt eine Mail. Dazu eine interne Notiz, die nur du siehst.
 - 📬 **Mail bei neuem Wunsch:** Du bekommst Bescheid, sobald jemand etwas einreicht.
 - 📸 **Foto vom fertigen Druck:** Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“. Mit **„Nochmal drucken“** bestellt er dasselbe mit einem Klick erneut.
@@ -140,6 +141,7 @@ flowchart LR
 
 - 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Nur damit niemand raten muss.
 - ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
+- 🤝 **Preis aushandeln:** Du schickst ein Angebot, der Freund nimmt an oder macht einen Gegenvorschlag, du nimmst an oder bietest neu. Bis der Preis abgemacht ist, wird nicht gedruckt oder abgebucht. Praktisch bei großen Bestellungen.
 - 🪙 **Vorab zahlen (optional):** Du schaltest es pro Freund ein, wenn Filament-Kosten vor dem Druck beglichen werden sollen. Zwei Wege: ein Haken „bezahlt“ pro Auftrag oder ein Guthaben-Konto, das du aufladest und von dem jeder Auftrag bezahlt wird (abgelehnte werden zurückgebucht). Der Preis ist Filamentkosten plus Aufschlag in Prozent für Strom, Verschleiß und Ausschuss. Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen. Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
 
 </details>
@@ -148,7 +150,7 @@ flowchart LR
 <summary><b>🔒 Betrieb und Sicherheit</b></summary>
 
 - 🎟️ **Nur auf Einladung:** Einladungslinks gelten 7 Tage und nur einmal. Konten lassen sich sperren, „Passwort vergessen“ läuft per Mail.
-- ⚖️ **Faire Grenzen:** höchstens 10 offene Aufträge und 500 MB 3D-Dateien pro Person.
+- ⚖️ **Faire Grenzen:** standardmäßig höchstens 50 offene Aufträge (einstellbar) und 500 MB 3D-Dateien pro Person.
 - 🌍 **Deutsch, Englisch, Französisch:** Jeder wählt seine Sprache unten auf der Seite oder im Profil. Sie gilt für die ganze App und für die Status-Mails, die immer in der Sprache des Empfängers rausgehen.
 - 📱 **Handy-tauglich:** als App auf dem Startbildschirm installierbar (PWA), mit hellem und dunklem Design.
 - 📄 **Impressum und Datenschutz** direkt in der App, für Adress-Sammler unlesbar.

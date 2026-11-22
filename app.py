@@ -37,8 +37,10 @@ MODELS = os.path.join(os.path.dirname(DB), "models")
 os.makedirs(IMAGES, exist_ok=True)
 os.makedirs(MODELS, exist_ok=True)
 
-STATUSES = ("neu", "geplant", "gedruckt", "abgelehnt")
-MAX_OPEN = 10                      # offene Aufträge (neu/geplant) pro Freund
+STATUSES = ("neu", "geplant", "gedruckt", "unterwegs", "zugestellt", "abgelehnt")
+DEAL_OPEN = ("offer", "counter")   # Preis noch nicht abgemacht: nicht abbuchen, nicht drucken
+PRINTED = ("gedruckt", "unterwegs", "zugestellt")   # fertig gedruckt, ob abgeholt oder verschickt
+MAX_OPEN = 50                      # Standard: offene Aufträge (neu/geplant) pro Freund, einstellbar in Einstellungen → Werkstatt
 MAX_STORAGE = 500 * 1024 * 1024    # Speicher für 3D-Dateien pro Freund
 INVITE_DAYS = 7
 INVITE_LEN = 5
@@ -91,9 +93,11 @@ def db():
                      ("size", "INTEGER NOT NULL DEFAULT 0"), ("filament", "TEXT"), ("color", "TEXT"),
                      ("color_hex", "TEXT"), ("dims", "TEXT"), ("reason", "TEXT"), ("volume", "REAL"),
                      ("qty", "INTEGER NOT NULL DEFAULT 1"), ("successor", "INTEGER"), ("archived", "TEXT"),
-                     ("note", "TEXT"), ("photo", "TEXT"), ("price", "REAL"), ("paid", "INTEGER NOT NULL DEFAULT 0")):
+                     ("note", "TEXT"), ("photo", "TEXT"), ("price", "REAL"), ("paid", "INTEGER NOT NULL DEFAULT 0"), ("deal", "TEXT"), ("tracking", "TEXT")):
         # note: interne Notiz; photo: Bild vom fertigen Druck; price: festgehaltener Preis in €, NULL = wird berechnet
         # paid: 1 = bezahlt (Haken der Werkstatt oder vom Guthaben abgebucht)
+        # tracking: Sendungsnummer oder Verfolgungs-Link, wird mit der Mail „Unterwegs“ verschickt
+        # deal: Preis aushandeln – 'offer' = Angebot der Werkstatt, 'counter' = Gegenvorschlag des Freundes, 'agreed' = angenommen
         if col not in cols:
             con.execute(f"ALTER TABLE links ADD COLUMN {col} {typ}")
     return con
@@ -115,7 +119,7 @@ def auto_archive(con):
     """Erledigte Aufträge (gedruckt/abgelehnt) wandern nach der Frist ins Archiv; 0 Tage = nur per Knopf.
     ponytail: läuft beim Aufruf der Warteschlange statt per Zeitplan, für einen Freundeskreis schnell genug."""
     if days := int(setting(con, "archive_days", ARCHIVE_DAYS)):
-        con.execute(f"UPDATE links SET archived = ? WHERE archived IS NULL AND status IN ('gedruckt', 'abgelehnt') "
+        con.execute(f"UPDATE links SET archived = ? WHERE archived IS NULL AND status IN ('gedruckt', 'zugestellt', 'abgelehnt') "
                     f"AND (SELECT MAX({iso('at')}) FROM status_log WHERE link_id = links.id) "
                     "<= date('now', 'localtime', ?)", (now(con), f"-{days} days"))
 
@@ -145,8 +149,12 @@ def flow(con, e):
         if "geplant" in at:
             steps.append((_("Geplant"), at["geplant"], "done"))
         return steps + [(_("Abgelehnt"), at.get("abgelehnt"), "stop")]
-    steps.append((_("Geplant"), at.get("geplant"), "done" if s in ("geplant", "gedruckt") else "off"))
-    return steps + [(_("Gedruckt"), at.get("gedruckt"), "done" if s == "gedruckt" else "off")]
+    steps.append((_("Geplant"), at.get("geplant"), "done" if s in ("geplant",) + PRINTED else "off"))
+    steps.append((_("Gedruckt"), at.get("gedruckt"), "done" if s in PRINTED else "off"))
+    if s in ("unterwegs", "zugestellt"):   # Versand-Schritte nur, wenn der Auftrag verschickt wird (Abholen bleibt wie bisher)
+        steps.append((_("Unterwegs"), at.get("unterwegs"), "done"))
+        steps.append((_("Zugestellt"), at.get("zugestellt"), "done" if s == "zugestellt" else "off"))
+    return steps
 
 
 def get_entry(con, link_id):
@@ -217,7 +225,7 @@ def estimate(con, e):
 def printed(con, user_id):
     """(Stück, Gramm, Euro oder None) aller gedruckten Aufträge einer Person – für „Für dich gedruckt“."""
     n, grams, eur = 0, 0.0, None
-    for e in con.execute("SELECT * FROM links WHERE user_id = ? AND status = 'gedruckt'", (user_id,)).fetchall():
+    for e in con.execute("SELECT * FROM links WHERE user_id = ? AND status IN ('gedruckt', 'unterwegs', 'zugestellt')", (user_id,)).fetchall():
         n += e["qty"] or 1
         if c := estimate(con, e):
             grams += c[0]
@@ -270,7 +278,7 @@ def needs_pay(con, e):
 def settle(con, link_id):
     """Guthaben-Modus: den Preis vom Konto abbuchen, sobald das Guthaben reicht."""
     e = con.execute("SELECT * FROM links WHERE id = ?", (link_id,)).fetchone()
-    if pay_mode(con) != "credit" or e["status"] not in ("neu", "geplant") or not needs_pay(con, e):
+    if pay_mode(con) != "credit" or e["status"] not in ("neu", "geplant") or e["deal"] in DEAL_OPEN or not needs_pay(con, e):
         return
     p = price_of(con, e)
     if p is not None and balance(con, e["user_id"]) >= p:
@@ -342,9 +350,9 @@ def stats(con, user_id=None, months=12):
                 col[(e["filament"], e["color"], e["color_hex"])] += 1
         if e["status"] == "abgelehnt":
             reasons[e["reason"] or ""] += 1
-        if e["status"] != "gedruckt":
+        if e["status"] not in PRINTED:
             continue
-        done, c = parse_at(at.get("gedruckt")), estimate(con, e)
+        done, c = parse_at(at.get("gedruckt") or at.get(e["status"])), estimate(con, e)
         total["pieces"] += e["qty"] or 1
         if c:
             total["g"] += c[0]
@@ -433,8 +441,9 @@ def limit_error(con, new_bytes=0):
     open_count, used = con.execute(
         "SELECT SUM(status IN ('neu', 'geplant')), COALESCE(SUM(size), 0) FROM links WHERE user_id = ?",
         (uid,)).fetchone()
-    if (open_count or 0) >= MAX_OPEN:
-        return _("Du hast schon {n} offene Aufträge. Warte, bis welche gedruckt sind.", n=MAX_OPEN)
+    limit = int(setting(con, "max_open", MAX_OPEN)) or MAX_OPEN   # 0/leer = Standard
+    if (open_count or 0) >= limit:
+        return _("Du hast schon {n} offene Aufträge. Warte, bis welche gedruckt sind.", n=limit)
     if used + new_bytes > MAX_STORAGE:
         return _("Dein Speicherplatz ({mb} MB) ist voll.", mb=MAX_STORAGE // 1024 // 1024)
     return None
@@ -830,7 +839,7 @@ def entry(link_id):
             con.execute("UPDATE links SET volume = ? WHERE id = ?", (v, link_id))
             e = get_entry(con, link_id)
         owner = con.execute("SELECT name FROM users WHERE id = ?", (e["user_id"],)).fetchone()
-        return render_template("detail.html", e=e, place=queue_place(con, e), can_repeat=owns(e) and e["status"] == "gedruckt", owner=owner["name"] if owner else _("ich"), bed=bed(con),
+        return render_template("detail.html", e=e, place=queue_place(con, e), can_repeat=owns(e) and e["status"] in PRINTED, owner=owner["name"] if owner else _("ich"), bed=bed(con),
                                cost=estimate(con, e), flow=flow(con, e), options=filament_options(con), pay=pay_info(con, e),
                                can_resubmit=can_resubmit(e), tip=text_setting(con, "tip_url"),
                                slicers=slicer_links(con, e) if g.admin else [],
@@ -884,7 +893,7 @@ def repeat(link_id):
     """Gedruckten Auftrag noch einmal bestellen: neuer Auftrag mit Kopie von Datei und Bild."""
     with db() as con:
         old = get_entry(con, link_id)
-        if not (owns(old) and old["status"] == "gedruckt"):
+        if not (owns(old) and old["status"] in PRINTED):
             abort(400)
         if err := limit_error(con, old["size"] if old["file"] else 0):
             abort(400, err)
@@ -934,12 +943,16 @@ def set_status(link_id):
             reason = (request.form.get("free") or reason).strip()[:300]
     with db() as con:
         old = get_entry(con, link_id)
+        if old["deal"] in DEAL_OPEN and status in ("geplant",) + PRINTED:
+            abort(400, _("Der Preis ist noch nicht abgemacht."))
         con.execute("UPDATE links SET status = ?, reason = ? WHERE id = ?", (status, reason or None, link_id))
+        if status in ("unterwegs", "zugestellt") and "tracking" in request.form:   # vor der Mail speichern
+            con.execute("UPDATE links SET tracking = ? WHERE id = ?", (request.form["tracking"].strip()[:200] or None, link_id))
         if status == "abgelehnt":
             refund(con, link_id)
         else:
             settle(con, link_id)
-            if status in ("geplant", "gedruckt") and needs_pay(con, get_entry(con, link_id)):   # abort macht alles rückgängig
+            if status in ("geplant",) + PRINTED and needs_pay(con, get_entry(con, link_id)):   # abort macht alles rückgängig
                 abort(400, _("Noch nicht bezahlt: Erst die Zahlung bestätigen, das Guthaben aufladen oder einen Preis festlegen."))
         if old["status"] != status:
             con.execute("UPDATE links SET archived = NULL WHERE id = ?", (link_id,))   # Frist beginnt neu
@@ -1216,8 +1229,49 @@ def set_price(link_id):
     with db() as con:
         if get_entry(con, link_id)["paid"]:
             abort(400, _("Schon bezahlt: Der Preis lässt sich nicht mehr ändern."))
-        con.execute("UPDATE links SET price = ? WHERE id = ?", (price, link_id))
-        settle(con, link_id)
+        offer = request.form.get("offer") == "1"
+        if offer and price is None:
+            abort(400, _("Für ein Angebot brauchst du einen Preis."))
+        con.execute("UPDATE links SET price = ?, deal = ? WHERE id = ?", (price, "offer" if offer else None, link_id))
+        if offer:   # Freund bekommt das Angebot per Mail, antwortet im Auftrag
+            e = get_entry(con, link_id)
+            if mail.configured() and e["user_id"] and (u := friend_address(con, e)):
+                mail.send(info_mail(e, u["email"], u["lang"],
+                                    lambda: _("Angebot der Werkstatt: {price}", price=money(price)), friend=True))
+        else:
+            settle(con, link_id)
+    return redirect(url_for("entry", link_id=link_id))
+
+
+@app.post("/entry/<int:link_id>/deal")
+def answer_deal(link_id):
+    """Preis aushandeln: Der Freund nimmt das Angebot an oder macht einen Gegenvorschlag, die Werkstatt nimmt ihn an
+    (oder schickt ein neues Angebot über /price). Erst wenn beide einverstanden sind, wird gedruckt und abgebucht."""
+    act = request.form.get("act")
+    with db() as con:
+        e = get_entry(con, link_id)
+        if e["paid"] or e["status"] in PRINTED + ("abgelehnt",) or e["deal"] != ("counter" if g.admin else "offer"):
+            abort(400)
+        if act == "accept":
+            con.execute("UPDATE links SET deal = 'agreed' WHERE id = ?", (link_id,))
+            settle(con, link_id)
+            headline = lambda: _("Preis abgemacht: {price}", price=money(e["price"]))
+        elif act == "counter" and not g.admin:
+            try:
+                price = round(min(max(float(request.form.get("price", "").strip().replace(",", ".")), 0), 10_000), 2)
+            except ValueError:
+                abort(400)
+            con.execute("UPDATE links SET price = ?, deal = 'counter' WHERE id = ?", (price, link_id))
+            con.execute("INSERT INTO comments (link_id, user_id, text, at) VALUES (?, ?, ?, ?)",
+                        (link_id, g.user["id"], f"{_('Gegenvorschlag')}: {money(price)}", now(con)))
+            headline = lambda: _("Gegenvorschlag: {price}", price=money(price))
+        else:
+            abort(400)
+        e = get_entry(con, link_id)
+        if not g.admin:
+            notify_workshop(con, e, headline)
+        elif mail.configured() and e["user_id"] and (u := friend_address(con, e)):
+            mail.send(info_mail(e, u["email"], u["lang"], headline, friend=True))
     return redirect(url_for("entry", link_id=link_id))
 
 
@@ -1232,6 +1286,8 @@ def set_paid(link_id):
             p = price_of(con, e)
             if p is None:
                 abort(400, _("Erst einen Preis festlegen."))
+            if e["deal"] in DEAL_OPEN:
+                abort(400, _("Der Preis ist noch nicht abgemacht."))
             con.execute("UPDATE links SET paid = 1, price = ? WHERE id = ?", (p, link_id))
         else:
             con.execute("UPDATE links SET paid = 0 WHERE id = ?", (link_id,))
@@ -1414,6 +1470,7 @@ def settings():
                                types=[t for t in FILAMENT_TYPES if t.lower() not in have],
                                fill=setting(con, "fill", FILL), imp=impressum_data(con), imp_fields=IMPRESSUM,
                                archive_days=int(setting(con, "archive_days", ARCHIVE_DAYS)),
+                               max_open=int(setting(con, "max_open", MAX_OPEN)) or MAX_OPEN,
                                tip=text_setting(con, "tip_url"), notify_email=text_setting(con, "notify_email"),
                                notify_mute=text_setting(con, "notify_mute"), pay_mode=pay_mode(con),
                                pay_markup=setting(con, "pay_markup", MARKUP),
@@ -1506,17 +1563,17 @@ def save_tip():
 @app.post("/settings/bed")
 def save_bed():
     with db() as con:
-        for k in ("bed_x", "bed_y", "bed_z", "fill", "archive_days"):
+        for k in ("bed_x", "bed_y", "bed_z", "fill", "archive_days", "max_open"):
             if k not in request.form:
                 continue
             v = request.form[k].strip().replace(",", ".")
-            top = {"fill": 100.0, "archive_days": 3650.0}.get(k, 10_000.0)
+            top = {"fill": 100.0, "archive_days": 3650.0, "max_open": 1000.0}.get(k, 10_000.0)
             try:
                 v = str(max(0.0, min(float(v), top))) if v else ""
             except ValueError:
                 abort(400)
             put_setting(con, k, v)
-    return redirect(url_for("settings", tab="werkstatt" if "archive_days" in request.form else "drucker"))
+    return redirect(url_for("settings", tab="werkstatt" if "archive_days" in request.form or "max_open" in request.form else "drucker"))
 
 
 @app.post("/settings/filaments")

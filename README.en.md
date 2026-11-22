@@ -83,12 +83,12 @@ flowchart LR
 <td align="center" width="33%">🖨️<br><b>Open in slicer</b><br><sub>Orca, Bambu Studio, Creality</sub></td>
 </tr>
 <tr>
-<td align="center" width="33%">📊<br><b>Clear status</b><br><sub>Progress bar, queue position</sub></td>
+<td align="center" width="33%">📊<br><b>Clear status &amp; shipping</b><br><sub>Progress bar, tracking number</sub></td>
 <td align="center" width="33%">💬<br><b>Questions</b><br><sub>Right on the request, with e-mail</sub></td>
 <td align="center" width="33%">📸<br><b>Photo + Print again</b><br><sub>Picture of the finished print</sub></td>
 </tr>
 <tr>
-<td align="center" width="33%">🪙<br><b>Pay in advance</b><br><sub>Tick or credit, optional</sub></td>
+<td align="center" width="33%">🪙<br><b>Pay in advance &amp; negotiate price</b><br><sub>Tick, credit or offer</sub></td>
 <td align="center" width="33%">📦<br><b>Archive &amp; statistics</b><br><sub>Search, grams, cost per month</sub></td>
 <td align="center" width="33%">🌍<br><b>DE · EN · FR</b><br><sub>App and status e-mails</sub></td>
 </tr>
@@ -128,7 +128,7 @@ flowchart LR
 <details>
 <summary><b>📣 Status and contact</b></summary>
 
-- 📊 **Clear status:** submitted → planned → printed, or rejected with a reason, shown as a progress bar of hexagons with a filament thread that gets thicker from step to step. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
+- 📊 **Clear status:** submitted → planned → printed (for shipped requests continuing with on its way → delivered, with a tracking number), or rejected with a reason, shown as a progress bar of hexagons with a filament thread that gets thicker from step to step. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
 - 💬 **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. Plus an internal note only you can see.
 - 📬 **E-mail on new requests:** you're notified as soon as someone submits something.
 - 📸 **Photo of the finished print:** your friend sees it on the request and gets it with the “Printed” e-mail. With **“Print again”** they can reorder the same thing in one click.
@@ -140,6 +140,7 @@ flowchart LR
 
 - 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. Just so nobody has to guess.
 - ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
+- 🤝 **Negotiate the price:** You send an offer, the friend accepts or makes a counteroffer, and you accept or offer again. Nothing is printed or charged until the price is agreed. Handy for big orders.
 - 🪙 **Pay in advance (optional):** switch it on per friend when filament costs should be settled before printing. Two ways: a “paid” tick per request, or a credit account you top up that every request is paid from (rejected ones are refunded). The price is filament cost plus a percentage surcharge for power, wear and failed prints. Without payment a request cannot be set to “planned”. The money changes hands outside the app (cash, PayPal); it only calculates and remembers the status.
 
 </details>
@@ -148,7 +149,7 @@ flowchart LR
 <summary><b>🔒 Operation and security</b></summary>
 
 - 🎟️ **Invite only:** invite links are valid for 7 days and can be used once. Accounts can be disabled, “forgot password” works via e-mail.
-- ⚖️ **Fair limits:** at most 10 open requests and 500 MB of 3D files per person.
+- ⚖️ **Fair limits:** by default at most 50 open requests (adjustable) and 500 MB of 3D files per person.
 - 🌍 **German, English, French:** everyone picks their language at the bottom of the page or in their profile. It applies to the whole app and to status emails, which are always sent in the recipient’s language.
 - 📱 **Mobile friendly:** installable on the home screen (PWA), with light and dark theme.
 - 📄 **Legal notice and privacy page** (German *Impressum* / *Datenschutz*) built in, unreadable for address scrapers.

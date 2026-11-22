@@ -3,7 +3,8 @@ PleasePrintit – {{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}
 {{ e.title }}
 {{ _('Status') }}: {{ status_label(e.status) }}
 {{ _('Stückzahl') }}: {{ e.qty or 1 }}
-{% if e.status == 'abgelehnt' and e.reason %}
+{% if e.tracking and e.status in ('unterwegs', 'zugestellt') %}{{ _('Sendungsverfolgung') }}: {{ e.tracking }}
+{% endif %}{% if e.status == 'abgelehnt' and e.reason %}
 {{ _('Warum?') }} {{ reason_text(e.reason) }}
 {% endif %}
 {{ _('Ablauf') }}: {% for name, at, state in flow %}{{ name }}{{ ' ✓' if state == 'done' else (' ✕' if state == 'stop' else ' –') }}{{ ' → ' if not loop.last }}{% endfor %}

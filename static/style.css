@@ -18,6 +18,7 @@
   --geplant:#8a5a00; --geplant-bg:#fbefc9;
   --gedruckt:#127a3a; --gedruckt-bg:#daf3e3;
   --abgelehnt:#b42323; --abgelehnt-bg:#fde3e3;
+  --unterwegs:#6d28d9; --unterwegs-bg:#ece4ff; --zugestellt:#0f766e; --zugestellt-bg:#d5f2ee;
   --focus:#2563eb;
   /* Schrift */
   --font-display:"Bahnschrift","DIN Alternate","DIN Next","Barlow","Segoe UI Variable Display",system-ui,sans-serif;
@@ -40,6 +41,7 @@
   --grid:rgba(255,255,255,.03); --layer:rgba(255,255,255,.05);
   --neu:#9dbcff; --neu-bg:#1a2742; --geplant:#f3c75a; --geplant-bg:#352a0f;
   --gedruckt:#7fe0a6; --gedruckt-bg:#12301f; --abgelehnt:#ff9e9e; --abgelehnt-bg:#3a1616;
+  --unterwegs:#c9b3ff; --unterwegs-bg:#2a1f45; --zugestellt:#6ee7d8; --zugestellt-bg:#0f302d;
   --focus:#7aa7ff;
   --shadow:0 1px 0 rgba(0,0,0,.3),0 2px 8px -2px rgba(0,0,0,.4);
   --shadow-lift:0 1px 0 rgba(0,0,0,.3),0 14px 30px -10px rgba(0,0,0,.6);
@@ -52,6 +54,7 @@
   --grid:rgba(255,255,255,.03); --layer:rgba(255,255,255,.05);
   --neu:#9dbcff; --neu-bg:#1a2742; --geplant:#f3c75a; --geplant-bg:#352a0f;
   --gedruckt:#7fe0a6; --gedruckt-bg:#12301f; --abgelehnt:#ff9e9e; --abgelehnt-bg:#3a1616;
+  --unterwegs:#c9b3ff; --unterwegs-bg:#2a1f45; --zugestellt:#6ee7d8; --zugestellt-bg:#0f302d;
   --focus:#7aa7ff;
   --shadow:0 1px 0 rgba(0,0,0,.3),0 2px 8px -2px rgba(0,0,0,.4);
   --shadow-lift:0 1px 0 rgba(0,0,0,.3),0 14px 30px -10px rgba(0,0,0,.6);
@@ -131,6 +134,8 @@ label,.label-t{display:block;font-weight:600;font-size:.9rem;margin:0 0 .35rem}
 .s-neu{color:var(--neu);background:var(--neu-bg)}
 .s-geplant{color:var(--geplant);background:var(--geplant-bg)}
 .s-gedruckt{color:var(--gedruckt);background:var(--gedruckt-bg)}
+.s-unterwegs{color:var(--unterwegs);background:var(--unterwegs-bg)}
+.s-zugestellt{color:var(--zugestellt);background:var(--zugestellt-bg)}
 .s-abgelehnt{color:var(--abgelehnt);background:var(--abgelehnt-bg)}
 
 /* ---------- 6. Auftragsliste ---------- */
@@ -179,7 +184,7 @@ label,.label-t{display:block;font-weight:600;font-size:.9rem;margin:0 0 .35rem}
 .order:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:var(--line-strong)}
 .order:hover .go{transform:translateX(3px);color:var(--signal)}
 .order[data-s=neu]{--rail:var(--neu)} .order[data-s=geplant]{--rail:var(--geplant)}
-.order[data-s=gedruckt]{--rail:var(--gedruckt)} .order[data-s=abgelehnt]{--rail:var(--abgelehnt)}
+.order[data-s=gedruckt]{--rail:var(--gedruckt)} .order[data-s=unterwegs]{--rail:var(--unterwegs)} .order[data-s=zugestellt]{--rail:var(--zugestellt)} .order[data-s=abgelehnt]{--rail:var(--abgelehnt)}
 .order-head{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-bottom:.2rem}
 .order-title{font:600 1.05rem/1.3 var(--font-display);display:block}
 .order .meta{display:flex;flex-wrap:wrap;gap:.2rem .8rem;font-size:.82rem;color:var(--ink-2);margin-top:.25rem}
