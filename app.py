@@ -458,7 +458,7 @@ MAX_VOLUME = 1_000_000   # cm³ = 1 m³; mehr kann kein Hobbydrucker
 PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang", "slicer_file"}
 PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne Anmeldung → Login, danach zurück
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-ADMIN_ONLY = {"set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
+ADMIN_ONLY = {"save_currency", "set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
               "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify",
               "save_note", "save_photo", "set_price", "set_paid", "toggle_prepay", "add_credit", "save_pay"}
@@ -532,8 +532,27 @@ def dec(text):
     return (text or "").replace(",", ".") if g.get("lang") == "en" else text
 
 
+CURRENCIES = ("EUR", "USD", "GBP", "CHF", "CAD", "AUD", "SEK", "NOK", "DKK", "PLN", "CZK")
+
+
+def cur_code():
+    if "cur" not in g:
+        with db() as con:
+            c = text_setting(con, "currency")
+        g.cur = c if c in CURRENCIES else "EUR"
+    return g.cur
+
+
+def cur():
+    """Währung der Werkstatt (Einstellungen → Werkstatt). EUR zeigt weiter „€“, alle anderen ihr Kürzel (USD, GBP …)."""
+    return "€" if cur_code() == "EUR" else g.cur
+
+
 def money(v):
-    return f"€{v:.2f}" if g.get("lang") == "en" else f"{num(v, 2)} €"
+    c = cur()
+    if g.get("lang") == "en":
+        return f"{c}{v:.2f}" if c == "€" else f"{c} {v:.2f}"
+    return f"{num(v, 2)} {c}"
 
 
 @app.post("/lang")
@@ -590,7 +609,7 @@ def security_headers(r):
 def helpers():
     return {"domain": domain, "kind": kind, "statuses": STATUSES, "fmt_dims": fmt_dims, "reasons": REASONS,
             "reason_text": reason_text, "reason_short": reason_short, "_": _, "status_label": status_label,
-            "color_name": color_name, "num": num, "dec": dec, "money": money, "languages": i18n.LANGS,
+            "color_name": color_name, "num": num, "dec": dec, "money": money, "cur": cur, "cur_code": cur_code, "currencies": CURRENCIES, "languages": i18n.LANGS,
             "js_texts": lambda: i18n.js_texts(g.lang),
             "year": time.localtime().tm_year, "public": public, "max_qty": MAX_QTY}
 
@@ -1596,6 +1615,16 @@ def save_bed():
                 abort(400)
             put_setting(con, k, v)
     return redirect(url_for("settings", tab="werkstatt" if "archive_days" in request.form or "max_open" in request.form else "drucker"))
+
+
+@app.post("/settings/currency")
+def save_currency():
+    c = request.form.get("currency")
+    if c not in CURRENCIES:
+        abort(400)
+    with db() as con:
+        put_setting(con, "currency", c)
+    return redirect(url_for("settings", tab="werkstatt"))
 
 
 @app.post("/settings/filaments")

@@ -47,6 +47,15 @@
 </section>
 
 <section class="card rise" style="--i:1">
+  <h3>{{ icon('coin') }} {{ _('Währung') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Für Preise, Guthaben und Mails. Es wird nichts umgerechnet, nur das Kürzel ändert sich.') }}</p>
+  <form class="row" method="post" action="{{ url_for('save_currency') }}">
+    <label style="max-width:14rem">{{ _('Währung') }} <select name="currency">{% for c in currencies %}<option value="{{ c }}"{% if c == cur_code() %} selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
+<section class="card rise" style="--i:1">
   <h3>{{ icon('layers') }} {{ _('Limit offener Aufträge') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('So viele Aufträge darf ein Freund gleichzeitig offen haben (neu oder geplant). Die Werkstatt hat kein Limit.') }}</p>
   <form class="row" method="post" action="{{ url_for('save_bed') }}">
@@ -112,7 +121,7 @@
     </div>
     <form class="row" method="post" action="{{ url_for('save_filament_price', fid=f.id) }}">
       <label>{{ _('Preis') }} <span class="unit"><input type="number" name="price_kg" min="0" max="1000" step="0.01" value="{{ f.price_kg or '' }}"
-        placeholder="{{ _('z. B. 20') }}" inputmode="decimal"> €/kg</span></label>
+        placeholder="{{ _('z. B. 20') }}" inputmode="decimal"> {{ cur() }}/kg</span></label>
       <label>{{ _('Dichte') }} <span class="unit"><input type="number" name="density" min="0" max="10" step="0.01" value="{{ f.density or '' }}"
         placeholder="{{ num(1.24, 2) }}" inputmode="decimal"> g/cm³</span></label>
       <button class="btn">{{ _('Speichern') }}</button>

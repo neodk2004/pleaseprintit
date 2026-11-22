@@ -6,6 +6,14 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.6.0] – 2026-11-22
+
+### Added
+- **Selectable currency:** In Settings → Workshop you choose the currency (EUR, USD, GBP, CHF, CAD, AUD, SEK, NOK, DKK, PLN, CZK). Euro still shows “€”, all others show their code, e.g. “USD 12.50”. Nothing is converted.
+- **Tidier status area:** The workshop now only sees the **next step** (Accept → Printed → On its way → Delivered). The tracking field only appears when it’s needed. “Decline” can be expanded. The free choice of all statuses is still there as “Change status freely (correction)”.
+
+Thanks to @dexxfm for both ideas.
+
 ## [1.5.1] – 2026-11-22
 
 ### Fixed
@@ -99,7 +107,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0

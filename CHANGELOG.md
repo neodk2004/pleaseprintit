@@ -6,6 +6,14 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.6.0] – 2026-11-22
+
+### Neu
+- **Währung einstellbar:** In Einstellungen → Werkstatt wählst du die Währung (EUR, USD, GBP, CHF, CAD, AUD, SEK, NOK, DKK, PLN, CZK). Euro zeigt weiter „€“, alle anderen ihr Kürzel, z. B. „12,50 USD“. Es wird nichts umgerechnet.
+- **Status-Bereich aufgeräumt:** Die Werkstatt sieht nur noch den **nächsten Schritt** (Annehmen → Gedruckt → Unterwegs → Zugestellt). Das Feld für die Sendungsnummer erscheint nur, wenn es gebraucht wird. „Ablehnen“ ist aufklappbar. Die freie Auswahl aller Status gibt es weiter als „Status frei ändern (Korrektur)“.
+
+Danke an @dexxfm für beide Ideen.
+
 ## [1.5.1] – 2026-11-22
 
 ### Behoben
@@ -99,7 +107,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0

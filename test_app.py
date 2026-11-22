@@ -709,6 +709,14 @@ A.get_entry = lambda *a: 1 / 0
 _r = admin.get(f"/entry/{dn}")
 A.get_entry = _ge
 assert _r.status_code == 500 and "<html" in _r.data.decode() and "Internal Server Error" not in _r.data.decode(), "500 als HTML-Seite"
+assert admin.post("/settings/currency", data={"currency": "XYZ"}).status_code == 400
+assert admin.post("/settings/currency", data={"currency": "USD"}).status_code == 302
+_h = admin.get(f"/entry/{dn}").data.decode()
+assert "USD" in _h and "Neues Angebot" in _h, "Währung USD im Auftrag"
+assert "USD" in admin.get("/settings?tab=werkstatt").data.decode()
+with A.app.test_request_context():
+    assert A.money(12.5) == "12,50 USD"
+assert admin.post("/settings/currency", data={"currency": "EUR"}).status_code == 302
 _r = admin.get("/gibt-es-nicht")
 assert _r.status_code == 404 and "<html" in _r.data.decode() and "existiert nicht" in _r.data.decode(), "404 als HTML-Seite"
 assert "Als abgemacht eintragen" in admin.get(f"/entry/{dn}").data.decode(), "Werkstatt kann Angebot als abgemacht eintragen"
