@@ -6,6 +6,12 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.5.1] – 2026-11-22
+
+### Fixed
+- **Clear error messages:** Errors now show as a regular app page with a readable text and a button back to the overview, instead of a bare “Bad Request”. This includes invalid numbers for price, credit and surcharge, and an expired session.
+- **Negotiating a price:** If the friend hasn’t answered an offer (or has no email), the workshop can now move on: **“Mark as agreed”** records a verbal agreement. Before, the order got stuck at “The price hasn’t been agreed yet”.
+
 ## [1.5.0] – 2026-11-22
 
 ### New
@@ -93,7 +99,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0

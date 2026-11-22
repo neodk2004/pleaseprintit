@@ -13,6 +13,7 @@ from urllib.parse import quote, urlparse
 
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 from flask import Flask, abort, g, redirect, render_template, request, send_from_directory, session, url_for
+from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -830,6 +831,27 @@ def too_large(_err):
     return new_page(_("Die Datei ist zu groß (max. 100 MB)."), 413)
 
 
+@app.errorhandler(HTTPException)
+def friendly_error(err):
+    """Fehler immer als normale Seite mit verständlichem Text, nie als rohes „Bad Request“."""
+    if err.code == 413:
+        return too_large(err)
+    if not hasattr(g, "lang"):   # Routing-Fehler (z. B. 404) laufen vor load_user
+        g.nonce, g.admin, g.user, g.lang = secrets.token_urlsafe(16), False, None, pick_lang()
+    if err.code == 403 and not (g.admin or g.user):
+        return render_template("error.html", code=403, text=_(
+            "Du bist nicht angemeldet, oder die Sitzung ist abgelaufen. Bitte melde dich neu an.")), 403
+    general = {400: _("Das hat nicht geklappt. Bitte prüfe deine Eingabe und versuche es noch einmal."),
+               403: _("Dafür hast du keine Berechtigung."),
+               404: _("Diese Seite oder dieser Auftrag existiert nicht (mehr)."),
+               405: _("Diese Aktion ist hier nicht möglich."),
+               409: _("Das wurde schon erledigt.")}
+    # eigene Texte (abort(400, "…")) sind schon übersetzt; die Standardtexte von Werkzeug ersetzen wir
+    text = err.description if err.code in (400, 403, 409) and err.description not in (type(err).description, None) \
+        else general.get(err.code, _("Es ist ein Fehler aufgetreten. Bitte versuche es noch einmal."))
+    return render_template("error.html", text=text, code=err.code), err.code
+
+
 @app.get("/entry/<int:link_id>")
 def entry(link_id):
     with db() as con:
@@ -1225,7 +1247,7 @@ def set_price(link_id):
     try:
         price = round(min(max(float(v), 0), 10_000), 2) if v else None
     except ValueError:
-        abort(400)
+        abort(400, _("Bitte den Preis als Zahl eingeben, z. B. 12,50."))
     with db() as con:
         if get_entry(con, link_id)["paid"]:
             abort(400, _("Schon bezahlt: Der Preis lässt sich nicht mehr ändern."))
@@ -1250,8 +1272,8 @@ def answer_deal(link_id):
     act = request.form.get("act")
     with db() as con:
         e = get_entry(con, link_id)
-        if e["paid"] or e["status"] in PRINTED + ("abgelehnt",) or e["deal"] != ("counter" if g.admin else "offer"):
-            abort(400)
+        if e["paid"] or e["status"] in PRINTED + ("abgelehnt",) or e["deal"] not in (DEAL_OPEN if g.admin else ("offer",)):
+            abort(400, _("Auf diesen Preis lässt sich gerade nicht antworten. Lade die Seite neu, vielleicht hat sich schon etwas geändert."))
         if act == "accept":
             con.execute("UPDATE links SET deal = 'agreed' WHERE id = ?", (link_id,))
             settle(con, link_id)
@@ -1260,7 +1282,7 @@ def answer_deal(link_id):
             try:
                 price = round(min(max(float(request.form.get("price", "").strip().replace(",", ".")), 0), 10_000), 2)
             except ValueError:
-                abort(400)
+                abort(400, _("Bitte den Preis als Zahl eingeben, z. B. 12,50."))
             con.execute("UPDATE links SET price = ?, deal = 'counter' WHERE id = ?", (price, link_id))
             con.execute("INSERT INTO comments (link_id, user_id, text, at) VALUES (?, ?, ?, ?)",
                         (link_id, g.user["id"], f"{_('Gegenvorschlag')}: {money(price)}", now(con)))
@@ -1308,9 +1330,9 @@ def add_credit(uid):
     try:
         amount = round(float(request.form.get("amount", "").strip().replace(",", ".")), 2)
     except ValueError:
-        abort(400)
+        abort(400, _("Bitte den Betrag als Zahl eingeben, z. B. 10 oder -5."))
     if not amount or abs(amount) > 1000:
-        abort(400)
+        abort(400, _("Der Betrag muss zwischen 0,01 und 1000 liegen (mit Minus zum Abziehen)."))
     with db() as con:
         if not con.execute("SELECT 1 FROM users WHERE id = ?", (uid,)).fetchone():
             abort(404)
@@ -1329,7 +1351,7 @@ def save_pay():
     try:
         markup = max(0.0, min(float(request.form.get("pay_markup", "").strip().replace(",", ".") or MARKUP), 500.0))
     except ValueError:
-        abort(400)
+        abort(400, _("Bitte den Aufschlag als Zahl eingeben, z. B. 20."))
     with db() as con:
         put_setting(con, "pay_mode", mode)
         put_setting(con, "pay_markup", str(markup))

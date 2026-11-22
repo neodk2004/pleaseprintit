@@ -696,7 +696,22 @@ assert admin.post(f"/entry/{dn}/price", data={"price": "", "offer": "1"}).status
 admin.post(f"/entry/{dn}/price", data={"price": "40", "offer": "1"})
 assert "Angebot der Werkstatt" in dora.get(f"/entry/{dn}").data.decode() and "40,00" in dora.get(f"/entry/{dn}").data.decode()
 assert status(dn, "geplant") == 400, "offenes Angebot: nicht drucken"
-assert admin.post(f"/entry/{dn}/deal", data={"act": "accept"}).status_code == 400, "Werkstatt kann ihr eigenes Angebot nicht annehmen"
+assert status(dn, "geplant") == 400, "bei offenem Angebot wird nicht geplant"
+_r = admin.post(f"/entry/{dn}/status", data={"status": "geplant"})
+assert "text/html" in _r.content_type and "noch nicht abgemacht" in _r.data.decode() and "Bad Request" not in _r.data.decode(), "Fehler als verständliche HTML-Seite"
+_r = client().post(f"/entry/{dn}/status", data={"status": "geplant"})
+assert _r.status_code == 403 and "nicht angemeldet" in _r.data.decode() and "<html" in _r.data.decode(), "abgelaufene Sitzung: klare Meldung"
+_r = admin.post(f"/entry/{dn}/price", data={"price": "abc"})
+assert _r.status_code == 400 and "als Zahl" in _r.data.decode(), "Preis kein Zahl: klare Meldung"
+A.app.config["PROPAGATE_EXCEPTIONS"] = False
+_ge = A.get_entry
+A.get_entry = lambda *a: 1 / 0
+_r = admin.get(f"/entry/{dn}")
+A.get_entry = _ge
+assert _r.status_code == 500 and "<html" in _r.data.decode() and "Internal Server Error" not in _r.data.decode(), "500 als HTML-Seite"
+_r = admin.get("/gibt-es-nicht")
+assert _r.status_code == 404 and "<html" in _r.data.decode() and "existiert nicht" in _r.data.decode(), "404 als HTML-Seite"
+assert "Als abgemacht eintragen" in admin.get(f"/entry/{dn}").data.decode(), "Werkstatt kann Angebot als abgemacht eintragen"
 assert dora.post(f"/entry/{dn}/deal", data={"act": "counter", "price": "30"}).status_code == 302
 assert "Gegenvorschlag: 30,00" in admin.get(f"/entry/{dn}").data.decode() and status(dn, "geplant") == 400
 assert dora.post(f"/entry/{dn}/deal", data={"act": "accept"}).status_code == 400, "Freund kann seinen Gegenvorschlag nicht annehmen"

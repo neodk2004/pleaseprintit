@@ -60,6 +60,9 @@
   {% if e.deal == 'agreed' %}<p style="margin:0"><span class="big mono">{{ euro(e.price) }}</span> <span class="badge s-gedruckt">{{ _('abgemacht') }}</span></p>
   {% elif e.deal == 'offer' %}<p style="margin:0"><span class="big mono">{{ euro(e.price) }}</span> <span class="badge s-neu">{{ _('Angebot der Werkstatt') }}</span></p>
     {% if g.admin %}<p class="hint">{{ _('Der Freund muss annehmen oder einen Gegenvorschlag machen. Bis dahin wird nicht gedruckt.') }}</p>
+      <form class="row" method="post" action="{{ url_for('answer_deal', link_id=e.id) }}">
+      <button class="btn btn-sm" name="act" value="accept">{{ icon('check') }}{{ _('Als abgemacht eintragen') }}</button></form>
+      <p class="hint">{{ _('Zum Beispiel, wenn ihr euch schon mündlich geeinigt habt.') }}</p>
     {% else %}<form class="row" method="post" action="{{ url_for('answer_deal', link_id=e.id) }}" style="margin-top:var(--s3)">
       <button class="btn btn-primary btn-sm" name="act" value="accept">{{ icon('check') }}{{ _('Annehmen') }}</button></form>
       <form class="row" method="post" action="{{ url_for('answer_deal', link_id=e.id) }}" style="margin-top:var(--s3)">

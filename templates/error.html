@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}{{ _('Das hat nicht geklappt') }} · {% endblock %}
+{% block body %}
+<section class="card" style="max-width:36rem;margin:var(--s6) auto">
+  <h2 style="margin:0 0 var(--s3)">{{ _('Das hat nicht geklappt') }}</h2>
+  <p class="err" role="alert">{{ icon('info') }}{{ text }}</p>
+  <p><a class="btn btn-primary" href="{{ url_for('index') }}">{{ _('Zurück zur Übersicht') }}</a></p>
+</section>
+{% endblock %}

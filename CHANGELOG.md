@@ -6,6 +6,12 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.5.1] – 2026-11-22
+
+### Behoben
+- **Klare Fehlermeldungen:** Fehler erscheinen jetzt als normale Seite der App mit verständlichem Text und einem Knopf zurück zur Übersicht, nicht mehr als rohes „Bad Request“. Neu verständlich sind unter anderem ungültige Zahlen bei Preis, Guthaben und Aufschlag sowie eine abgelaufene Sitzung.
+- **Preis aushandeln:** Hat der Freund ein Angebot nicht beantwortet (oder gar keine Mail), kommt die Werkstatt jetzt weiter: Mit **„Als abgemacht eintragen“** hält sie eine mündliche Einigung fest. Vorher blieb der Auftrag bei „Der Preis ist noch nicht abgemacht“ hängen.
+
 ## [1.5.0] – 2026-11-22
 
 ### Neu
@@ -93,7 +99,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.2.0...v1.3.0
