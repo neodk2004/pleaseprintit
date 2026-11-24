@@ -6,19 +6,27 @@ geprüften IP, damit ein zweiter DNS-Abruf nicht auf ein internes Gerät umlenke
 """
 import codecs
 import http.client
+import io
 import ipaddress
+import json
+import re
 import socket
 import ssl
 import time
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
 
+from PIL import Image
+
+Image.MAX_IMAGE_PIXELS = 50_000_000   # Schutz vor Dekompressionsbomben (Pillow bricht darüber ab)
+
 TIMEOUT = 5            # Sekunden pro Verbindungsschritt
 DEADLINE = 10          # Sekunden gesamt pro Abruf
 MAX_REDIRECTS = 5
 MAX_HTML = 2_000_000   # Bytes; der <head> steht vorne, Rest wird abgeschnitten
-MAX_IMAGE = 5_000_000  # Bytes; größere Bilder werden abgelehnt
-UA = "Mozilla/5.0 (compatible; PleasePrintitBot/1.0)"
+MAX_IMAGE = 5_000_000  # Bytes; größere Uploads werden abgelehnt
+MAX_FETCHED = 15_000_000  # Bytes; Vorschaubilder von Seiten (Printables liefert Originale um 5 MB)
+UA = "PleasePrintit-LinkPreview/1.0 (private Druckwunsch-Verwaltung; ruft nur Titel und Vorschaubild eines eingereichten Links ab)"
 
 
 class Blocked(Exception):
@@ -60,8 +68,9 @@ class _HTTPS(http.client.HTTPSConnection):
         self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
 
 
-def fetch(url, limit):
-    """Gibt (finale_url, content_type, bytes) zurück; liest höchstens limit+1 Bytes."""
+def fetch(url, limit, body=None):
+    """Gibt (finale_url, content_type, bytes) zurück; liest höchstens limit+1 Bytes.
+    Mit body (JSON-Text) wird gepostet; sonst GET."""
     deadline = time.monotonic() + DEADLINE
     for _ in range(MAX_REDIRECTS + 1):
         u = urlsplit(url)
@@ -70,8 +79,11 @@ def fetch(url, limit):
         port = u.port or (443 if u.scheme == "https" else 80)
         conn = (_HTTPS if u.scheme == "https" else _HTTP)(u.hostname, port, public_ip(u.hostname))
         try:
-            conn.request("GET", (u.path or "/") + (f"?{u.query}" if u.query else ""),
-                         headers={"User-Agent": UA, "Accept": "*/*", "Accept-Language": "de,en;q=0.8"})
+            headers = {"User-Agent": UA, "Accept": "*/*", "Accept-Language": "de,en;q=0.8"}
+            if body is not None:
+                headers["Content-Type"] = "application/json"
+            conn.request("POST" if body is not None else "GET", (u.path or "/") + (f"?{u.query}" if u.query else ""),
+                         body=body.encode() if body is not None else None, headers=headers)
             r = conn.getresponse()
             if r.status in (301, 302, 303, 307, 308) and r.getheader("Location"):
                 url = urljoin(url, r.getheader("Location"))
@@ -137,6 +149,20 @@ def image_ext(data):
     return None
 
 
+def shrink(data, size=800):
+    """Bild auf höchstens size Pixel Kantenlänge verkleinern und als WebP speichern.
+    → (bytes, "webp") oder None, wenn das Bild nicht lesbar ist (Aufrufer behält dann das Original).
+    Bei GIF zählt nur das erste Bild."""
+    try:
+        with Image.open(io.BytesIO(data)) as im:
+            im.thumbnail((size, size))
+            out = io.BytesIO()
+            im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB").save(out, "WEBP", quality=80)
+            return out.getvalue(), "webp"
+    except (OSError, ValueError, Image.DecompressionBombError):
+        return None
+
+
 def _charset(ctype):
     for part in ctype.split(";")[1:]:
         k, _, v = part.strip().partition("=")
@@ -150,25 +176,51 @@ def _charset(ctype):
 
 ERRORS = (Blocked, OSError, ValueError, http.client.HTTPException)
 
+PRINTABLES_URL = re.compile(r"^https?://(?:www\.)?printables\.com/(?:[a-z]{2}/)?model/(\d+)", re.I)
+PRINTABLES_API = "https://api.printables.com/graphql/"
+PRINTABLES_MEDIA = "https://media.printables.com/"
+
+
+def printables(url):
+    """Titel und Bild über die GraphQL-Schnittstelle von Printables (die Webseite selbst sperrt Skripte).
+    → Meta-Dict wie parse(), oder None, wenn die URL kein Printables-Modell ist.
+    # ponytail: inoffizielle Schnittstelle; ändert Printables sie, greift der normale Abruf bzw. das eigene Bild."""
+    m = PRINTABLES_URL.match(url)
+    if not m:
+        return None
+    query = '{ print(id: "%s") { name images { filePath } } }' % m.group(1)
+    _, _, data = fetch(PRINTABLES_API, 200_000, json.dumps({"query": query}))
+    p = (json.loads(data).get("data") or {}).get("print") or {}
+    path = (p.get("images") or [{}])[0].get("filePath")
+    return {"title": (p.get("name") or "").strip()[:200] or None, "site": "Printables",
+            "image_url": urljoin(PRINTABLES_MEDIA, path) if path else None}
+
 
 def preview(url):
     """Liefert {"title", "site", "image": (bytes, ext) | None}. Wirft nie; Fehler stehen in "error"."""
     out = {"title": None, "site": None, "image": None, "error": None}
     try:
-        final, ctype, data = fetch(url, MAX_HTML)
-        if "html" not in ctype.lower():
-            out["error"] = f"keine HTML-Seite ({ctype})"
-            return out
-        meta = parse(data[:MAX_HTML].decode(_charset(ctype), "replace"), final)
+        meta = None
+        try:
+            meta = printables(url)
+        except ERRORS as e:
+            out["error"] = f"Printables-Schnittstelle: {e}"
+        if not meta or not meta["title"]:
+            final, ctype, data = fetch(url, MAX_HTML)
+            if "html" not in ctype.lower():
+                out["error"] = f"keine HTML-Seite ({ctype})"
+                return out
+            meta = parse(data[:MAX_HTML].decode(_charset(ctype), "replace"), final)
+            out["error"] = None
     except ERRORS as e:
         out["error"] = str(e)
         return out
     out["title"], out["site"] = meta["title"], meta["site"]
     if meta["image_url"]:
         try:
-            _, _, img = fetch(meta["image_url"], MAX_IMAGE)
+            _, _, img = fetch(meta["image_url"], MAX_FETCHED)
             ext = image_ext(img)
-            if ext and len(img) <= MAX_IMAGE:
+            if ext and len(img) <= MAX_FETCHED:
                 out["image"] = (img, ext)
             else:
                 out["error"] = "Bild zu groß oder unbekanntes Format"

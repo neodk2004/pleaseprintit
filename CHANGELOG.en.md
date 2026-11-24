@@ -6,6 +6,17 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.6.1] – 2026-11-24
+
+### Fixed
+- **Preview for Printables links:** Printables blocks fetching its web pages. Title and image now come through its API, so the preview works again.
+- **MakerWorld:** The site still blocks automatic fetching. When submitting you can now **upload your own image** (collapsible under the link); the title comes from the title field. Automatic fetching will follow as soon as it becomes possible.
+
+### Changed
+- **Small images as WebP:** Preview images are scaled down to at most 800 pixels and stored as WebP (instead of originals of several MB). New dependency: Pillow.
+- The fetcher identifies itself with its own honest name (`PleasePrintit-LinkPreview`).
+- Code tidy-up (number inputs, money display).
+
 ## [1.6.0] – 2026-11-22
 
 ### Added
@@ -107,7 +118,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, badge, nr, filament_chip, thumb, grams, euro, printer with context %}
+{% from "_macros.html" import icon, badge, nr, filament_chip, thumb, grams, printer with context %}
 {% block body %}
 <div class="pagehead rise">
   <div><p class="eyebrow">{{ _('Werkstatt · Archiv') if arch else _('Werkstatt · Warteschlange') if g.admin else _('Hallo {name}', name=g.user.name) }}</p>
@@ -54,7 +54,7 @@
         {%- if e.qty > 1 %}<span>{{ icon('layers') }}{{ _('{n} Stück', n=e.qty) }}</span>{% endif %}
         {%- if c %}<span>{{ icon('scale') }}{{ grams(c) }}</span>{% endif %}
         {%- if e.created %}<span>{{ icon('clock') }}{{ e.created }}</span>{% endif %}</span></span>
-    <span class="aside"><span class="price">{{ euro(c[1]) if c and c[1] is not none else '' }}</span>{{ icon('go', cls='go') }}</span>
+    <span class="aside"><span class="price">{{ money(c[1]) if c and c[1] is not none else '' }}</span>{{ icon('go', cls='go') }}</span>
   </a></li>{% endfor %}
 </ul>
 {% elif arch and f|length == 1 %}

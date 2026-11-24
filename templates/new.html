@@ -16,6 +16,10 @@
     <div class="field"><label for="url">{{ _('Link zum Modell') }}</label>
       <input id="url" type="url" name="url" maxlength="2000" placeholder="https://…" inputmode="url" value="{{ request.form.url }}">
       <p class="hint">{{ _('Egal woher: Printables, MakerWorld, Thingiverse, aber auch Instagram, TikTok, Etsy, Amazon …') }}</p></div>
+    <details id="own-image"><summary class="hint">{{ _('Vorschau klappt nicht? Eigenes Bild und Titel angeben') }}</summary>
+      <label>{{ _('Bild zum Link') }} <small>{{ _('(optional, JPG, PNG, GIF oder WebP bis 5 MB)') }}</small>
+        <input type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp"></label>
+      <p class="hint">{{ _('Manche Seiten (z. B. MakerWorld) verbieten den automatischen Abruf. Dann gibst du Titel (unten) und Bild selbst an.') }}</p></details>
     <div class="or-line">{{ _('oder') }}</div>
     <label class="drop dropzone" for="model">{{ icon('upload') }}<b>{{ _('STL, 3MF oder STEP hierher ziehen') }}</b>
       <small>{{ _('oder klicken zum Auswählen · bis 100 MB') }}</small>

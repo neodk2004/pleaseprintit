@@ -6,6 +6,17 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.6.1] – 2026-11-24
+
+### Behoben
+- **Vorschau bei Printables-Links:** Printables sperrt den Abruf der Webseite. Titel und Bild kommen jetzt über dessen Schnittstelle, die Vorschau funktioniert wieder.
+- **MakerWorld:** Die Seite sperrt den automatischen Abruf weiterhin. Beim Einreichen lässt sich jetzt **ein eigenes Bild** hochladen (aufklappbar unter dem Link), der Titel kommt aus dem Titelfeld. Der automatische Abruf folgt, sobald er möglich ist.
+
+### Geändert
+- **Bilder klein als WebP:** Vorschaubilder werden auf höchstens 800 Pixel verkleinert und als WebP gespeichert (statt Originale von mehreren MB). Neue Abhängigkeit: Pillow.
+- Der Abruf meldet sich mit einem eigenen, ehrlichen Namen (`PleasePrintit-LinkPreview`).
+- Aufräumarbeiten im Code (Zahlen-Eingaben, Geld-Anzeige).
+
 ## [1.6.0] – 2026-11-22
 
 ### Neu
@@ -107,7 +118,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.4.0...v1.5.0

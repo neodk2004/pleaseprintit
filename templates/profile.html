@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, grams, euro, langs, month_bars with context %}
+{% from "_macros.html" import icon, grams, langs, month_bars with context %}
 {% block title %}{{ _('Profil') }} · {% endblock %}
 {% block body %}
 <div style="max-width:36rem;margin:0 auto">
@@ -8,14 +8,14 @@
 
 {% if credit %}<section class="card rise" style="--i:1">
   <h3>{{ icon('coin') }} {{ _('Dein Guthaben') }}</h3>
-  <p style="margin:0"><b class="mono" style="font-size:1.4rem">{{ euro(balance) }}</b></p>
+  <p style="margin:0"><b class="mono" style="font-size:1.4rem">{{ money(balance) }}</b></p>
   <p class="hint">{{ _('Aufladen lässt du es bei der Werkstatt. Jeder Auftrag wird davon bezahlt, abgelehnte bekommst du zurück.') }}</p>
-  {% if rows %}<ul class="invites">{% for r in rows %}<li><span class="mono grow">{{ r.at }}</span><span>{{ _(r.note) if r.note in ('Auftrag', 'Aufladung', 'Korrektur', 'Rückerstattung') else r.note }}{% if r.link_id %} #{{ '%04d'|format(r.link_id) }}{% endif %}</span><b class="mono">{{ ('+' if r.amount > 0 else '') ~ euro(r.amount) }}</b></li>{% endfor %}</ul>{% endif %}
+  {% if rows %}<ul class="invites">{% for r in rows %}<li><span class="mono grow">{{ r.at }}</span><span>{{ _(r.note) if r.note in ('Auftrag', 'Aufladung', 'Korrektur', 'Rückerstattung') else r.note }}{% if r.link_id %} #{{ '%04d'|format(r.link_id) }}{% endif %}</span><b class="mono">{{ ('+' if r.amount > 0 else '') ~ money(r.amount) }}</b></li>{% endfor %}</ul>{% endif %}
 </section>{% endif %}
 <section class="card rise" style="--i:1">
   <h3>{{ icon('coin') }} {{ _('Für dich gedruckt') }}</h3>
   {% if done[0] %}
-  <p style="margin:0"><b>{{ _('1 Teil') if done[0] == 1 else _('{n} Teile', n=done[0]) }}</b>{% if done[1] %} · {{ grams(done) }}{% endif %}{% if done[2] %} · {{ _('Material ca.') }} <b>{{ euro(done[2]) }}</b>{% endif %}</p>
+  <p style="margin:0"><b>{{ _('1 Teil') if done[0] == 1 else _('{n} Teile', n=done[0]) }}</b>{% if done[1] %} · {{ grams(done) }}{% endif %}{% if done[2] %} · {{ _('Material ca.') }} <b>{{ money(done[2]) }}</b>{% endif %}</p>
   <p class="muted" style="margin:.4em 0 0">{{ _('Grobe Schätzung ohne Strom und Druckzeit – falls du dich mal mit einer Rolle Filament oder einem Kaffee revanchieren magst.') }}</p>
   {% if tip %}<p style="margin:var(--s3) 0 0"><a class="btn btn-sm" href="{{ tip }}" target="_blank" rel="noopener noreferrer">{{ icon('heart') }}{{ _('Trinkgeld geben') }} {{ icon('external') }}</a></p>{% endif %}
   {% else %}

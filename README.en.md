@@ -110,7 +110,7 @@ flowchart LR
 <details open>
 <summary><b>📥 Submitting requests</b></summary>
 
-- 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse (title and preview image are fetched automatically) or your own STL, 3MF or STEP file.
+- 🔗 **Requests by link or file:** a link to Printables, MakerWorld or Thingiverse, or your own STL, 3MF or STEP file. Title and preview image are fetched automatically, for Printables through its API. **MakerWorld currently blocks automatic fetching**: there you enter the title and an image yourself (collapsible in the form). Fetching will follow as soon as it becomes possible.
 - 🧊 **3D preview in the browser:** rotate the model, see its dimensions, and check whether it fits your build plate. STEP files from CAD programs are read and measured right in the browser, too.
 - 🎨 **Filaments and colors:** you maintain what you have in stock. Friends pick from it or choose “Random”. Add a price per kg to get a material cost estimate.
 

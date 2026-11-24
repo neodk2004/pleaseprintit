@@ -110,7 +110,7 @@ flowchart LR
 <details open>
 <summary><b>📥 Wünsche einreichen</b></summary>
 
-- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse (Titel und Vorschaubild werden automatisch geholt) oder eine eigene STL-, 3MF- oder STEP-Datei.
+- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse oder eine eigene STL-, 3MF- oder STEP-Datei. Titel und Vorschaubild werden automatisch geholt, bei Printables über dessen Schnittstelle. **MakerWorld sperrt den automatischen Abruf derzeit**: Dort gibst du Titel und Bild selbst an (aufklappbar im Formular). Der Abruf wird nachgereicht, sobald er möglich ist.
 - 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt. Auch STEP-Dateien aus CAD-Programmen werden direkt im Browser gelesen und vermessen.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
 

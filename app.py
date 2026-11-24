@@ -20,7 +20,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import i18n
 import mail
 from models import MAX_MODEL, embedded_thumbnail, fits, model_kind, volume_cm3
-from preview import MAX_IMAGE, image_ext, preview
+from preview import MAX_IMAGE, image_ext, preview, shrink
 
 app = Flask(__name__)
 # Hinter dem Nginx Proxy Manager: echte Besucher-IP und https aus den Weiterleitungs-Headern übernehmen
@@ -178,6 +178,7 @@ def queue_place(con, e):
 
 
 def save_image(con, link_id, data, ext):
+    data, ext = shrink(data) or (data, ext)   # klein als WebP; nicht lesbar → Original behalten
     old = get_entry(con, link_id)["image"]
     name = f"{link_id}.{ext}"
     with open(os.path.join(IMAGES, name), "wb") as f:
@@ -532,6 +533,15 @@ def dec(text):
     return (text or "").replace(",", ".") if g.get("lang") == "en" else text
 
 
+def form_num(name, lo, hi, msg=None, digits=2):
+    """Zahl aus dem Formular (Komma oder Punkt), auf lo…hi begrenzt und gerundet. Leer = None, keine Zahl = Fehlerseite."""
+    v = request.form.get(name, "").strip().replace(",", ".")
+    try:
+        return round(min(max(float(v), lo), hi), digits) if v else None
+    except ValueError:
+        abort(400, msg or _("Bitte eine Zahl eingeben."))
+
+
 CURRENCIES = ("EUR", "USD", "GBP", "CHF", "CAD", "AUD", "SEK", "NOK", "DKK", "PLN", "CZK")
 
 
@@ -609,7 +619,7 @@ def security_headers(r):
 def helpers():
     return {"domain": domain, "kind": kind, "statuses": STATUSES, "fmt_dims": fmt_dims, "reasons": REASONS,
             "reason_text": reason_text, "reason_short": reason_short, "_": _, "status_label": status_label,
-            "color_name": color_name, "num": num, "dec": dec, "money": money, "cur": cur, "cur_code": cur_code, "currencies": CURRENCIES, "languages": i18n.LANGS,
+            "color_name": color_name, "num": num, "dec": dec, "money": money, "PRINTED": PRINTED, "cur": cur, "cur_code": cur_code, "currencies": CURRENCIES, "languages": i18n.LANGS,
             "js_texts": lambda: i18n.js_texts(g.lang),
             "year": time.localtime().tm_year, "public": public, "max_qty": MAX_QTY}
 
@@ -798,13 +808,17 @@ def create_order():
             return new_page(err, 400)
     extra = {"filament": filament, "color": color, "color_hex": color_hex,
              "dims": fmt_dims(dims) if dims else None, "qty": parse_qty(request.form)}
-    return save_file_order(f, title, extra) if has_file else save_link_order(url, title, extra)
+    return save_file_order(f, title, extra) if has_file else save_link_order(url, title, extra, request.files.get("image"))
 
 
-def save_link_order(url, title, extra):
+def save_link_order(url, title, extra, upload=None):
     p = preview(url)
     if p["error"]:
         app.logger.warning("Vorschau für %s: %s", url, p["error"])
+    # eigenes Bild des Einsenders hat Vorrang (Seiten wie MakerWorld sperren den Abruf)
+    data = upload.read(MAX_IMAGE + 1) if upload else b""
+    if data and image_ext(data) and len(data) <= MAX_IMAGE:
+        p["image"] = (data, image_ext(data))
     with db() as con:
         link_id = insert(con, title=title or p["title"] or domain(url), url=url, site=p["site"], **extra)
         if p["image"]:
@@ -1262,11 +1276,7 @@ def test_mail():
 @app.post("/entry/<int:link_id>/price")
 def set_price(link_id):
     """Preis von Hand festlegen (0 = kostenlos); leer = wieder automatisch berechnen."""
-    v = request.form.get("price", "").strip().replace(",", ".")
-    try:
-        price = round(min(max(float(v), 0), 10_000), 2) if v else None
-    except ValueError:
-        abort(400, _("Bitte den Preis als Zahl eingeben, z. B. 12,50."))
+    price = form_num("price", 0, 10_000, _("Bitte den Preis als Zahl eingeben, z. B. 12,50."))
     with db() as con:
         if get_entry(con, link_id)["paid"]:
             abort(400, _("Schon bezahlt: Der Preis lässt sich nicht mehr ändern."))
@@ -1298,9 +1308,8 @@ def answer_deal(link_id):
             settle(con, link_id)
             headline = lambda: _("Preis abgemacht: {price}", price=money(e["price"]))
         elif act == "counter" and not g.admin:
-            try:
-                price = round(min(max(float(request.form.get("price", "").strip().replace(",", ".")), 0), 10_000), 2)
-            except ValueError:
+            price = form_num("price", 0, 10_000, _("Bitte den Preis als Zahl eingeben, z. B. 12,50."))
+            if price is None:
                 abort(400, _("Bitte den Preis als Zahl eingeben, z. B. 12,50."))
             con.execute("UPDATE links SET price = ?, deal = 'counter' WHERE id = ?", (price, link_id))
             con.execute("INSERT INTO comments (link_id, user_id, text, at) VALUES (?, ?, ?, ?)",
@@ -1367,10 +1376,9 @@ def save_pay():
     mode = request.form.get("pay_mode", "")
     if mode not in ("", "order", "credit"):
         abort(400)
-    try:
-        markup = max(0.0, min(float(request.form.get("pay_markup", "").strip().replace(",", ".") or MARKUP), 500.0))
-    except ValueError:
-        abort(400, _("Bitte den Aufschlag als Zahl eingeben, z. B. 20."))
+    markup = form_num("pay_markup", 0, 500, _("Bitte den Aufschlag als Zahl eingeben, z. B. 20."))
+    if markup is None:
+        markup = MARKUP
     with db() as con:
         put_setting(con, "pay_mode", mode)
         put_setting(con, "pay_markup", str(markup))
@@ -1607,13 +1615,8 @@ def save_bed():
         for k in ("bed_x", "bed_y", "bed_z", "fill", "archive_days", "max_open"):
             if k not in request.form:
                 continue
-            v = request.form[k].strip().replace(",", ".")
-            top = {"fill": 100.0, "archive_days": 3650.0, "max_open": 1000.0}.get(k, 10_000.0)
-            try:
-                v = str(max(0.0, min(float(v), top))) if v else ""
-            except ValueError:
-                abort(400)
-            put_setting(con, k, v)
+            v = form_num(k, 0, {"fill": 100, "archive_days": 3650, "max_open": 1000}.get(k, 10_000), digits=3)
+            put_setting(con, k, "" if v is None else str(v))
     return redirect(url_for("settings", tab="werkstatt" if "archive_days" in request.form or "max_open" in request.form else "drucker"))
 
 
@@ -1648,11 +1651,7 @@ def delete_filament(fid):
 def save_filament_price(fid):
     vals = []
     for k, top in (("density", 10), ("price_kg", 1000)):
-        v = request.form.get(k, "").strip().replace(",", ".")
-        try:
-            vals.append((min(max(float(v), 0), top) or None) if v else None)
-        except ValueError:
-            abort(400)
+        vals.append(form_num(k, 0, top) or None)   # leer oder 0 = nicht gesetzt
     with db() as con:
         con.execute("UPDATE filaments SET density = ?, price_kg = ? WHERE id = ?", (*vals, fid))
     return redirect(url_for("settings", tab="filamente"))

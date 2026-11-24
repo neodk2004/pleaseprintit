@@ -167,6 +167,14 @@ T = {
     "Egal woher: Printables, MakerWorld, Thingiverse, aber auch Instagram, TikTok, Etsy, Amazon …":
         ("From anywhere: Printables, MakerWorld, Thingiverse, but also Instagram, TikTok, Etsy, Amazon …",
          "D’où tu veux : Printables, MakerWorld, Thingiverse, mais aussi Instagram, TikTok, Etsy, Amazon …"),
+    "Vorschau klappt nicht? Eigenes Bild und Titel angeben":
+        ("Preview not working? Add your own image and title", "L’aperçu ne marche pas ? Ajoute ta propre image et ton titre"),
+    "Bild zum Link": ("Image for the link", "Image pour le lien"),
+    "(optional, JPG, PNG, GIF oder WebP bis 5 MB)":
+        ("(optional, JPG, PNG, GIF or WebP up to 5 MB)", "(facultatif, JPG, PNG, GIF ou WebP jusqu’à 5 Mo)"),
+    "Manche Seiten (z. B. MakerWorld) verbieten den automatischen Abruf. Dann gibst du Titel (unten) und Bild selbst an.":
+        ("Some sites (e.g. MakerWorld) forbid automatic fetching. Then enter the title (below) and an image yourself.",
+         "Certains sites (p. ex. MakerWorld) interdisent la récupération automatique. Indique alors toi-même le titre (en bas) et une image."),
     "STL, 3MF oder STEP hierher ziehen": ("Drop an STL, 3MF or STEP here", "Dépose un STL, 3MF ou STEP ici"),
     "oder klicken zum Auswählen · bis 100 MB": ("or click to choose · up to 100 MB", "ou clique pour choisir · jusqu’à 100 Mo"),
     "Druckbereich der Werkstatt: max. {dims} mm": ("Workshop build volume: max. {dims} mm",
@@ -408,6 +416,7 @@ T = {
     "Gegenvorschlag des Freundes": ("Friend’s counteroffer", "Contre-proposition de l’ami"),
     "Der Freund muss annehmen oder einen Gegenvorschlag machen. Bis dahin wird nicht gedruckt.": ("The friend has to accept or make a counteroffer. Nothing is printed until then.", "L’ami doit accepter ou faire une contre-proposition. Rien n’est imprimé d’ici là."),
     "Annehmen": ("Accept", "Accepter"),
+    "Bitte eine Zahl eingeben.": ("Please enter a number.", "Saisissez un nombre."),
     "Nächster Schritt": ("Next step", "Étape suivante"),
     "Ablehnen": ("Decline", "Refuser"),
     "Grund": ("Reason", "Motif"),

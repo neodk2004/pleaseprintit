@@ -285,6 +285,12 @@ assert len(sent) == 3 and m["To"] == "werkstatt@example.de" and "ben" in m["Subj
 assert "/entry/" in m.get_body(("plain",)).get_content() and "PETG" in m.get_body(("html",)).get_content()
 admin.post("/orders", data=order)
 assert len(sent) == 3, "eigene Aufträge der Werkstatt lösen keine Mail aus"
+# eigenes Bild beim Einreichen (Seite sperrt den Abruf): Bild landet am Auftrag, kaputte Datei wird still ignoriert
+ben.post("/orders", data={**order, "image": (io.BytesIO(b"\x89PNG\r\n\x1a\n" + b"\0" * 20), "v.png")})
+assert con.execute("SELECT image FROM links ORDER BY id DESC LIMIT 1").fetchone()[0].endswith(".png"), "eigenes Bild gespeichert"
+ben.post("/orders", data={**order, "image": (io.BytesIO(b"kein bild"), "x.png")})
+assert con.execute("SELECT image FROM links ORDER BY id DESC LIMIT 1").fetchone()[0] is None, "kaputtes Bild ignoriert"
+sent.pop(), sent.pop()   # die zwei Test-Werkstatt-Mails zählen nicht für die folgenden Zähler
 # Rückfragen: Freund → Mail an die Werkstatt, Werkstatt → Mail an den Freund; fremde Aufträge tabu
 k_id = con.execute("SELECT MAX(id) FROM links WHERE user_id = (SELECT id FROM users WHERE name = 'ben')").fetchone()[0]
 assert anna.post(f"/entry/{k_id}/comment", data={"text": "fremd"}).status_code in (403, 404), "anna ist hier gesperrt"

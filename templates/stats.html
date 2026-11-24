@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, badge, month_bars, euro with context %}
+{% from "_macros.html" import icon, badge, month_bars with context %}
 {% block title %}{{ _('Statistik') }} · {% endblock %}
 {% block body %}
 <div class="pagehead rise"><div><p class="eyebrow">{{ _('Werkstatt · Statistik') }}</p><h1>{{ _('Statistik') }}</h1></div></div>
@@ -10,7 +10,7 @@
   <div><dt>{{ _('Aufträge') }}</dt><dd>{{ t.orders }}</dd></div>
   <div><dt>{{ _('Gedruckte Teile') }}</dt><dd>{{ t.pieces }}</dd></div>
   <div><dt>{{ _('Material') }}</dt><dd>{{ num(t.g / 1000, 2) }} kg</dd></div>
-  <div><dt>{{ _('Materialkosten') }}</dt><dd>{{ euro(t.eur) if t.eur is not none else '–' }}</dd></div>
+  <div><dt>{{ _('Materialkosten') }}</dt><dd>{{ money(t.eur) if t.eur is not none else '–' }}</dd></div>
   <div><dt>{{ _('Ø Wartezeit') }}</dt><dd>{{ _('{n} Tage', n=num(st.wait, 1)) if st.wait is not none else '–' }}</dd></div>
 </dl>
 

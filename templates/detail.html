@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, badge, nr, filament_chip, picture, grams, euro, sad, flowbar, picker, STATUS_ICON with context %}
+{% from "_macros.html" import icon, badge, nr, filament_chip, picture, grams, sad, flowbar, picker, STATUS_ICON with context %}
 {% block title %}#{{ e.id }} {{ e.title }} · {% endblock %}
 {% block body %}
 {% if g.admin and e.archived %}<a class="back" href="{{ url_for('index', archiv=1) }}">{{ icon('back') }}{{ _('Archiv') }}</a>
@@ -25,7 +25,7 @@
     <dt>{{ icon('scale') }}{{ _('Gewicht') }}{% if e.qty > 1 %} <small>{{ _('(gesamt)') }}</small>{% endif %}</dt><dd class="mono">{{ grams(cost) }}</dd>{% endif %}
 </dl>
 {% if cost and cost[1] is not none %}
-<div class="cost"><div><small>{{ _('Materialkosten (Schätzung)') }}</small><span class="big">{{ euro(cost[1]) }}</span></div>
+<div class="cost"><div><small>{{ _('Materialkosten (Schätzung)') }}</small><span class="big">{{ money(cost[1]) }}</span></div>
   <small style="text-align:right">{{ _('grob aus dem Modellvolumen') }}</small></div>
 {% elif cost and g.admin %}<p class="hint">{{ _('Für einen Preis trag in den Einstellungen den Preis pro kg ein.') }} <a href="{{ url_for('settings') }}">{{ _('Einstellungen') }}</a></p>{% endif %}
 {% endmacro %}
@@ -36,7 +36,7 @@
   {% if pay.price is none %}
     <p class="hint">{{ _('Der Preis steht noch nicht fest. Die Werkstatt legt ihn fest.') }}</p>
   {% else %}
-    <p style="margin:0"><span class="big mono">{{ euro(pay.price) }}</span>
+    <p style="margin:0"><span class="big mono">{{ money(pay.price) }}</span>
       <span class="badge {{ 's-gedruckt' if pay.paid or not pay.needs else 's-neu' }}">{{ _('bezahlt') if pay.paid else (_('kostenlos') if not pay.needs else _('offen')) }}</span></p>
   {% endif %}
   {% if pay.needs and not g.admin %}<p class="hint">
@@ -57,8 +57,8 @@
 {% macro deal() %}{% if e.deal or (g.admin and not e.paid and e.status in ('neu', 'geplant')) %}
 <section class="card pay" style="margin-top:var(--s4)">
   <h3>{{ icon('coin') }} {{ _('Preis aushandeln') }}</h3>
-  {% if e.deal == 'agreed' %}<p style="margin:0"><span class="big mono">{{ euro(e.price) }}</span> <span class="badge s-gedruckt">{{ _('abgemacht') }}</span></p>
-  {% elif e.deal == 'offer' %}<p style="margin:0"><span class="big mono">{{ euro(e.price) }}</span> <span class="badge s-neu">{{ _('Angebot der Werkstatt') }}</span></p>
+  {% if e.deal == 'agreed' %}<p style="margin:0"><span class="big mono">{{ money(e.price) }}</span> <span class="badge s-gedruckt">{{ _('abgemacht') }}</span></p>
+  {% elif e.deal == 'offer' %}<p style="margin:0"><span class="big mono">{{ money(e.price) }}</span> <span class="badge s-neu">{{ _('Angebot der Werkstatt') }}</span></p>
     {% if g.admin %}<p class="hint">{{ _('Der Freund muss annehmen oder einen Gegenvorschlag machen. Bis dahin wird nicht gedruckt.') }}</p>
       <form class="row" method="post" action="{{ url_for('answer_deal', link_id=e.id) }}">
       <button class="btn btn-sm" name="act" value="accept">{{ icon('check') }}{{ _('Als abgemacht eintragen') }}</button></form>
@@ -68,7 +68,7 @@
       <form class="row" method="post" action="{{ url_for('answer_deal', link_id=e.id) }}" style="margin-top:var(--s3)">
       <label>{{ _('Mein Gegenvorschlag') }} <span class="unit"><input type="number" name="price" min="0" max="10000" step="0.01" inputmode="decimal" required> {{ cur() }}</span></label>
       <button class="btn btn-sm" name="act" value="counter">{{ _('Senden') }}</button></form>{% endif %}
-  {% elif e.deal == 'counter' %}<p style="margin:0"><span class="big mono">{{ euro(e.price) }}</span> <span class="badge s-geplant">{{ _('Gegenvorschlag des Freundes') }}</span></p>
+  {% elif e.deal == 'counter' %}<p style="margin:0"><span class="big mono">{{ money(e.price) }}</span> <span class="badge s-geplant">{{ _('Gegenvorschlag des Freundes') }}</span></p>
     {% if g.admin %}<form class="row" method="post" action="{{ url_for('answer_deal', link_id=e.id) }}" style="margin-top:var(--s3)">
       <button class="btn btn-primary btn-sm" name="act" value="accept">{{ icon('check') }}{{ _('Annehmen') }}</button></form>
     {% else %}<p class="hint">{{ _('Die Werkstatt antwortet. Bis dahin wird nicht gedruckt.') }}</p>{% endif %}
@@ -189,7 +189,7 @@
         {% if can_repeat %}<form method="post" action="{{ url_for('repeat', link_id=e.id) }}" class="row">
           <label style="flex:0 0 5.5rem">{{ _('Stückzahl') }} <input type="number" name="qty" min="1" max="{{ max_qty }}" value="{{ e.qty }}" inputmode="numeric" required></label>
           <button class="btn btn-wide" style="flex:1;align-self:flex-end">{{ icon('rotate') }}{{ _('Nochmal drucken') }}</button></form>{% endif %}
-        {% if tip and not g.admin and e.status in ('gedruckt', 'unterwegs', 'zugestellt') %}<a class="btn btn-wide" href="{{ tip }}" target="_blank" rel="noopener noreferrer">{{ icon('heart') }}{{ _('Trinkgeld geben') }} {{ icon('external') }}</a>{% endif %}
+        {% if tip and not g.admin and e.status in PRINTED %}<a class="btn btn-wide" href="{{ tip }}" target="_blank" rel="noopener noreferrer">{{ icon('heart') }}{{ _('Trinkgeld geben') }} {{ icon('external') }}</a>{% endif %}
         {% if g.admin %}<form method="post" action="{{ url_for('archive') }}">
           <input type="hidden" name="id" value="{{ e.id }}"><input type="hidden" name="next" value="{{ url_for('entry', link_id=e.id) }}">
           {% if e.archived %}<p class="hint">{{ icon('archive') }} {{ _('Archiviert am {at}', at=e.archived) }}</p>

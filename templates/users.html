@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, euro with context %}
+{% from "_macros.html" import icon with context %}
 {% block title %}{{ _('Freunde') }} · {% endblock %}
 {% block body %}
 <div class="pagehead rise">
@@ -33,12 +33,12 @@
     <span class="avatar" aria-hidden="true">{{ p.name[:1]|upper }}</span>
     <span class="who"><a href="{{ url_for('index', user=p.id) }}">{{ p.name }}</a><br>
       <small>{{ _('seit {date}', date=p.created) }}{% if p.email %} · {{ icon('mail', _('bekommt Status-Mails')) }}{% endif %}{% if p.lang %} · {{ p.lang|upper }}{% endif %}{% if not p.active %} · {{ _('gesperrt') }}{% endif %}</small></span>
-    <span class="stats"><span>{{ _('{n} Auftr.', n=p.orders) }}</span><span>{{ num(p.used / 1048576, 1) }} MB</span>{% if done[p.id][2] %}<span title="{{ _('Materialkosten aller gedruckten Teile (Schätzung)') }}">{{ euro(done[p.id][2]) }}</span>{% endif %}</span>
+    <span class="stats"><span>{{ _('{n} Auftr.', n=p.orders) }}</span><span>{{ num(p.used / 1048576, 1) }} MB</span>{% if done[p.id][2] %}<span title="{{ _('Materialkosten aller gedruckten Teile (Schätzung)') }}">{{ money(done[p.id][2]) }}</span>{% endif %}</span>
     {% if p.active %}<form method="post" action="{{ url_for('create_reset', uid=p.id) }}"><button class="btn btn-sm btn-ghost" title="{{ _('Link für ein neues Passwort erzeugen') }}">{{ icon('rotate') }}<span class="label-sm">{{ _('Passwort-Link') }}</span></button></form>{% endif %}
     <form method="post" action="{{ url_for('toggle_user', uid=p.id) }}"><button class="btn btn-sm">{{ _('Sperren') if p.active else _('Entsperren') }}</button></form>
     {% if mode %}<div class="payrow">
       <form method="post" action="{{ url_for('toggle_prepay', uid=p.id) }}"><button class="btn btn-sm" aria-pressed="{{ 'true' if p.prepay else 'false' }}">{{ icon('coin') }}{{ _('Vorab zahlen: an') if p.prepay else _('Vorab zahlen: aus') }}</button></form>
-      {% if mode == 'credit' and p.prepay %}<b class="mono" title="{{ _('Guthaben') }}">{{ euro(balances[p.id]) }}</b>
+      {% if mode == 'credit' and p.prepay %}<b class="mono" title="{{ _('Guthaben') }}">{{ money(balances[p.id]) }}</b>
       <form class="row" method="post" action="{{ url_for('add_credit', uid=p.id) }}">
         <input type="number" name="amount" step="0.01" min="-1000" max="1000" required inputmode="decimal" placeholder="5,00" aria-label="{{ _('Betrag in Euro') }}" style="width:6rem">
         <button class="btn btn-sm">{{ icon('plus') }}{{ _('Aufladen') }}</button></form>{% endif %}

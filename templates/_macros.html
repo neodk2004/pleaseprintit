@@ -29,7 +29,6 @@
   </tr>{% endfor %}</tbody></table>{% endmacro %}
 
 {% macro grams(c) %}≈ {{ num(c[0], 0) }} g{% endmacro %}
-{% macro euro(v) %}{{ money(v) }}{% endmacro %}
 
 {# Sprachwahl: unten auf jeder Seite; merkt sich die Wahl im Cookie und im Konto #}
 {% macro langs() %}<form class="langs" method="post" action="{{ url_for('set_lang') }}" aria-label="{{ _('Sprache') }}">
