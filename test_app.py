@@ -272,7 +272,11 @@ admin.post(f"/entry/{w_id}/status", data={"status": "neu"})
 assert len(sent) == 2, "nach Löschen der Adresse keine Mails mehr"
 # Mail an die Werkstatt bei neuem Auftrag eines Freundes
 order = {"url": "https://www.printables.com/model/1", "title": "Haken", "choice": f"r:{pid}"}
-real_preview, A.preview = A.preview, lambda url: {"error": None, "title": None, "site": None, "image": None}   # kein Netzabruf im Test
+seen_creds = []
+def fake_preview(url, creds=None):   # kein Netzabruf im Test
+    seen_creds.append(creds)
+    return {"error": None, "title": None, "site": None, "image": None}
+real_preview, A.preview = A.preview, fake_preview
 ben.post("/orders", data=order)
 assert len(sent) == 2, "ohne Adresse keine Werkstatt-Mail"
 assert ben.post("/settings/notify", data={"notify_email": "x@example.de"}).status_code == 403
@@ -290,6 +294,26 @@ ben.post("/orders", data={**order, "image": (io.BytesIO(b"\x89PNG\r\n\x1a\n" + b
 assert con.execute("SELECT image FROM links ORDER BY id DESC LIMIT 1").fetchone()[0].endswith(".png"), "eigenes Bild gespeichert"
 ben.post("/orders", data={**order, "image": (io.BytesIO(b"kein bild"), "x.png")})
 assert con.execute("SELECT image FROM links ORDER BY id DESC LIMIT 1").fetchone()[0] is None, "kaputtes Bild ignoriert"
+# Zugänge für Link-Vorschauen: nur Werkstatt, verschlüsselt gespeichert, nie wieder angezeigt, .env hat Vorrang
+assert ben.post("/settings/previews", data={"THINGIVERSE_TOKEN": "x"}).status_code == 403
+admin.post("/settings/previews", data={"THINGIVERSE_TOKEN": " tok-123 ", "CULTS3D_USER": "nick", "CULTS3D_KEY": "key-456"})
+raw = con.execute("SELECT value FROM settings WHERE key = 'secret:THINGIVERSE_TOKEN'").fetchone()[0]
+assert raw and "tok-123" not in raw, "nur verschlüsselt in der Datenbank"
+assert A.secret_state(con, "THINGIVERSE_TOKEN") == ("tok-123", "db")
+page = admin.get("/settings?tab=werkstatt").data.decode()
+assert "tok-123" not in page and "key-456" not in page and "✓ gesetzt" in page, "wird nie wieder angezeigt"
+ben.post("/orders", data=order)
+assert seen_creds[-1] == {"THINGIVERSE_TOKEN": "tok-123", "CULTS3D_USER": "nick", "CULTS3D_KEY": "key-456"}, "Zugänge gehen an die Vorschau"
+admin.post("/settings/previews", data={"THINGIVERSE_TOKEN": "", "CULTS3D_KEY": "neu-789"})
+assert A.secret_state(con, "THINGIVERSE_TOKEN")[0] == "tok-123", "leeres Feld lässt den Wert unverändert"
+assert A.secret_state(con, "CULTS3D_KEY")[0] == "neu-789"
+os.environ["CULTS3D_USER"] = "aus-env"
+assert A.secret_state(con, "CULTS3D_USER") == ("aus-env", "env"), ".env hat Vorrang"
+del os.environ["CULTS3D_USER"]
+con.execute("UPDATE settings SET value = 'kaputt' WHERE key = 'secret:CULTS3D_KEY'"); con.commit()
+assert A.secret_state(con, "CULTS3D_KEY") == ("", "broken"), "unlesbar (SECRET_KEY geändert) → leer statt Absturz"
+admin.post("/settings/previews", data={"clear_THINGIVERSE_TOKEN": "1", "clear_CULTS3D_KEY": "1", "clear_CULTS3D_USER": "1"})
+assert A.preview_creds(con) == {"THINGIVERSE_TOKEN": "", "CULTS3D_USER": "", "CULTS3D_KEY": ""}, "Entfernen löscht"
 sent.pop(), sent.pop()   # die zwei Test-Werkstatt-Mails zählen nicht für die folgenden Zähler
 # Rückfragen: Freund → Mail an die Werkstatt, Werkstatt → Mail an den Freund; fremde Aufträge tabu
 k_id = con.execute("SELECT MAX(id) FROM links WHERE user_id = (SELECT id FROM users WHERE name = 'ben')").fetchone()[0]

@@ -110,7 +110,7 @@ flowchart LR
 <details open>
 <summary><b>📥 Wünsche einreichen</b></summary>
 
-- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse oder eine eigene STL-, 3MF- oder STEP-Datei. Titel und Vorschaubild werden automatisch geholt, bei Printables über dessen Schnittstelle. **MakerWorld sperrt den automatischen Abruf derzeit**: Dort gibst du Titel und Bild selbst an (aufklappbar im Formular). Der Abruf wird nachgereicht, sobald er möglich ist.
+- 🔗 **Aufträge per Link oder Datei:** Link zu Printables, MakerWorld oder Thingiverse oder eine eigene STL-, 3MF- oder STEP-Datei. Titel und Vorschaubild werden automatisch geholt: bei Printables ohne Zusatz, bei Thingiverse und Cults3D mit eigenem kostenlosem Zugang (siehe [Anleitung](#optional-vorschau-für-thingiverse-und-cults3d)). **MakerWorld sperrt den automatischen Abruf derzeit**: Dort gibst du Titel und Bild selbst an (aufklappbar im Formular). Der Abruf wird nachgereicht, sobald er möglich ist.
 - 🧊 **3D-Vorschau im Browser:** Modell drehen, Maße ansehen, Prüfung, ob es aufs Druckbett passt. Auch STEP-Dateien aus CAD-Programmen werden direkt im Browser gelesen und vermessen.
 - 🎨 **Filamente und Farben:** Du pflegst, was du da hast. Freunde wählen daraus oder sagen „Random“. Mit Preis pro kg gibt es eine Materialkosten-Schätzung.
 
@@ -283,6 +283,21 @@ Bei dieser Variante liegen die Daten und Sicherungen in Docker-Volumes (`<stack>
 
 1. Unter **Einstellungen** dein Druckbett, deine Filamente und das Impressum eintragen.
 2. Unter **Freunde** für jeden Freund auf **Einladungslink erzeugen** klicken und ihm den Link schicken. Ein Link gilt 7 Tage und nur einmal.
+
+## Optional: Vorschau für Thingiverse und Cults3D
+
+Printables funktioniert ohne Zusatz. Thingiverse und Cults3D sperren den Abruf ihrer Webseiten. Mit einem eigenen, kostenlosen Zugang holt die App Titel und Bild über deren offizielle Schnittstellen. Das richtest du **einmal als Betreiber** ein, deine Freunde brauchen nichts.
+
+**Thingiverse**
+1. Auf [thingiverse.com/developers](https://www.thingiverse.com/developers) anmelden und eine App anlegen (Name und kurze Beschreibung genügen).
+2. Den **App-Token** der App kopieren.
+3. In PleasePrintit: **Einstellungen → Werkstatt → Link-Vorschau** → bei „Thingiverse: App-Token“ einfügen → **Speichern**.
+
+**Cults3D**
+1. In deinem Cults3D-Konto (Bereich API) einen **API-Schlüssel** erzeugen.
+2. In PleasePrintit: **Einstellungen → Werkstatt → Link-Vorschau** → „Cults3D: Nickname“ (dein Benutzername) und „Cults3D: API-Schlüssel“ einfügen → **Speichern**.
+
+Die Werte werden **verschlüsselt** gespeichert (der Schlüssel dazu wird aus deinem `SECRET_KEY` abgeleitet) und nie wieder angezeigt. Ein leeres Feld lässt den gespeicherten Wert unverändert, „Entfernen“ löscht ihn. Änderst du den `SECRET_KEY`, musst du die Zugänge neu eingeben. Alternativ setzt du `THINGIVERSE_TOKEN`, `CULTS3D_USER` und `CULTS3D_KEY` in der `.env`, das hat Vorrang. Ohne Zugang bleibt es beim Fallback: Der Freund gibt Titel und Bild beim Einreichen selbst an.
 
 ## Von außen erreichbar machen
 

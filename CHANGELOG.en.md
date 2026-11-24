@@ -6,6 +6,12 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.6.2] – 2026-11-24
+
+### Added
+- **Preview for Thingiverse and Cults3D:** With your own free access (Thingiverse app token, Cults3D nickname with API key), the app gets title and image through their official APIs. Without access nothing changes. A short guide is in the README.
+- **Access in the settings:** Under Settings → Workshop → Link preview you enter the access directly in the web interface, no Docker knowledge needed. It is stored **encrypted** (derived from `SECRET_KEY`) and never shown again. Variables in `.env` (`THINGIVERSE_TOKEN`, `CULTS3D_USER`, `CULTS3D_KEY`) still take precedence. New dependency: `cryptography`.
+
 ## [1.6.1] – 2026-11-24
 
 ### Fixed
@@ -118,7 +124,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1

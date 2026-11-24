@@ -4,6 +4,7 @@ Schutz vor SSRF: Jede Adresse (auch nach Weiterleitungen) wird aufgelöst und nu
 abgerufen, wenn ALLE ihre IPs öffentlich sind. Verbunden wird dann genau mit der
 geprüften IP, damit ein zweiter DNS-Abruf nicht auf ein internes Gerät umlenken kann.
 """
+import base64
 import codecs
 import http.client
 import io
@@ -68,9 +69,11 @@ class _HTTPS(http.client.HTTPSConnection):
         self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
 
 
-def fetch(url, limit, body=None):
+def fetch(url, limit, body=None, extra=None):
     """Gibt (finale_url, content_type, bytes) zurück; liest höchstens limit+1 Bytes.
-    Mit body (JSON-Text) wird gepostet; sonst GET."""
+    Mit body (JSON-Text) wird gepostet; sonst GET. extra: zusätzliche Header, nur für den ersten Host
+    (nach einer Weiterleitung auf einen anderen Host wird z. B. ein Token nicht mitgeschickt)."""
+    first_host = urlsplit(url).hostname
     deadline = time.monotonic() + DEADLINE
     for _ in range(MAX_REDIRECTS + 1):
         u = urlsplit(url)
@@ -82,6 +85,8 @@ def fetch(url, limit, body=None):
             headers = {"User-Agent": UA, "Accept": "*/*", "Accept-Language": "de,en;q=0.8"}
             if body is not None:
                 headers["Content-Type"] = "application/json"
+            if extra and u.hostname == first_host:
+                headers.update(extra)
             conn.request("POST" if body is not None else "GET", (u.path or "/") + (f"?{u.query}" if u.query else ""),
                          body=body.encode() if body is not None else None, headers=headers)
             r = conn.getresponse()
@@ -196,15 +201,53 @@ def printables(url):
             "image_url": urljoin(PRINTABLES_MEDIA, path) if path else None}
 
 
-def preview(url):
-    """Liefert {"title", "site", "image": (bytes, ext) | None}. Wirft nie; Fehler stehen in "error"."""
+THINGIVERSE_URL = re.compile(r"^https?://(?:www\.)?thingiverse\.com/thing:(\d+)", re.I)
+
+
+def thingiverse(url, creds):
+    """Titel und Bild über die offizielle Thingiverse-API. Nur aktiv, wenn creds["THINGIVERSE_TOKEN"] gesetzt ist
+    (die Webseite sperrt Skripte). → Meta-Dict wie parse(), oder None."""
+    m, token = THINGIVERSE_URL.match(url), creds.get("THINGIVERSE_TOKEN")
+    if not m or not token:
+        return None
+    _, _, data = fetch(f"https://api.thingiverse.com/things/{m.group(1)}", 500_000,
+                       extra={"Authorization": f"Bearer {token}"})
+    t = json.loads(data)
+    image = t.get("thumbnail") or (t.get("default_image") or {}).get("url")
+    return {"title": (t.get("name") or "").strip()[:200] or None, "site": "Thingiverse",
+            "image_url": image if isinstance(image, str) and image.startswith("https://") else None}
+
+
+CULTS_URL = re.compile(r"^https?://(?:www\.)?cults3d\.com/(?:[a-z]{2}(?:-[a-z]{2})?/)?3d-model/[^/?#]+/([\w-]+)", re.I)
+
+
+def cults3d(url, creds):
+    """Titel und Bild über die offizielle Cults3D-GraphQL-API (HTTP Basic mit Nickname und API-Key).
+    Nur aktiv, wenn creds CULTS3D_USER und CULTS3D_KEY enthält. → Meta-Dict wie parse(), oder None."""
+    m, user, key = CULTS_URL.match(url), creds.get("CULTS3D_USER"), creds.get("CULTS3D_KEY")
+    if not (m and user and key):
+        return None
+    auth = base64.b64encode(f"{user}:{key}".encode()).decode()
+    body = json.dumps({"query": "query($s: String!) { creation(slug: $s) { name(locale: EN) illustrationImageUrl } }",
+                       "variables": {"s": m.group(1)}})
+    _, _, data = fetch("https://cults3d.com/graphql", 200_000, body, {"Authorization": f"Basic {auth}"})
+    c = (json.loads(data).get("data") or {}).get("creation") or {}
+    image = c.get("illustrationImageUrl")
+    return {"title": (c.get("name") or "").strip()[:200] or None, "site": "Cults3D",
+            "image_url": image if isinstance(image, str) and image.startswith("https://") else None}
+
+
+def preview(url, creds=None):
+    """Liefert {"title", "site", "image": (bytes, ext) | None}. Wirft nie; Fehler stehen in "error".
+    creds: Zugangsdaten für Thingiverse und Cults3D (optional, sonst bleibt es beim Abruf der Webseite)."""
+    creds = creds or {}
     out = {"title": None, "site": None, "image": None, "error": None}
     try:
         meta = None
         try:
-            meta = printables(url)
+            meta = printables(url) or thingiverse(url, creds) or cults3d(url, creds)
         except ERRORS as e:
-            out["error"] = f"Printables-Schnittstelle: {e}"
+            out["error"] = f"Schnittstelle: {e}"
         if not meta or not meta["title"]:
             final, ctype, data = fetch(url, MAX_HTML)
             if "html" not in ctype.lower():

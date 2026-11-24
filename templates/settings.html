@@ -99,6 +99,22 @@
   </form>
 </section>
 
+<section class="card rise" id="vorschau" style="--i:3">
+  <h3>{{ icon('external') }} {{ _('Link-Vorschau (optional)') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Manche Seiten sperren den automatischen Abruf von Titel und Bild. Mit eigenem Zugang geht es trotzdem: Thingiverse-App-Token (thingiverse.com/developers) und Cults3D-Nickname mit API-Schlüssel aus deinem Cults-Konto. Die Werte werden verschlüsselt gespeichert und nie wieder angezeigt. Ein leeres Feld lässt den gespeicherten Wert unverändert.') }}</p>
+  <form method="post" action="{{ url_for('save_previews') }}" autocomplete="off">
+    {% for key, label in (('THINGIVERSE_TOKEN', _('Thingiverse: App-Token')), ('CULTS3D_USER', _('Cults3D: Nickname')), ('CULTS3D_KEY', _('Cults3D: API-Schlüssel'))) %}
+    <div class="field"><label for="p-{{ key }}">{{ label }}
+      {% if prev_state[key] == 'env' %}<small>{{ _('(in der .env gesetzt, dort ändern)') }}</small>
+      {% elif prev_state[key] == 'db' %}<small>{{ _('✓ gesetzt') }}</small>
+      {% elif prev_state[key] == 'broken' %}<small>{{ _('nicht lesbar, bitte neu eingeben') }}</small>{% endif %}</label>
+      <input id="p-{{ key }}" type="password" name="{{ key }}" maxlength="300" autocomplete="new-password"{% if prev_state[key] == 'env' %} disabled{% endif %}>
+      {% if prev_state[key] in ('db', 'broken') %}<label><input type="checkbox" name="clear_{{ key }}" value="1"> {{ _('Entfernen') }}</label>{% endif %}</div>
+    {% endfor %}
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
 <section class="card rise" id="slicer" style="--i:3">
   <h3>{{ icon('external') }} {{ _('Slicer') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('Knöpfe im Auftrag, die die 3D-Datei direkt in deinem Slicer am PC öffnen. Der Slicer muss installiert sein. Der Link gilt eine Stunde.') }}</p>

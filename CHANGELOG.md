@@ -6,6 +6,12 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.6.2] – 2026-11-24
+
+### Neu
+- **Vorschau für Thingiverse und Cults3D:** Mit einem eigenen, kostenlosen Zugang (Thingiverse-App-Token, Cults3D-Nickname mit API-Schlüssel) holt die App Titel und Bild über deren offizielle Schnittstellen. Ohne Zugang bleibt alles wie bisher. Eine kurze Anleitung steht im README.
+- **Zugänge in den Einstellungen:** Unter Einstellungen → Werkstatt → Link-Vorschau trägst du die Zugänge direkt in der Weboberfläche ein, ohne Docker-Kenntnisse. Sie werden **verschlüsselt** gespeichert (abgeleitet aus `SECRET_KEY`) und nie wieder angezeigt. Variablen in der `.env` (`THINGIVERSE_TOKEN`, `CULTS3D_USER`, `CULTS3D_KEY`) haben weiter Vorrang. Neue Abhängigkeit: `cryptography`.
+
 ## [1.6.1] – 2026-11-24
 
 ### Behoben
@@ -118,7 +124,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.0...v1.5.1

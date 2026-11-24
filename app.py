@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import hmac
 import json
 import os
@@ -11,6 +12,7 @@ from collections import Counter
 from datetime import date, datetime
 from urllib.parse import quote, urlparse
 
+from cryptography.fernet import Fernet, InvalidToken
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 from flask import Flask, abort, g, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.exceptions import HTTPException
@@ -204,6 +206,34 @@ def setting(con, key, default=0.0):
 def put_setting(con, key, value):
     con.execute("INSERT INTO settings (key, value) VALUES (?, ?) "
                 "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, value))
+
+
+# Zugangsdaten für Link-Vorschauen: verschlüsselt (Fernet) in der Datenbank, Schlüssel abgeleitet aus SECRET_KEY.
+# Eine Sicherung der Datenbank allein verrät sie nicht. Die .env hat Vorrang. Ändert sich SECRET_KEY, sind sie nicht mehr lesbar.
+PREVIEW_KEYS = ("THINGIVERSE_TOKEN", "CULTS3D_USER", "CULTS3D_KEY")
+_fernet = Fernet(base64.urlsafe_b64encode(hashlib.sha256(b"pleaseprintit/secrets/v1:" + app.secret_key.encode()).digest()))
+
+
+def secret_state(con, name):
+    """→ (wert, zustand) mit zustand "env" | "db" | "broken" | ""."""
+    if v := os.environ.get(name):
+        return v, "env"
+    raw = text_setting(con, "secret:" + name)
+    if not raw:
+        return "", ""
+    try:
+        return _fernet.decrypt(raw.encode()).decode(), "db"
+    except InvalidToken:
+        app.logger.warning("Gespeicherter Zugang %s nicht lesbar (SECRET_KEY geändert?)", name)
+        return "", "broken"
+
+
+def put_secret(con, name, value):
+    put_setting(con, "secret:" + name, _fernet.encrypt(value.encode()).decode() if value else "")
+
+
+def preview_creds(con):
+    return {k: secret_state(con, k)[0] for k in PREVIEW_KEYS}
 
 
 # Filament-Sorten zur Auswahl (kein Freitext) mit typischer Dichte in g/cm³ als Startwert für die Kostenschätzung
@@ -459,7 +489,7 @@ MAX_VOLUME = 1_000_000   # cm³ = 1 m³; mehr kann kein Hobbydrucker
 PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang", "slicer_file"}
 PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne Anmeldung → Login, danach zurück
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-ADMIN_ONLY = {"save_currency", "set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
+ADMIN_ONLY = {"save_previews", "save_currency", "set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
               "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify",
               "save_note", "save_photo", "set_price", "set_paid", "toggle_prepay", "add_credit", "save_pay"}
@@ -812,7 +842,9 @@ def create_order():
 
 
 def save_link_order(url, title, extra, upload=None):
-    p = preview(url)
+    with db() as con:
+        creds = preview_creds(con)
+    p = preview(url, creds)
     if p["error"]:
         app.logger.warning("Vorschau für %s: %s", url, p["error"])
     # eigenes Bild des Einsenders hat Vorrang (Seiten wie MakerWorld sperren den Abruf)
@@ -1093,6 +1125,18 @@ def save_note(link_id):
         get_entry(con, link_id)
         con.execute("UPDATE links SET note = ? WHERE id = ?", (request.form.get("note", "").strip()[:2000] or None, link_id))
     return redirect(url_for("entry", link_id=link_id))
+
+
+@app.post("/settings/previews")
+def save_previews():
+    """Zugänge für Link-Vorschauen: leeres Feld = unverändert, Haken „Entfernen“ löscht. Nichts wird je wieder angezeigt."""
+    with db() as con:
+        for key in PREVIEW_KEYS:
+            if request.form.get("clear_" + key):
+                put_secret(con, key, "")
+            elif value := request.form.get(key, "").strip()[:300]:
+                put_secret(con, key, value)
+    return redirect(url_for("settings", tab="werkstatt") + "#vorschau")
 
 
 @app.post("/settings/notify")
@@ -1523,7 +1567,7 @@ def settings():
                                tip=text_setting(con, "tip_url"), notify_email=text_setting(con, "notify_email"),
                                notify_mute=text_setting(con, "notify_mute"), pay_mode=pay_mode(con),
                                pay_markup=setting(con, "pay_markup", MARKUP),
-                               mail_on=mail.configured(), slicers=SLICERS, chosen=chosen_slicers(con),
+                               mail_on=mail.configured(), prev_state={k: secret_state(con, k)[1] for k in PREVIEW_KEYS}, slicers=SLICERS, chosen=chosen_slicers(con),
                                datenschutz=text_setting(con, "datenschutz"),
                                template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))
 

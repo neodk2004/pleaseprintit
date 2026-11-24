@@ -573,6 +573,17 @@ T = {
 
     # --- Slicer ---
     "Slicer": ("Slicer", "Trancheur"),
+    "Link-Vorschau (optional)": ("Link preview (optional)", "Aperçu des liens (facultatif)"),
+    "Manche Seiten sperren den automatischen Abruf von Titel und Bild. Mit eigenem Zugang geht es trotzdem: Thingiverse-App-Token (thingiverse.com/developers) und Cults3D-Nickname mit API-Schlüssel aus deinem Cults-Konto. Die Werte werden verschlüsselt gespeichert und nie wieder angezeigt. Ein leeres Feld lässt den gespeicherten Wert unverändert.":
+        ("Some sites block automatic fetching of title and image. With your own access it still works: Thingiverse app token (thingiverse.com/developers) and Cults3D nickname with the API key from your Cults account. Values are stored encrypted and never shown again. An empty field keeps the stored value.",
+         "Certains sites bloquent la récupération automatique du titre et de l’image. Avec ton propre accès, ça marche quand même : jeton d’appli Thingiverse (thingiverse.com/developers) et pseudo Cults3D avec la clé API de ton compte Cults. Les valeurs sont chiffrées et jamais réaffichées. Un champ vide conserve la valeur enregistrée."),
+    "Thingiverse: App-Token": ("Thingiverse: app token", "Thingiverse : jeton d’appli"),
+    "Cults3D: Nickname": ("Cults3D: nickname", "Cults3D : pseudo"),
+    "Cults3D: API-Schlüssel": ("Cults3D: API key", "Cults3D : clé API"),
+    "(in der .env gesetzt, dort ändern)": ("(set in .env, change it there)", "(défini dans .env, à modifier là-bas)"),
+    "✓ gesetzt": ("✓ set", "✓ défini"),
+    "nicht lesbar, bitte neu eingeben": ("unreadable, please enter again", "illisible, saisis à nouveau"),
+    "Entfernen": ("Remove", "Supprimer"),
     "In {name} öffnen": ("Open in {name}", "Ouvrir dans {name}"),
     "Knöpfe im Auftrag, die die 3D-Datei direkt in deinem Slicer am PC öffnen. Der Slicer muss installiert sein. Der Link gilt eine Stunde.":
         ("Buttons on a request that open the 3D file directly in the slicer on your computer. The slicer must be "

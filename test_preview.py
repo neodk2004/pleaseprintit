@@ -33,6 +33,31 @@ r = P.printables("https://www.printables.com/de/model/3161-3d-benchy")
 assert r == {"title": "3DBenchy", "site": "Printables", "image_url": "https://media.printables.com/media/prints/3161/a.jpg"}, r
 assert calls[0][0] == P.PRINTABLES_API and 'print(id: \\"3161\\")' in calls[0][1]
 assert P.printables("https://makerworld.com/en/models/1") is None
+# Thingiverse: ohne Token inaktiv; mit Token Bearer-Header, Titel und Bild aus der Antwort
+assert P.thingiverse("https://www.thingiverse.com/thing:763622", {}) is None, "ohne Token inaktiv"
+TV = {"THINGIVERSE_TOKEN": "geheim"}
+seen = []
+def fake_t(url, limit, body=None, extra=None):
+    seen.append((url, extra))
+    return url, "application/json", b'{"name":" Benchy ","thumbnail":"https://cdn.thingiverse.com/x.JPG"}'
+P.fetch = fake_t
+r = P.thingiverse("https://www.thingiverse.com/thing:763622", TV)
+assert r == {"title": "Benchy", "site": "Thingiverse", "image_url": "https://cdn.thingiverse.com/x.JPG"}, r
+assert seen[0] == ("https://api.thingiverse.com/things/763622", {"Authorization": "Bearer geheim"}), seen
+assert P.thingiverse("https://makerworld.com/en/models/1", TV) is None
+# Cults3D: ohne Zugang inaktiv; mit Zugang Basic-Header, Slug als Variable (keine Injektion), Titel und Bild
+assert P.cults3d("https://cults3d.com/en/3d-model/tool/benchy", {}) is None, "ohne Zugang inaktiv"
+CU = {"CULTS3D_USER": "nick", "CULTS3D_KEY": "schluessel"}
+seen.clear()
+def fake_c(url, limit, body=None, extra=None):
+    seen.append((url, body, extra))
+    return url, "application/json", b'{"data":{"creation":{"name":" Benchy ","illustrationImageUrl":"https://images.cults3d.com/a.JPG"}}}'
+P.fetch = fake_c
+r = P.cults3d("https://cults3d.com/de/3d-model/tool/3dbenchy-the-jolly?x=1", CU)
+assert r == {"title": "Benchy", "site": "Cults3D", "image_url": "https://images.cults3d.com/a.JPG"}, r
+assert seen[0][0] == "https://cults3d.com/graphql" and '"s": "3dbenchy-the-jolly"' in seen[0][1], seen
+assert seen[0][2] == {"Authorization": "Basic bmljazpzY2hsdWVzc2Vs"}, seen[0][2]
+assert P.cults3d("https://cults3d.com/en", CU) is None and P.cults3d("https://example.com/3d-model/a/b", CU) is None
 P.fetch = real
 # Verkleinern: großes PNG → WebP mit höchstens 800 px; kaputte Daten → None (Original bleibt)
 import io
