@@ -4,6 +4,7 @@
 !models.py
 !backup.py
 !mail.py
+!ntfy.py
 !i18n.py
 !requirements.txt
 !static

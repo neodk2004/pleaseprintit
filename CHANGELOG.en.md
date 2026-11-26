@@ -6,6 +6,9 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+### Added
+- **Push notifications via ntfy:** The workshop can get a push notification on their phone for new print requests and questions, via ntfy.sh or a self-hosted ntfy server (home network works too). Set it up under Settings → Workshop → Push notification via ntfy: topic address, optional access token or user:password (stored encrypted, `NTFY_TOKEN` in `.env` takes precedence), a button for a test message, can be paused. Works without e-mail as well. No new dependency.
+
 ## [1.6.2] – 2026-11-24
 
 ### Added

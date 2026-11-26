@@ -6,6 +6,9 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+### Neu
+- **Push-Nachrichten über ntfy:** Bei neuen Druckwünschen und Rückfragen bekommt die Werkstatt auf Wunsch eine Push-Nachricht aufs Handy, über ntfy.sh oder den eigenen ntfy-Server (auch im Heimnetz). Einrichten unter Einstellungen → Werkstatt → Push-Nachricht über ntfy: Adresse des Themas, optional Zugangstoken oder Benutzer:Passwort (verschlüsselt gespeichert, `NTFY_TOKEN` in der `.env` hat Vorrang), Knopf für eine Testnachricht, pausierbar. Funktioniert auch ohne Mailversand. Keine neue Abhängigkeit.
+
 ## [1.6.2] – 2026-11-24
 
 ### Neu

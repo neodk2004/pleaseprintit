@@ -384,6 +384,75 @@ assert all(os.path.exists(os.path.join(A.MODELS, x["file"])) for x in (old, new)
 assert ben.get(f"/models/{q2}/file").data == CUBE and new["filament"] == old["filament"]
 ben.post("/me", data={"email": ""})
 admin.post("/settings/notify", data={"notify_email": ""})
+# --- Push-Nachricht an die Werkstatt über ntfy ------------------------------
+import json  # noqa: E402
+assert A.ntfy.split("https://ntfy.example.org/druck") == ("https://ntfy.example.org/", "druck")
+assert A.ntfy.split("http://192.168.1.5:8081/ntfy/werk_statt/") == ("http://192.168.1.5:8081/ntfy/", "werk_statt"), "Heimnetz und Unterpfad"
+for bad in ("ftp://x.org/a", "https://x.org/", "https://x.org/a b", "https://u:p@x.org/a", "https://x.org/a?x=1", "https://x.org:99999/a", "druck"):
+    assert A.ntfy.split(bad) is None, bad
+req = A.ntfy.request("https://ntfy.example.org/druck", "tk_abc", {"title": "Größer 🖨"})
+assert req.full_url == "https://ntfy.example.org/" and req.get_header("Authorization") == "Bearer tk_abc"
+assert json.loads(req.data) == {"topic": "druck", "title": "Größer 🖨"}, "JSON an die Server-Adresse, Umlaute kein Problem"
+assert A.ntfy.request("https://n.org/a", "ich:geheim", {}).get_header("Authorization") == "Basic aWNoOmdlaGVpbQ=="
+assert A.ntfy.request("https://n.org/a", "", {}).get_header("Authorization") is None
+assert A.ntfy.send_now("kaputt", "", {}) == "invalid url"
+pushed = []
+A.ntfy.send = lambda url, tok, msg: pushed.append((url, tok, msg))
+ntfy_answer = [None]
+A.ntfy.send_now = lambda url, tok, msg: pushed.append((url, tok, msg)) or ntfy_answer[0]
+upload = lambda: {"model": (io.BytesIO(CUBE), "push.stl"), "choice": f"r:{pid}", "qty": "2"}
+ben.post("/orders", data=upload(), content_type="multipart/form-data")
+assert not pushed, "ohne Thema keine Push-Nachricht"
+assert ben.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/druck"}).status_code == 403
+assert ben.post("/settings/ntfy/test").status_code == 403
+assert admin.post("/settings/ntfy/test").status_code == 400, "Test ohne Thema geht nicht"
+assert admin.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/"}).status_code == 400
+r = admin.post("/settings/ntfy", data={"ntfy_url": " https://ntfy.example.org/druck ", "ntfy_token": "tk_geheim"})
+assert r.headers["Location"].endswith("tab=werkstatt#ntfy")
+raw = con.execute("SELECT value FROM settings WHERE key = 'secret:NTFY_TOKEN'").fetchone()[0]
+assert raw and "tk_geheim" not in raw, "Zugang nur verschlüsselt in der Datenbank"
+page = admin.get("/settings?tab=werkstatt").data.decode()
+assert 'value="https://ntfy.example.org/druck"' in page and "tk_geheim" not in page and "Testnachricht senden" in page
+ben.post("/orders", data=upload(), content_type="multipart/form-data")
+url, tok, msg = pushed[-1]
+assert (url, tok) == ("https://ntfy.example.org/druck", "tk_geheim") and len(pushed) == 1
+assert msg["title"] == "Neuer Druckwunsch von ben" and "push" in msg["message"] and "Stückzahl: 2" in msg["message"]
+assert msg["click"].endswith(f"/entry/{con.execute('SELECT MAX(id) FROM links').fetchone()[0]}") and msg["tags"] == ["printer"]
+admin.post("/orders", data=upload(), content_type="multipart/form-data")
+assert len(pushed) == 1, "eigene Aufträge der Werkstatt lösen keine Push-Nachricht aus"
+ben.post(f"/entry/{k_id}/comment", data={"text": "Geht auch Rot?"})
+assert pushed[-1][2]["title"] == "Neuer Kommentar von ben" and "Geht auch Rot?" in pushed[-1][2]["message"]
+assert pushed[-1][2]["tags"] == ["speech_balloon"] and len(pushed) == 2
+admin.post(f"/entry/{k_id}/comment", data={"text": "Ja"})
+assert len(pushed) == 2, "Antwort der Werkstatt geht nicht an die Werkstatt"
+en = client(); login(en, "admin", "adminpw"); en.post("/lang", data={"lang": "en"})
+en.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/druck"})
+ben.post(f"/entry/{k_id}/comment", data={"text": "Danke"})
+assert pushed[-1][2]["title"] == "New comment from ben", "Sprache wie beim Einrichten"
+assert pushed[-1][1] == "tk_geheim", "leeres Feld lässt den Zugang unverändert"
+assert "Danke" in pushed[-1][2]["message"] and "tk_geheim" not in str(pushed[-1][2])
+# Testnachricht: sofort, Ergebnis steht direkt in der Karte
+r = admin.post("/settings/ntfy/test")
+assert r.status_code == 200 and "Testnachricht ist raus." in r.data.decode() and pushed[-1][2]["title"] == "Testnachricht von PleasePrintit"
+ntfy_answer[0] = "HTTP Error 403: Forbidden"
+r = admin.post("/settings/ntfy/test")
+assert r.status_code == 502 and "HTTP Error 403: Forbidden" in r.data.decode()
+# Pausieren und Entfernen
+n = len(pushed)
+admin.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/druck", "mute": "1", "clear_token": "1"})
+ben.post(f"/entry/{k_id}/comment", data={"text": "Still"})
+assert len(pushed) == n, "pausiert → keine Push-Nachricht"
+assert A.secret_state(con, "NTFY_TOKEN") == ("", "") and 'name="mute" value="1" checked' in admin.get("/settings?tab=werkstatt").data.decode()
+os.environ["NTFY_TOKEN"] = "aus-env"
+admin.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/druck"})
+ben.post(f"/entry/{k_id}/comment", data={"text": "Laut"})
+assert pushed[-1][1] == "aus-env", ".env hat Vorrang"
+assert "(in der .env gesetzt, dort ändern)" in admin.get("/settings?tab=werkstatt").data.decode()
+del os.environ["NTFY_TOKEN"]
+admin.post("/settings/ntfy", data={"ntfy_url": ""})
+n = len(pushed)
+ben.post(f"/entry/{k_id}/comment", data={"text": "Weg"})
+assert len(pushed) == n, "leeres Thema → aus"
 A.preview = real_preview
 del os.environ["SMTP_HOST"]
 # --- Stückzahl und Neu-Einreichen mit anderem Filament ----------------------
