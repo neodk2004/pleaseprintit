@@ -178,6 +178,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 | Rückfragen am Auftrag | ✅ | ✅ | ➖ |
 | Interne Notiz nur für dich | ✅ | ➖ | 🟡 Notizen |
 | Mails | ✅ neuer Wunsch, Status, Rückfragen, pausierbar | ✅ neuer Wunsch, Status, Kommentare, abschaltbar | 🟡 nur „fertig gedruckt“ |
+| Push aufs Handy | ✅ über ntfy, auch eigener Server im Heimnetz | 🟡 nur Hinweise in der App | ➖ |
 | Platz in der Warteschlange für Freunde | ✅ | ➖ | ➖ |
 | Foto vom fertigen Druck | ✅ im Auftrag und in der Mail | ➖ | ➖ |
 | Nochmal drucken | ✅ | ✅ | ➖ |

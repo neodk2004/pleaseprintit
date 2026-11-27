@@ -177,6 +177,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 | Questions on the request | ✅ | ✅ | ➖ |
 | Internal note just for you | ✅ | ➖ | 🟡 notes |
 | E-mails | ✅ new request, status, questions, can be paused | ✅ new request, status, comments, can be turned off | 🟡 only “ready to collect” |
+| Push to your phone | ✅ via ntfy, self-hosted server works too | 🟡 in-app notifications only | ➖ |
 | Queue position for friends | ✅ | ➖ | ➖ |
 | Photo of the finished print | ✅ on the request and in the e-mail | ➖ | ➖ |
 | Print again | ✅ | ✅ | ➖ |
