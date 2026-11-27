@@ -21,6 +21,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import i18n
 import mail
+import ntfy
 from models import MAX_MODEL, embedded_thumbnail, fits, model_kind, volume_cm3
 from preview import MAX_IMAGE, image_ext, preview, shrink
 
@@ -491,7 +492,7 @@ PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ONLY = {"save_previews", "save_currency", "set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
-              "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify",
+              "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify", "save_ntfy", "test_ntfy",
               "save_note", "save_photo", "set_price", "set_paid", "toggle_prepay", "add_credit", "save_pay"}
 # Ablehnungsgründe: kurz für die Werkstatt (wird gespeichert) → ausformuliert für den Freund (Seite + Mail)
 REASONS = {
@@ -1092,12 +1093,35 @@ def info_mail(e, to, lang, headline, comment=None, friend=False):
 
 
 def notify_workshop(con, e, headline=None, comment=None):
-    """Mail an die Werkstatt, wenn ein Freund etwas einreicht oder schreibt (Adresse in Einstellungen → Werkstatt)."""
+    """Mail und/oder ntfy-Nachricht an die Werkstatt, wenn ein Freund etwas einreicht oder schreibt
+    (Adresse und ntfy-Thema in Einstellungen → Werkstatt, beide getrennt pausierbar)."""
+    name = g.user["name"]
+    headline = headline or (lambda: _("Neuer Druckwunsch von {name}", name=name))
+    lang = text_setting(con, "notify_lang")
     to = text_setting(con, "notify_email")
     if to and mail.configured() and not text_setting(con, "notify_mute"):
-        name = g.user["name"]
-        mail.send(info_mail(e, to, text_setting(con, "notify_lang"),
-                            headline or (lambda: _("Neuer Druckwunsch von {name}", name=name)), comment))
+        mail.send(info_mail(e, to, lang, headline, comment))
+    topic = text_setting(con, "ntfy_url")
+    if topic and not text_setting(con, "ntfy_mute"):
+        ntfy.send(topic, secret_state(con, "NTFY_TOKEN")[0], ntfy_message(e, lang, headline, comment))
+
+
+def ntfy_message(e, lang, headline, comment=None):
+    """Push-Nachricht zu einem Auftrag: Überschrift als Titel, darunter Auftrag und Kommentar oder Filament und Stückzahl.
+    Ein Tipp auf die Nachricht öffnet den Auftrag."""
+    with in_lang(lang):
+        lines = [f"#{e['id']:04d} " + " ".join(e["title"].split())]
+        if comment:
+            lines.append(f"„{comment[:500]}“")
+        else:
+            if e["filament"]:
+                lines.append(f"{_('Filament')}: {e['filament']} · {color_name(e['color'])}")
+            lines.append(f"{_('Stückzahl')}: {e['qty'] or 1}")
+        msg = {"title": headline(), "message": "\n".join(lines), "click": public("entry", link_id=e["id"]),
+               "tags": ["speech_balloon" if comment else "printer"]}
+    if PUBLIC_URL:   # Symbol lädt die ntfy-App, also nur mit öffentlicher Adresse
+        msg["icon"] = PUBLIC_URL + url_for("static", filename="icon-192.png")
+    return msg
 
 
 @app.post("/entry/<int:link_id>/comment")
@@ -1149,6 +1173,38 @@ def save_notify():
         put_setting(con, "notify_mute", "1" if request.form.get("mute") else "")
         put_setting(con, "notify_lang", g.lang)   # Mails an die Werkstatt in der Sprache, in der sie eingestellt wurde
     return redirect(url_for("settings", tab="werkstatt"))
+
+
+@app.post("/settings/ntfy")
+def save_ntfy():
+    """ntfy-Thema der Werkstatt. Zugang wie bei der Link-Vorschau: verschlüsselt, leer = unverändert, nie wieder angezeigt."""
+    url = request.form.get("ntfy_url", "").strip()[:300]
+    if url and not ntfy.split(url):
+        abort(400, _("Das sieht nicht wie die Adresse eines ntfy-Themas aus, z. B. https://ntfy.example.org/druck."))
+    with db() as con:
+        put_setting(con, "ntfy_url", url)
+        put_setting(con, "ntfy_mute", "1" if request.form.get("mute") else "")
+        put_setting(con, "notify_lang", g.lang)
+        if request.form.get("clear_token"):
+            put_secret(con, "NTFY_TOKEN", "")
+        elif token := request.form.get("ntfy_token", "").strip()[:300]:
+            put_secret(con, "NTFY_TOKEN", token)
+    return redirect(url_for("settings", tab="werkstatt") + "#ntfy")
+
+
+@app.post("/settings/ntfy/test")
+def test_ntfy():
+    """Testnachricht sofort schicken und das Ergebnis direkt anzeigen, damit sich Adresse und Zugang prüfen lassen."""
+    with db() as con:
+        url = text_setting(con, "ntfy_url")
+        if not url:
+            abort(400)
+        token = secret_state(con, "NTFY_TOKEN")[0]
+    fail = ntfy.send_now(url, token, {   # außerhalb von db(): bis zu 10 s Wartezeit, keine offene Verbindung
+        "title": _("Testnachricht von PleasePrintit"), "tags": ["printer"],
+        "message": _("Klappt! Hier meldet sich PleasePrintit bei neuen Druckwünschen und Rückfragen."),
+        "click": public("index")})
+    return settings_page("werkstatt", ntfy_ok=not fail, ntfy_err=fail), 502 if fail else 200
 
 
 @app.post("/entry/<int:link_id>/model")
@@ -1555,7 +1611,10 @@ def toggle_user(uid):
 @app.get("/settings")
 def settings():
     tab = request.args.get("tab")
-    tab = tab if tab in ("drucker", "filamente", "werkstatt", "rechtliches") else "drucker"
+    return settings_page(tab if tab in ("drucker", "filamente", "werkstatt", "rechtliches") else "drucker")
+
+
+def settings_page(tab, **extra):
     with db() as con:
         options = filament_options(con)
         have = {f["name"].lower() for f, _c in options}
@@ -1569,7 +1628,9 @@ def settings():
                                pay_markup=setting(con, "pay_markup", MARKUP),
                                mail_on=mail.configured(), prev_state={k: secret_state(con, k)[1] for k in PREVIEW_KEYS}, slicers=SLICERS, chosen=chosen_slicers(con),
                                datenschutz=text_setting(con, "datenschutz"),
-                               template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE))
+                               ntfy_url=text_setting(con, "ntfy_url"), ntfy_mute=text_setting(con, "ntfy_mute"),
+                               ntfy_token=secret_state(con, "NTFY_TOKEN")[1],
+                               template=i18n.PRIVACY_TEMPLATES.get(g.lang, DATENSCHUTZ_TEMPLATE), **extra)
 
 
 # --- Impressum und Datenschutz (öffentlich; die Werkstatt pflegt beides in den Einstellungen) ---

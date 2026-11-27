@@ -131,7 +131,7 @@ flowchart LR
 - 📊 **Klarer Status:** Eingereicht → Geplant → Gedruckt (bei Versand weiter Unterwegs → Zugestellt, mit Sendungsnummer), oder Abgelehnt mit Grund, als Ablauf-Leiste mit Sechsecken und einem Filament-Faden, der von Schritt zu Schritt dicker wird. Auf Wunsch per E-Mail, jederzeit pausierbar. Freunde sehen ihren Platz in der Warteschlange.
 - 📦 **Versand mit Sendungsnummer:** Nach „Gedruckt“ folgen **Unterwegs** und **Zugestellt**. Beim Setzen auf „Unterwegs“ trägst du eine Sendungsnummer oder einen Verfolgungs-Link ein, der Freund bekommt ihn in der Mail und sieht ihn im Auftrag und kann die Lieferung selbst verfolgen. Wer abholt, sieht die Schritte nicht.
 - 💬 **Rückfragen am Auftrag:** Freund und Werkstatt schreiben sich direkt am Auftrag, die andere Seite bekommt eine Mail. Dazu eine interne Notiz, die nur du siehst.
-- 📬 **Mail bei neuem Wunsch:** Du bekommst Bescheid, sobald jemand etwas einreicht.
+- 📬 **Mail oder Push bei neuem Wunsch:** Du bekommst Bescheid, sobald jemand etwas einreicht oder eine Rückfrage schreibt, per Mail und/oder als Push-Nachricht aufs Handy über [ntfy](https://ntfy.sh) (auch mit eigenem Server, siehe [Anleitung](#optional-push-nachrichten-über-ntfy)).
 - 📸 **Foto vom fertigen Druck:** Der Freund sieht es im Auftrag und bekommt es mit der Mail „Gedruckt“. Mit **„Nochmal drucken“** bestellt er dasselbe mit einem Klick erneut.
 
 </details>
@@ -298,6 +298,17 @@ Printables funktioniert ohne Zusatz. Thingiverse und Cults3D sperren den Abruf i
 2. In PleasePrintit: **Einstellungen → Werkstatt → Link-Vorschau** → „Cults3D: Nickname“ (dein Benutzername) und „Cults3D: API-Schlüssel“ einfügen → **Speichern**.
 
 Die Werte werden **verschlüsselt** gespeichert (der Schlüssel dazu wird aus deinem `SECRET_KEY` abgeleitet) und nie wieder angezeigt. Ein leeres Feld lässt den gespeicherten Wert unverändert, „Entfernen“ löscht ihn. Änderst du den `SECRET_KEY`, musst du die Zugänge neu eingeben. Alternativ setzt du `THINGIVERSE_TOKEN`, `CULTS3D_USER` und `CULTS3D_KEY` in der `.env`, das hat Vorrang. Ohne Zugang bleibt es beim Fallback: Der Freund gibt Titel und Bild beim Einreichen selbst an.
+
+## Optional: Push-Nachrichten über ntfy
+
+Statt oder zusätzlich zur Mail schickt PleasePrintit dir eine Push-Nachricht aufs Handy, sobald ein Freund einen Druckwunsch einreicht oder eine Rückfrage schreibt. Das läuft über [ntfy](https://ntfy.sh), entweder über ntfy.sh oder über deinen eigenen ntfy-Server (auch im Heimnetz, z. B. `http://192.168.1.5:8081/druck`). Ein SMTP-Zugang ist dafür nicht nötig.
+
+1. In der ntfy-App (Android, iOS oder Web) ein Thema abonnieren, z. B. `druck`. Bei ntfy.sh ist das Thema öffentlich, nimm dort einen schwer zu erratenden Namen.
+2. In PleasePrintit: **Einstellungen → Werkstatt → Push-Nachricht über ntfy** → bei „Adresse des Themas“ die volle Adresse eintragen, z. B. `https://ntfy.example.org/druck`.
+3. Ist dein Thema geschützt, bei „Zugang“ einen **Zugangstoken** (`tk_…`, in ntfy unter Konto → Zugangstoken) oder `benutzer:passwort` eintragen. Der Zugang braucht Schreibrecht auf das Thema.
+4. **Speichern**, dann **Testnachricht senden**. Klappt es nicht, steht der Grund direkt darüber, z. B. `HTTP Error 403: Forbidden` bei falschem Zugang.
+
+Die Nachricht nennt den Auftrag, Filament und Stückzahl (bei Rückfragen den Text). Ein Tipp darauf öffnet den Auftrag. Mit gesetzter `PUBLIC_URL` zeigt sie auch das App-Symbol. Der Zugang wird wie die Link-Vorschau-Zugänge **verschlüsselt** gespeichert und nie wieder angezeigt. Alternativ setzt du `NTFY_TOKEN` in der `.env`, das hat Vorrang. Mit „Push-Nachrichten pausieren“ bleibt alles gespeichert, es geht aber nichts raus. Ein leeres Adressfeld schaltet ntfy ab.
 
 ## Von außen erreichbar machen
 

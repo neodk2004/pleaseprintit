@@ -130,7 +130,7 @@ flowchart LR
 
 - 📊 **Clear status:** submitted → planned → printed (for shipped requests continuing with on its way → delivered, with a tracking number), or rejected with a reason, shown as a progress bar of hexagons with a filament thread that gets thicker from step to step. Optional e-mail notifications that can be paused anytime. Friends see their position in the queue.
 - 💬 **Questions on a request:** friend and workshop write to each other right on the request, and the other side gets an e-mail. Plus an internal note only you can see.
-- 📬 **E-mail on new requests:** you're notified as soon as someone submits something.
+- 📬 **E-mail or push on new requests:** you're notified as soon as someone submits something or asks a question, by e-mail and/or as a push notification on your phone via [ntfy](https://ntfy.sh) (self-hosted works too, see the [guide](#optional-push-notifications-via-ntfy)).
 - 📸 **Photo of the finished print:** your friend sees it on the request and gets it with the “Printed” e-mail. With **“Print again”** they can reorder the same thing in one click.
 
 </details>
@@ -238,6 +238,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 | `SMTP_SECURITY` | no | `starttls` (default), `ssl` or `none` |
 | `SMTP_USER`, `SMTP_PASSWORD` | no | login for the mail server (use an app password) |
 | `SMTP_FROM` | no | sender, e.g. `PleasePrintit <print@example.org>` |
+| `NTFY_TOKEN` | no | access token for ntfy push notifications, alternative to the settings ([guide](#optional-push-notifications-via-ntfy)) |
 
 ## Prebuilt image only (no Git)
 
@@ -318,6 +319,17 @@ Printables works without any extra setup. Thingiverse and Cults3D block fetching
 2. In PleasePrintit: **Einstellungen → Werkstatt → Link-Vorschau** → enter “Cults3D: nickname” (your username) and “Cults3D: API key” → **Speichern**.
 
 The values are stored **encrypted** (the key is derived from your `SECRET_KEY`) and never shown again. An empty field keeps the stored value, “Entfernen” (remove) deletes it. If you change `SECRET_KEY`, enter the access again. Alternatively set `THINGIVERSE_TOKEN`, `CULTS3D_USER` and `CULTS3D_KEY` in `.env`, which takes precedence. Without access it stays at the fallback: your friend enters title and image when submitting.
+
+## Optional: push notifications via ntfy
+
+Instead of or in addition to e-mail, PleasePrintit sends a push notification to your phone whenever a friend submits a print request or asks a question. This uses [ntfy](https://ntfy.sh), either ntfy.sh or your own ntfy server (also on your home network, e.g. `http://192.168.1.5:8081/print`). No SMTP access is needed for this.
+
+1. In the ntfy app (Android, iOS or web), subscribe to a topic, e.g. `print`. On ntfy.sh topics are public, so pick a name that is hard to guess.
+2. In PleasePrintit: **Einstellungen → Werkstatt → Push-Nachricht über ntfy** (Settings → Workshop → Push notification via ntfy) → enter the full address under “Topic address”, e.g. `https://ntfy.example.org/print`.
+3. If your topic is protected, enter an **access token** (`tk_…`, in ntfy under Account → Access tokens) or `user:password` under “Access”. It needs write access to the topic.
+4. **Save**, then **Send test message**. If it fails, the reason is shown right above, e.g. `HTTP Error 403: Forbidden` for wrong access.
+
+The notification names the request, filament and quantity (for questions, the text). Tapping it opens the request. With `PUBLIC_URL` set it also shows the app icon. Like the link preview access, the token is stored **encrypted** and never shown again. Alternatively set `NTFY_TOKEN` in `.env`, which takes precedence. “Pause push notifications” keeps everything saved but sends nothing. An empty address turns ntfy off.
 
 ## How it works for your friends
 

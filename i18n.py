@@ -38,6 +38,25 @@ T = {
     "Dafür muss der Mailversand in der .env eingerichtet sein.":
         ("This requires e-mail sending to be set up in the .env file.",
          "Pour cela, l'envoi d'e-mails doit être configuré dans le fichier .env."),
+    # --- Push-Nachricht an die Werkstatt über ntfy ---
+    "Push-Nachricht über ntfy": ("Push notification via ntfy", "Notification push via ntfy"),
+    "Statt oder zusätzlich zur Mail: eine Nachricht aufs Handy über ntfy (ntfy.sh oder dein eigener Server), sobald ein Freund einen Druckwunsch einreicht oder eine Rückfrage schreibt. Trag die Adresse deines Themas ein. Für ein geschütztes Thema einen Zugangstoken (tk_…) oder Benutzer:Passwort, wird verschlüsselt gespeichert und nie wieder angezeigt. Leer = keine Push-Nachrichten.":
+        ("Instead of or in addition to e-mail: a message on your phone via ntfy (ntfy.sh or your own server) whenever a friend submits a print request or asks a question. Enter the address of your topic. For a protected topic, add an access token (tk_…) or user:password, it is stored encrypted and never shown again. Empty = no push notifications.",
+         "À la place de l'e-mail ou en plus : un message sur ton téléphone via ntfy (ntfy.sh ou ton propre serveur) dès qu'un ami envoie une demande d'impression ou pose une question. Saisis l'adresse de ton sujet. Pour un sujet protégé, ajoute un jeton d'accès (tk_…) ou utilisateur:mot de passe, il est enregistré chiffré et n'est plus jamais affiché. Vide = pas de notifications push."),
+    "Adresse des Themas": ("Topic address", "Adresse du sujet"),
+    "Zugang (optional)": ("Access (optional)", "Accès (facultatif)"),
+    "Push-Nachrichten pausieren (Adresse bleibt gespeichert)": ("Pause push notifications (address stays saved)",
+                                                                "Mettre les notifications push en pause (l'adresse reste enregistrée)"),
+    "Testnachricht senden": ("Send test message", "Envoyer un message de test"),
+    "Testnachricht ist raus.": ("Test message sent.", "Message de test envoyé."),
+    "Versand fehlgeschlagen:": ("Sending failed:", "Échec de l'envoi :"),
+    "Das sieht nicht wie die Adresse eines ntfy-Themas aus, z. B. https://ntfy.example.org/druck.":
+        ("That doesn't look like the address of an ntfy topic, e.g. https://ntfy.example.org/print.",
+         "Cela ne ressemble pas à l'adresse d'un sujet ntfy, par ex. https://ntfy.example.org/impression."),
+    "Testnachricht von PleasePrintit": ("Test message from PleasePrintit", "Message de test de PleasePrintit"),
+    "Klappt! Hier meldet sich PleasePrintit bei neuen Druckwünschen und Rückfragen.":
+        ("It works! PleasePrintit will notify you here about new print requests and questions.",
+         "Ça marche ! PleasePrintit te préviendra ici des nouvelles demandes d'impression et des questions."),
     "Neuer Druckwunsch von {name}": ("New print request from {name}", "Nouvelle demande d'impression de {name}"),
     # --- Rückfragen und interne Notiz am Auftrag ---
     "Rückfragen": ("Questions", "Questions"),

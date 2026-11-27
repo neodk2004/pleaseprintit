@@ -6,6 +6,11 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.7.0] – 2026-11-27
+
+### Neu
+- **Push-Nachrichten über ntfy:** Bei neuen Druckwünschen und Rückfragen bekommt die Werkstatt auf Wunsch eine Push-Nachricht aufs Handy, über ntfy.sh oder den eigenen ntfy-Server (auch im Heimnetz). Einrichten unter Einstellungen → Werkstatt → Push-Nachricht über ntfy: Adresse des Themas, optional Zugangstoken oder Benutzer:Passwort (verschlüsselt gespeichert, `NTFY_TOKEN` in der `.env` hat Vorrang), Knopf für eine Testnachricht, pausierbar. Funktioniert auch ohne Mailversand. Keine neue Abhängigkeit. Idee und Grundstock von GhostService (PR #18), danke!
+
 ## [1.6.2] – 2026-11-24
 
 ### Neu
@@ -124,7 +129,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0

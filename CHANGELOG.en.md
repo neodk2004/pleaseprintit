@@ -6,6 +6,11 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.7.0] – 2026-11-27
+
+### Added
+- **Push notifications via ntfy:** The workshop can get a push notification on their phone for new print requests and questions, via ntfy.sh or a self-hosted ntfy server (home network works too). Set it up under Settings → Workshop → Push notification via ntfy: topic address, optional access token or user:password (stored encrypted, `NTFY_TOKEN` in `.env` takes precedence), a button for a test message, can be paused. Works without e-mail as well. No new dependency. Idea and groundwork by GhostService (PR #18), thank you!
+
 ## [1.6.2] – 2026-11-24
 
 ### Added
@@ -124,7 +129,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.5.1...v1.6.0

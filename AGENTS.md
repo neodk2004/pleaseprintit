@@ -17,6 +17,7 @@ PleasePrintit is a small, self-hosted **3D print request queue** for a private c
 | `preview.py` | Fetches link previews (Open Graph) with SSRF protection — every IP must be public, connects to the checked IP |
 | `i18n.py` | Translation table (German key → English, French), language list, privacy-policy templates |
 | `mail.py` | SMTP e-mail via stdlib only; disabled when `SMTP_HOST` is empty |
+| `ntfy.py` | Push notifications to the workshop via ntfy (JSON publish, stdlib only); topic URL is a setting, token a secret (`NTFY_TOKEN`) |
 | `backup.py` | Daily `.tar.gz` backups (`--once`, `--check FILE`) |
 | `templates/` | Jinja2 templates (`base.html` layout, `_*.html` partials, `mail_*` e-mails) |
 | `static/` | Plain JS/CSS, PWA manifest, vendored three.js in `static/three/` (no build step, no npm) |
@@ -42,7 +43,7 @@ Tests set `SECRET_KEY`, `ADMIN_PASSWORD` and `DB_PATH` themselves and use a temp
 - **Security is a feature:** keep the CSP/HSTS headers, login throttling, invite-only signup, per-user limits (open orders, default 50 and adjustable; 500 MB files), content-based file checks and the SSRF guard in `preview.py`. Templates rely on Jinja2 autoescaping — don't use `|safe` on user data.
 - **STEP:** occt-import-js needs `eval` (embind) and WebAssembly. It runs only inside its Web Worker; `security_headers()` grants `'unsafe-eval' 'wasm-unsafe-eval'` to `/static/occt/` only. Never add eval to the page CSP. Python can't read STEP, so the order page measures the volume in the browser and posts it once to `/entry/<id>/measure`, which only accepts plausible values.
 - **Open in slicer:** `GET /slicer/<token>/<name>` is the only public file route on purpose, because the desktop slicer fetches the file without a session. The token is signed with `itsdangerous` (salt `slicer`) and valid for `SLICER_MAX_AGE` (1 hour), and only the admin's order page creates one. Keep it that way: never sign anything else with this serializer.
-- **Mails:** `notify()` sends status mails to friends, `notify_workshop()` mails the admin (setting `notify_email`) on new requests and comments, and `info_mail()` builds both from `mail_info.*`. Respect `users.mute` and the `notify_mute` setting: muted means no mail, but the address is kept.
+- **Mails:** `notify()` sends status mails to friends, `notify_workshop()` mails the admin (setting `notify_email`) on new requests and comments, and `info_mail()` builds both from `mail_info.*`. Respect `users.mute` and the `notify_mute` setting: muted means no mail, but the address is kept. `notify_workshop()` also pushes via `ntfy.send()` when `ntfy_url` is set and `ntfy_mute` is not; the ntfy URL is admin-set and may be a LAN host, so it deliberately bypasses the `preview.py` SSRF guard.
 - **Comments and photos:** `comments` (user_id NULL = workshop) and the columns `links.note` (admin only, never shown to friends) and `links.photo` (served via `/img/<name>` with the same permission check as the preview image).
 - The container runs as uid 1000 with a read-only filesystem; only `/data` and `/backups` are writable.
 - Configuration comes from environment variables only (see `.env.example`). Never commit `.env`, secrets or real personal data; screenshots use demo data.
