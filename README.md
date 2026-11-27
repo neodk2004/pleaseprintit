@@ -78,7 +78,7 @@ flowchart LR
 
 <table>
 <tr>
-<td align="center" width="33%">🔗<br><b>Link oder Datei</b><br><sub>Printables, MakerWorld, STL, 3MF, STEP</sub></td>
+<td align="center" width="33%">🔗<br><b>Link oder Datei</b><br><sub>Jeder Link, STL, 3MF, STEP</sub></td>
 <td align="center" width="33%">🧊<br><b>3D-Vorschau</b><br><sub>Drehen, Maße, passt aufs Bett?</sub></td>
 <td align="center" width="33%">🖨️<br><b>In Slicer öffnen</b><br><sub>Orca, Bambu Studio, Creality</sub></td>
 </tr>
@@ -171,7 +171,7 @@ Es gibt inzwischen drei freie, selbst gehostete Tools für Druckwünsche. Sie si
 |---|---|---|---|
 | **🎯 Gedacht für** | **Freundeskreis**, ein Drucker | kleines Büro, ein Drucker | Hobby bis Druckfarm |
 | **📥 Einreichen und vorbereiten** | | | |
-| Wunsch per Link | Printables, MakerWorld, Thingiverse | 🟡 nur Printables (abschaltbar) | fünf Seiten, u. a. MakerWorld |
+| Wunsch per Link | Jeder Link; Titel und Bild automatisch bei Printables, Thingiverse, Cults3D (mit Token) | 🟡 nur Printables (abschaltbar) | fünf Seiten, u. a. MakerWorld |
 | 3D-Vorschau | ✅ mit Druckbett-Check | ✅ | ✅ |
 | In Slicer öffnen | ✅ Orca, Bambu Studio, Creality Print, ohne Zusatzprogramm | 🟡 nur mit Hilfsprogramm, das man installieren muss (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | ➖ |
 | **💬 Zusammenarbeit** | | | |

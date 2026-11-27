@@ -78,7 +78,7 @@ flowchart LR
 
 <table>
 <tr>
-<td align="center" width="33%">🔗<br><b>Link or file</b><br><sub>Printables, MakerWorld, STL, 3MF, STEP</sub></td>
+<td align="center" width="33%">🔗<br><b>Link or file</b><br><sub>Any link, STL, 3MF, STEP</sub></td>
 <td align="center" width="33%">🧊<br><b>3D preview</b><br><sub>Rotate, size, fits the bed?</sub></td>
 <td align="center" width="33%">🖨️<br><b>Open in slicer</b><br><sub>Orca, Bambu Studio, Creality</sub></td>
 </tr>
@@ -170,7 +170,7 @@ There are now three free, self-hosted tools for print requests. They come in dif
 |---|---|---|---|
 | **🎯 Built for** | **friends**, one printer | small office, one printer | hobby up to print farm |
 | **📥 Submit and prepare** | | | |
-| Request by link | Printables, MakerWorld, Thingiverse | 🟡 Printables only (opt-in) | five sites incl. MakerWorld |
+| Request by link | Any link; title and image automatic for Printables, Thingiverse, Cults3D (with token) | 🟡 Printables only (opt-in) | five sites incl. MakerWorld |
 | 3D preview | ✅ with build-plate check | ✅ | ✅ |
 | Open in slicer | ✅ Orca, Bambu Studio, Creality Print, no extra software | 🟡 only with a helper app you have to install (PrusaSlicer, Orca, Bambu Studio, Elegoo, Cura) | ➖ |
 | **💬 Working together** | | | |
