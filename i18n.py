@@ -565,6 +565,8 @@ T = {
     # --- Einstellungen: Tabs ---
     "Bereiche der Einstellungen": ("Settings sections", "Sections des réglages"),
     "Drucker": ("Printer", "Imprimante"),
+    "Benachrichtigungen": ("Notifications", "Notifications"),
+    "Vorschau & Slicer": ("Preview & slicer", "Aperçu et trancheur"),
     "Filamente": ("Filaments", "Filaments"),
 
     # --- Archiv ---

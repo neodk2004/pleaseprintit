@@ -312,11 +312,11 @@ Printables works without any extra setup. Thingiverse and Cults3D block fetching
 **Thingiverse**
 1. Sign in at [thingiverse.com/developers](https://www.thingiverse.com/developers) and create an app (a name and a short description are enough).
 2. Copy the app's **app token**.
-3. In PleasePrintit: **Einstellungen → Werkstatt → Link-Vorschau** (Settings → Workshop → Link preview) → paste it under “Thingiverse: app token” → **Speichern** (save).
+3. In PleasePrintit: **Einstellungen → Vorschau & Slicer → Link-Vorschau** (Settings → Preview & slicer → Link preview) → paste it under “Thingiverse: app token” → **Speichern** (save).
 
 **Cults3D**
 1. In your Cults3D account (API section), create an **API key**.
-2. In PleasePrintit: **Einstellungen → Werkstatt → Link-Vorschau** → enter “Cults3D: nickname” (your username) and “Cults3D: API key” → **Speichern**.
+2. In PleasePrintit: **Einstellungen → Vorschau & Slicer → Link-Vorschau** → enter “Cults3D: nickname” (your username) and “Cults3D: API key” → **Speichern**.
 
 The values are stored **encrypted** (the key is derived from your `SECRET_KEY`) and never shown again. An empty field keeps the stored value, “Entfernen” (remove) deletes it. If you change `SECRET_KEY`, enter the access again. Alternatively set `THINGIVERSE_TOKEN`, `CULTS3D_USER` and `CULTS3D_KEY` in `.env`, which takes precedence. Without access it stays at the fallback: your friend enters title and image when submitting.
 
@@ -325,7 +325,7 @@ The values are stored **encrypted** (the key is derived from your `SECRET_KEY`) 
 Instead of or in addition to e-mail, PleasePrintit sends a push notification to your phone whenever a friend submits a print request or asks a question. This uses [ntfy](https://ntfy.sh), either ntfy.sh or your own ntfy server (also on your home network, e.g. `http://192.168.1.5:8081/print`). No SMTP access is needed for this.
 
 1. In the ntfy app (Android, iOS or web), subscribe to a topic, e.g. `print`. On ntfy.sh topics are public, so pick a name that is hard to guess.
-2. In PleasePrintit: **Einstellungen → Werkstatt → Push-Nachricht über ntfy** (Settings → Workshop → Push notification via ntfy) → enter the full address under “Topic address”, e.g. `https://ntfy.example.org/print`.
+2. In PleasePrintit: **Einstellungen → Benachrichtigungen → Push-Nachricht über ntfy** (Settings → Notifications → Push notification via ntfy) → enter the full address under “Topic address”, e.g. `https://ntfy.example.org/print`.
 3. If your topic is protected, enter an **access token** (`tk_…`, in ntfy under Account → Access tokens) or `user:password` under “Access”. It needs write access to the topic.
 4. **Save**, then **Send test message**. If it fails, the reason is shown right above, e.g. `HTTP Error 403: Forbidden` for wrong access.
 

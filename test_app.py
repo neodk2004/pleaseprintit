@@ -281,8 +281,8 @@ ben.post("/orders", data=order)
 assert len(sent) == 2, "ohne Adresse keine Werkstatt-Mail"
 assert ben.post("/settings/notify", data={"notify_email": "x@example.de"}).status_code == 403
 assert admin.post("/settings/notify", data={"notify_email": "kaputt"}).status_code == 400
-assert admin.post("/settings/notify", data={"notify_email": "werkstatt@example.de"}).headers["Location"].endswith("tab=werkstatt")
-assert 'value="werkstatt@example.de"' in admin.get("/settings?tab=werkstatt").data.decode()
+assert admin.post("/settings/notify", data={"notify_email": "werkstatt@example.de"}).headers["Location"].endswith("tab=meldungen")
+assert 'value="werkstatt@example.de"' in admin.get("/settings?tab=meldungen").data.decode()
 ben.post("/orders", data=order)
 m = sent[-1]
 assert len(sent) == 3 and m["To"] == "werkstatt@example.de" and "ben" in m["Subject"] and "Haken" in m["Subject"]
@@ -300,7 +300,7 @@ admin.post("/settings/previews", data={"THINGIVERSE_TOKEN": " tok-123 ", "CULTS3
 raw = con.execute("SELECT value FROM settings WHERE key = 'secret:THINGIVERSE_TOKEN'").fetchone()[0]
 assert raw and "tok-123" not in raw, "nur verschlüsselt in der Datenbank"
 assert A.secret_state(con, "THINGIVERSE_TOKEN") == ("tok-123", "db")
-page = admin.get("/settings?tab=werkstatt").data.decode()
+page = admin.get("/settings?tab=verbindungen").data.decode()
 assert "tok-123" not in page and "key-456" not in page and "✓ gesetzt" in page, "wird nie wieder angezeigt"
 ben.post("/orders", data=order)
 assert seen_creds[-1] == {"THINGIVERSE_TOKEN": "tok-123", "CULTS3D_USER": "nick", "CULTS3D_KEY": "key-456"}, "Zugänge gehen an die Vorschau"
@@ -342,7 +342,7 @@ admin.post(f"/entry/{k_id}/status", data={"status": "geplant"})
 ben.post(f"/entry/{k_id}/comment", data={"text": "Ja"})
 assert len(sent) == n, "pausiert → keine Mails"
 assert 'name="mute" value="1" checked' in ben.get("/me").data.decode()
-assert 'name="mute" value="1" checked' in admin.get("/settings?tab=werkstatt").data.decode()
+assert 'name="mute" value="1" checked' in admin.get("/settings?tab=meldungen").data.decode()
 assert con.execute("SELECT email FROM users WHERE name = 'ben'").fetchone()[0] == "ben@example.org"
 ben.post("/me", data={"email": "ben@example.org"})
 admin.post(f"/entry/{k_id}/comment", data={"text": "Wieder da"})
@@ -409,10 +409,10 @@ assert ben.post("/settings/ntfy/test").status_code == 403
 assert admin.post("/settings/ntfy/test").status_code == 400, "Test ohne Thema geht nicht"
 assert admin.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/"}).status_code == 400
 r = admin.post("/settings/ntfy", data={"ntfy_url": " https://ntfy.example.org/druck ", "ntfy_token": "tk_geheim"})
-assert r.headers["Location"].endswith("tab=werkstatt#ntfy")
+assert r.headers["Location"].endswith("tab=meldungen#ntfy")
 raw = con.execute("SELECT value FROM settings WHERE key = 'secret:NTFY_TOKEN'").fetchone()[0]
 assert raw and "tk_geheim" not in raw, "Zugang nur verschlüsselt in der Datenbank"
-page = admin.get("/settings?tab=werkstatt").data.decode()
+page = admin.get("/settings?tab=meldungen").data.decode()
 assert 'value="https://ntfy.example.org/druck"' in page and "tk_geheim" not in page and "Testnachricht senden" in page
 ben.post("/orders", data=upload(), content_type="multipart/form-data")
 url, tok, msg = pushed[-1]
@@ -443,12 +443,12 @@ n = len(pushed)
 admin.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/druck", "mute": "1", "clear_token": "1"})
 ben.post(f"/entry/{k_id}/comment", data={"text": "Still"})
 assert len(pushed) == n, "pausiert → keine Push-Nachricht"
-assert A.secret_state(con, "NTFY_TOKEN") == ("", "") and 'name="mute" value="1" checked' in admin.get("/settings?tab=werkstatt").data.decode()
+assert A.secret_state(con, "NTFY_TOKEN") == ("", "") and 'name="mute" value="1" checked' in admin.get("/settings?tab=meldungen").data.decode()
 os.environ["NTFY_TOKEN"] = "aus-env"
 admin.post("/settings/ntfy", data={"ntfy_url": "https://ntfy.example.org/druck"})
 ben.post(f"/entry/{k_id}/comment", data={"text": "Laut"})
 assert pushed[-1][1] == "aus-env", ".env hat Vorrang"
-assert "(in der .env gesetzt, dort ändern)" in admin.get("/settings?tab=werkstatt").data.decode()
+assert "(in der .env gesetzt, dort ändern)" in admin.get("/settings?tab=meldungen").data.decode()
 del os.environ["NTFY_TOKEN"]
 admin.post("/settings/ntfy", data={"ntfy_url": ""})
 n = len(pushed)
@@ -671,12 +671,13 @@ assert anon.get(f"/slicer/{A.slicer_signer.dumps(sid + 1000)}/a.stl").status_cod
 real_max, A.SLICER_MAX_AGE = A.SLICER_MAX_AGE, -1
 assert anon.get(slicer_url.path).status_code == 403, "abgelaufen"
 A.SLICER_MAX_AGE = real_max
-assert 'value="orca" checked' in admin.get("/settings?tab=werkstatt").data.decode()
+assert 'value="orca" checked' in admin.get("/settings?tab=verbindungen").data.decode()
 admin.post("/settings/slicers", data={})
 
 # Einstellungen in Tabs: jeder Tab zeigt nur seinen Bereich; Speichern führt in denselben Tab zurück
 for tab, inside, outside in (("drucker", "bed_x", "tip_url"), ("filamente", "price_kg", "bed_x"),
-                             ("werkstatt", "tip_url", "imp_name"), ("rechtliches", "imp_name", "price_kg"),
+                             ("werkstatt", "tip_url", "imp_name"), ("meldungen", "ntfy_url", "tip_url"),
+                             ("verbindungen", "CULTS3D_KEY", "ntfy_url"), ("rechtliches", "imp_name", "price_kg"),
                              ("quatsch", "bed_x", "imp_name")):
     page = admin.get(f"/settings?tab={tab}").data.decode()
     assert f'name="{inside}"' in page and f'name="{outside}"' not in page, tab

@@ -6,6 +6,11 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.7.1] – 2026-11-27
+
+### Geändert
+- **Einstellungen übersichtlicher:** Der volle Tab „Werkstatt“ ist in drei Tabs geteilt: „Werkstatt“ (Archiv, Währung, Limit, Vorab zahlen, Trinkgeld), „Benachrichtigungen“ (Mail, ntfy) und „Vorschau & Slicer“. Speichern führt in den jeweils richtigen Tab zurück.
+
 ## [1.7.0] – 2026-11-27
 
 ### Neu
@@ -129,7 +134,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1

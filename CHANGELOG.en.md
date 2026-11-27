@@ -6,6 +6,11 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.7.1] – 2026-11-27
+
+### Changed
+- **Tidier settings:** The long “Workshop” tab is split into three: “Workshop” (archive, currency, limit, pay in advance, tip), “Notifications” (mail, ntfy) and “Preview & slicer”. Saving returns to the right tab.
+
 ## [1.7.0] – 2026-11-27
 
 ### Added
@@ -129,7 +134,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.0...v1.6.1

@@ -1160,7 +1160,7 @@ def save_previews():
                 put_secret(con, key, "")
             elif value := request.form.get(key, "").strip()[:300]:
                 put_secret(con, key, value)
-    return redirect(url_for("settings", tab="werkstatt") + "#vorschau")
+    return redirect(url_for("settings", tab="verbindungen") + "#vorschau")
 
 
 @app.post("/settings/notify")
@@ -1172,7 +1172,7 @@ def save_notify():
         put_setting(con, "notify_email", email)
         put_setting(con, "notify_mute", "1" if request.form.get("mute") else "")
         put_setting(con, "notify_lang", g.lang)   # Mails an die Werkstatt in der Sprache, in der sie eingestellt wurde
-    return redirect(url_for("settings", tab="werkstatt"))
+    return redirect(url_for("settings", tab="meldungen"))
 
 
 @app.post("/settings/ntfy")
@@ -1189,7 +1189,7 @@ def save_ntfy():
             put_secret(con, "NTFY_TOKEN", "")
         elif token := request.form.get("ntfy_token", "").strip()[:300]:
             put_secret(con, "NTFY_TOKEN", token)
-    return redirect(url_for("settings", tab="werkstatt") + "#ntfy")
+    return redirect(url_for("settings", tab="meldungen") + "#ntfy")
 
 
 @app.post("/settings/ntfy/test")
@@ -1204,7 +1204,7 @@ def test_ntfy():
         "title": _("Testnachricht von PleasePrintit"), "tags": ["printer"],
         "message": _("Klappt! Hier meldet sich PleasePrintit bei neuen Druckwünschen und Rückfragen."),
         "click": public("index")})
-    return settings_page("werkstatt", ntfy_ok=not fail, ntfy_err=fail), 502 if fail else 200
+    return settings_page("meldungen", ntfy_ok=not fail, ntfy_err=fail), 502 if fail else 200
 
 
 @app.post("/entry/<int:link_id>/model")
@@ -1302,7 +1302,7 @@ def slicer_file(token, name):
 def save_slicers():
     with db() as con:
         put_setting(con, "slicers", ",".join(k for k in SLICERS if k in request.form.getlist("slicer")))
-    return redirect(url_for("settings", tab="werkstatt"))
+    return redirect(url_for("settings", tab="verbindungen"))
 
 
 @app.post("/links/<int:link_id>/image")
@@ -1611,7 +1611,7 @@ def toggle_user(uid):
 @app.get("/settings")
 def settings():
     tab = request.args.get("tab")
-    return settings_page(tab if tab in ("drucker", "filamente", "werkstatt", "rechtliches") else "drucker")
+    return settings_page(tab if tab in ("drucker", "filamente", "werkstatt", "meldungen", "verbindungen", "rechtliches") else "drucker")
 
 
 def settings_page(tab, **extra):
