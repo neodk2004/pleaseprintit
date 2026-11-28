@@ -443,6 +443,7 @@ input[type=file]::file-selector-button{font:inherit;font-weight:600;border:1px s
 .site-foot div{max-width:58rem;margin:0 auto;padding:var(--s4);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.5rem;
   font:500 .8rem var(--font-mono);letter-spacing:.04em;color:var(--ink-3)}
 .site-foot svg{opacity:.85}
+.site-foot a{display:inline-flex;align-items:center;gap:.35em}   /* Icon und Text auf einer Linie */
 main{padding-bottom:var(--s5)}
 /* Rechtliches */
 .legal-text{white-space:pre-line;line-height:1.65}

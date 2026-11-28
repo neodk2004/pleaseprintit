@@ -6,6 +6,16 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.7.2] – 2026-11-28
+
+### Added
+- **Change the title afterwards:** Each order has a new “Change title” card (friends on their own orders, the workshop on all of them). Handy when the preview does not work, e.g. with MakerWorld. Idea from maume86 (#17), thanks!
+- **Image from the clipboard:** A copied image can be pasted straight in with Ctrl+V, on a new order and under “Replace preview image”. No need to save the image as a file first. The server checks type and size (up to 5 MB) as before.
+- **GitHub link in the footer:** The workshop sees a short way to the project on GitHub at the bottom. Friends do not see it.
+
+### Changed
+- “Change title” and “Replace preview image” now sit right below the order details, so no more scrolling.
+
 ## [1.7.1] – 2026-11-27
 
 ### Changed
@@ -134,7 +144,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.2...HEAD
+[1.7.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2

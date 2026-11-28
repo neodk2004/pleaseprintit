@@ -6,6 +6,16 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.7.2] – 2026-11-28
+
+### Neu
+- **Titel nachträglich ändern:** Im Auftrag gibt es die Karte „Titel ändern“ (Freunde bei ihren eigenen Aufträgen, die Werkstatt bei allen). Praktisch, wenn die Vorschau nicht klappt, etwa bei MakerWorld. Idee von maume86 (#17), danke!
+- **Bild aus der Zwischenablage:** Ein kopiertes Bild lässt sich mit Strg+V direkt einfügen, beim neuen Auftrag und bei „Vorschaubild ersetzen“. Das Bild muss nicht erst als Datei gespeichert werden. Typ und Größe (bis 5 MB) prüft der Server wie bisher.
+- **GitHub-Link im Fuß:** Die Werkstatt sieht unten einen kurzen Weg zum Projekt auf GitHub. Freunde sehen ihn nicht.
+
+### Geändert
+- „Titel ändern“ und „Vorschaubild ersetzen“ stehen jetzt gleich unter den Auftragsdaten, man muss nicht mehr scrollen.
+
 ## [1.7.1] – 2026-11-27
 
 ### Geändert
@@ -134,7 +144,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.2...HEAD
+[1.7.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0
 [1.6.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.1...v1.6.2

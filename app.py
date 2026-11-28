@@ -1305,6 +1305,18 @@ def save_slicers():
     return redirect(url_for("settings", tab="verbindungen"))
 
 
+@app.post("/links/<int:link_id>/title")
+def rename(link_id):
+    """Titel nachträglich ändern (Besitzer oder Werkstatt); leer geht nicht."""
+    title = request.form.get("title", "").strip()[:200]
+    if not title:
+        abort(400, _("Bitte einen Titel eingeben."))
+    with db() as con:
+        get_entry(con, link_id)   # fremde Aufträge: 404
+        con.execute("UPDATE links SET title = ? WHERE id = ?", (title, link_id))
+    return redirect(url_for("entry", link_id=link_id))
+
+
 @app.post("/links/<int:link_id>/image")
 def replace_image(link_id):
     f = request.files.get("image")

@@ -199,6 +199,23 @@
       </div>
     </div>
 
+    <details class="card">
+      <summary>{{ icon('file') }}{{ _('Titel ändern') }}</summary>
+      <form method="post" action="{{ url_for('rename', link_id=e.id) }}">
+        <label for="newtitle">{{ _('Titel') }}</label>
+        <input id="newtitle" name="title" maxlength="200" value="{{ e.title }}" required>
+        <button class="btn" style="margin-top:var(--s3)">{{ _('Speichern') }}</button>
+      </form>
+    </details>
+    <details class="card">
+      <summary>{{ icon('image') }}{{ _('Vorschaubild ersetzen') }}</summary>
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('replace_image', link_id=e.id) }}">
+        <label for="img">{{ _('Neues Bild') }} <small>{{ _('(JPG, PNG, GIF oder WebP, bis 5 MB; oder mit Strg+V einfügen)') }}</small></label>
+        <input id="img" type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+        <button class="btn" style="margin-top:var(--s3)">{{ _('Bild ersetzen') }}</button>
+      </form>
+    </details>
+
     {{ payment() }}
     {{ deal() }}
     {% if g.admin %}
@@ -224,14 +241,6 @@
       </form>
     </details>
     {% endif %}
-    <details class="card">
-      <summary>{{ icon('image') }}{{ _('Vorschaubild ersetzen') }}</summary>
-      <form method="post" enctype="multipart/form-data" action="{{ url_for('replace_image', link_id=e.id) }}">
-        <label for="img">{{ _('Neues Bild') }} <small>{{ _('(JPG, PNG, GIF oder WebP, bis 5 MB)') }}</small></label>
-        <input id="img" type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp" required>
-        <button class="btn" style="margin-top:var(--s3)">{{ _('Bild ersetzen') }}</button>
-      </form>
-    </details>
   </aside>
 </div>
 {% endif %}

@@ -78,6 +78,17 @@ assert b"teil" not in ben.get("/").data
 assert ben.post(f"/links/{anna_id}/image", data={"image": (io.BytesIO(b"\x89PNG\r\n\x1a\n"), "x.png")},
                 content_type="multipart/form-data").status_code == 404
 
+# Titel nachträglich ändern: Besitzerin ja, Fremde nein (404), leer nicht (400)
+assert anna.post(f"/links/{anna_id}/title", data={"title": "  Neuer Titel  "}).status_code == 302
+assert "Neuer Titel" in anna.get(f"/entry/{anna_id}").data.decode()
+assert ben.post(f"/links/{anna_id}/title", data={"title": "Hack"}).status_code == 404
+assert anna.post(f"/links/{anna_id}/title", data={"title": "  "}).status_code == 400
+assert "Neuer Titel" in anna.get(f"/entry/{anna_id}").data.decode()
+
+# GitHub-Link im Fuß: nur für die Werkstatt
+assert "github.com/neodk2004/pleaseprintit" in admin.get("/").data.decode()
+assert "github.com" not in anna.get("/").data.decode()
+
 # Nur die Werkstatt: Download, Status, Freunde verwalten
 assert anna.get(f"/models/{anna_id}/file?download=1").status_code == 403
 assert anna.post(f"/entry/{anna_id}/status", data={"status": "gedruckt"}).status_code == 403

@@ -10,6 +10,7 @@
 <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <script src="{{ url_for('static', filename='theme.js') }}"></script>
+<script src="{{ url_for('static', filename='paste.js') }}" defer></script>
 <script type="application/json" id="i18n">{{ js_texts()|tojson }}</script>
 </head><body>
 {% include "_icons.html" %}
@@ -40,6 +41,6 @@
 {% block body %}{% endblock %}
 </main>
 {% if not self.main_class() %}
-<footer class="site-foot"><div>{{ logo(18) }}<span>© {{ year }} PleasePrintit</span><span aria-hidden="true">·</span><span>{{ _('Privat, nur für Freunde') }}</span><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='impressum') }}">{{ _('Impressum') }}</a><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='datenschutz') }}">{{ _('Datenschutz') }}</a><span aria-hidden="true">·</span>{{ langs() }}</div></footer>
+<footer class="site-foot"><div>{{ logo(18) }}<span>© {{ year }} PleasePrintit</span><span aria-hidden="true">·</span><span>{{ _('Privat, nur für Freunde') }}</span><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='impressum') }}">{{ _('Impressum') }}</a><span aria-hidden="true">·</span><a href="{{ url_for('legal', page='datenschutz') }}">{{ _('Datenschutz') }}</a><span aria-hidden="true">·</span>{% if g.admin %}<a href="https://github.com/neodk2004/pleaseprintit" target="_blank" rel="noopener noreferrer">{{ icon('github') }} GitHub</a><span aria-hidden="true">·</span>{% endif %}{{ langs() }}</div></footer>
 {% endif %}
 </body></html>

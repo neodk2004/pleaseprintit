@@ -268,6 +268,10 @@ T = {
     "Neues Bild": ("New image", "Nouvelle image"),
     "(JPG, PNG, GIF oder WebP, bis 5 MB)": ("(JPG, PNG, GIF or WebP, up to 5 MB)", "(JPG, PNG, GIF ou WebP, jusqu’à 5 Mo)"),
     "Bild ersetzen": ("Replace image", "Remplacer l’image"),
+    "Titel ändern": ("Change title", "Modifier le titre"),
+    "Bitte einen Titel eingeben.": ("Please enter a title.", "Veuillez saisir un titre."),
+    "(JPG, PNG, GIF oder WebP, bis 5 MB; oder mit Strg+V einfügen)": ("(JPG, PNG, GIF or WebP, up to 5 MB; or paste with Ctrl+V)", "(JPG, PNG, GIF ou WebP, jusqu’à 5 Mo ; ou coller avec Ctrl+V)"),
+    "(optional, JPG, PNG, GIF oder WebP bis 5 MB; oder mit Strg+V einfügen)": ("(optional, JPG, PNG, GIF or WebP up to 5 MB; or paste with Ctrl+V)", "(facultatif, JPG, PNG, GIF ou WebP jusqu’à 5 Mo ; ou coller avec Ctrl+V)"),
 
     # --- Ablehnungsgründe: Kurzform (gespeichert) und ausformuliert ---
     "Zu komplex": ("Too complex", "Trop complexe"),
