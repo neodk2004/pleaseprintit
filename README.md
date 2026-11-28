@@ -122,6 +122,7 @@ flowchart LR
 - 🖨️ **In Slicer öffnen:** Ein Klick im Auftrag öffnet die 3D-Datei direkt in OrcaSlicer, Bambu Studio oder Creality Print an deinem PC. Welche Knöpfe erscheinen, wählst du in den Einstellungen.
 - 📦 **Archiv mit Suche:** Gedruckte und abgelehnte Aufträge wandern nach einer einstellbaren Frist oder per Knopf (auch mehrere auf einmal) ins Archiv. Dort findest du sie über die Suche nach Titel, Datei oder Freund und über einen Zeitraum wieder.
 - 📈 **Statistik:** Für dich Aufträge, Gramm und Materialkosten pro Monat, beliebte Filamente und Farben, Wartezeit und Ablehnungsgründe. Jeder Freund sieht seine eigenen Zahlen im Profil.
+- 🎨 **Eigenes Aussehen:** Unter Einstellungen → Werkstatt gibst du deiner Werkstatt einen **eigenen Namen** und wählst eines von **neun Designs** mit eigenem Layout, hell und dunkel: Werkstatt, Wald, Blueprint, Glas, Aurora, Panel, Terminal, Zeitung und Pop. Name, Akzentfarbe, Schrift und Logo-Farbe kommen auch in die **Status-Mails** (mit Klartext-Fassung), damit sie erkennbar von deiner Werkstatt kommen.
 
 </details>
 
@@ -142,7 +143,6 @@ flowchart LR
 - 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Nur damit niemand raten muss.
 - ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
 - 🤝 **Preis aushandeln:** Du schickst ein Angebot, der Freund nimmt an oder macht einen Gegenvorschlag, du nimmst an oder bietest neu. Bis der Preis abgemacht ist, wird nicht gedruckt oder abgebucht. Praktisch bei großen Bestellungen.
-- 🎨 **Eigenes Aussehen:** eigener Werkstattname (auch in den Mails) und neun Designs mit eigenem Layout (Werkstatt, Wald, Blueprint, Glas, Aurora, Panel, Terminal, Zeitung, Pop), hell und dunkel.
 - 💱 **Währung wählbar:** Euro, US-Dollar, Pfund, Franken und mehr, mit Kürzel (z. B. USD). Es wird nichts umgerechnet.
 - 🪙 **Vorab zahlen (optional):** Du schaltest es pro Freund ein, wenn Filament-Kosten vor dem Druck beglichen werden sollen. Zwei Wege: ein Haken „bezahlt“ pro Auftrag oder ein Guthaben-Konto, das du aufladest und von dem jeder Auftrag bezahlt wird (abgelehnte werden zurückgebucht). Der Preis ist Filamentkosten plus Aufschlag in Prozent für Strom, Verschleiß und Ausschuss. Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen. Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
 
