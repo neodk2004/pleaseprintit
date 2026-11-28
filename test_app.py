@@ -829,6 +829,44 @@ assert "USD" in admin.get("/settings?tab=werkstatt").data.decode()
 with A.app.test_request_context():
     assert A.money(12.5) == "12,50 USD"
 assert admin.post("/settings/currency", data={"currency": "EUR"}).status_code == 302
+# Aussehen: Design und Werkstattname (nur Werkstatt), ungültiges Design abgelehnt, Name wird escaped und gekürzt
+assert 'data-design="werkstatt"' in admin.get("/").data.decode() and "<span>Please<b>Print</b>it</span>" in admin.get("/").data.decode()
+assert admin.post("/settings/look", data={"design": "grell", "shop_name": "X"}).status_code == 400
+assert dora.post("/settings/look", data={"design": "wald", "shop_name": "X"}).status_code == 403
+assert admin.post("/settings/look", data={"design": "blueprint", "shop_name": "  <b>Kunst</b>  Werk" + "x" * 50}).status_code == 302
+_h = admin.get("/").data.decode()
+assert 'data-design="blueprint"' in _h and "&lt;b&gt;Kunst&lt;/b&gt; Werkx" in _h and "<b>Kunst</b>" not in _h and "x" * 41 not in _h
+assert 'data-design="blueprint"' in A.app.test_client().get("/").data.decode(), "Design auch auf der Anmeldeseite"
+for _d in A.DESIGNS:   # jedes Design lässt sich wählen und landet im HTML
+    assert admin.post("/settings/look", data={"design": _d, "shop_name": ""}).status_code == 302
+    assert f'data-design="{_d}"' in admin.get("/").data.decode() and f'value="{_d}" checked' in admin.get("/settings?tab=werkstatt").data.decode(), _d
+assert admin.post("/settings/look", data={"design": "werkstatt", "shop_name": ""}).status_code == 302
+# Mails im Aussehen der Werkstatt: Name im Kopf und in der Fußzeile (HTML und Klartext), Absendername, Akzentfarbe, Logo in Farbe
+import email.utils
+from PIL import Image as _Img
+def _status_mail():
+    with A.app.test_request_context("/"):
+        A.g.lang, A.g.admin = "de", True   # als Werkstatt
+        with A.db() as _c:
+            return A.status_mail(_c, A.get_entry(_c, w_id), "x@example.org", "de")
+def _logo(m):
+    return [p.get_content() for p in m.walk() if p.get_content_type() == "image/png"][0]
+os.environ["SMTP_FROM"] = "werkstatt@example.org"
+_default = _status_mail()
+assert "Please<span" in _default.get_body(("html",)).get_content() and "PleasePrintit –" in _default.get_body(("plain",)).get_content()
+assert "weil du in PleasePrintit eine" in _default.get_body(("plain",)).get_content() and _logo(_default) == open(A.mail.LOGO, "rb").read()
+assert email.utils.parseaddr(_default["From"]) == ("", "werkstatt@example.org"), "ohne Namen bleibt der Absender wie bisher"
+for _d in A.DESIGNS:
+    assert admin.post("/settings/look", data={"design": _d, "shop_name": "Mia <Druck>"}).status_code == 302
+    _m = _status_mail(); _h = _m.get_body(("html",)).get_content(); _t = _m.get_body(("plain",)).get_content()
+    _lk = A.MAIL_LOOK[_d]
+    assert "Mia &lt;Druck&gt;" in _h and "Please<span" not in _h and _lk["acc"] in _h and "weil du in Mia &lt;Druck&gt; eine" in _h, _d
+    assert _t.startswith("Mia <Druck> –") and "weil du in Mia <Druck> eine E-Mail-Adresse" in _t and "PleasePrintit" not in _t, _d
+    assert email.utils.parseaddr(_m["From"]) == ("Mia <Druck>", "werkstatt@example.org"), _d
+    _px = _Img.open(__import__("io").BytesIO(_logo(_m))).convert("RGB").getpixel((5, 5))
+    assert "#%02x%02x%02x" % _px == _lk["logo"], (_d, _px)
+del os.environ["SMTP_FROM"]
+assert admin.post("/settings/look", data={"design": "werkstatt", "shop_name": ""}).status_code == 302
 _r = admin.get("/gibt-es-nicht")
 assert _r.status_code == 404 and "<html" in _r.data.decode() and "existiert nicht" in _r.data.decode(), "404 als HTML-Seite"
 assert "Als abgemacht eintragen" in admin.get(f"/entry/{dn}").data.decode(), "Werkstatt kann Angebot als abgemacht eintragen"

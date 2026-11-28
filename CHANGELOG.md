@@ -6,6 +6,16 @@ Alle wichtigen Änderungen an PleasePrintit. Versionen folgen [Semantic Versioni
 
 ## [Unreleased]
 
+## [1.8.0] – 2026-11-28
+
+### Neu
+- **Eigenes Aussehen:** Unter Einstellungen → Werkstatt → Aussehen gibst du deiner Werkstatt einen **eigenen Namen** (bis 40 Zeichen, erscheint in Kopfzeile, Browser-Tab und Anmeldeseite) und wählst eines von neun **Designs**, jedes mit eigenem Layout und hell wie dunkel: **Werkstatt** (Orange, wie bisher), **Wald** (Grün, Serifenüberschriften, weiche Rundungen), **Blueprint** (Blau, kantig, Seitenleiste), **Glas** (Milchglas-Leiste, Segment-Reiter), **Aurora** (Violett, getönte Flächen, Navigationsleiste, auf dem Handy unten), **Panel** (Seitenmenü mit Akzent-Balken), **Terminal** (Monospace, grün, eckig), **Zeitung** (Serifen, Titelkopf, Linien) und **Pop** (dicke Rahmen, harte Schatten). Reines CSS, keine neue Abhängigkeit.
+
+- **Mails im Aussehen deiner Werkstatt:** Status-Mails, Mails zu Rückfragen und die Passwort-Mail tragen den **Werkstattnamen** im Kopf, in der Fußzeile („Du bekommst diese Mail, weil du in *Name* eine E-Mail-Adresse hinterlegt hast.“) und als **Absendername**. Dazu kommen Akzentfarbe, Schrift, Rundung und ein Logo in der Farbe des gewählten Designs. Die **Klartext-Fassung** jeder Mail enthält den Namen und die Fußzeile ebenfalls. Ohne eigenen Namen sehen die Mails aus wie bisher.
+
+### Behoben
+- **Auftragsseite bei wenig Platz:** Die rechte Spalte konnte bis an den Bildschirmrand wachsen, etwa neben einer Seitenleiste. Die Spalten halten jetzt ihren Platz.
+
 ## [1.7.2] – 2026-11-28
 
 ### Neu
@@ -144,7 +154,8 @@ Erste Version zum Selbsthosten.
 - Tests, Compose-Prüfung und Docker-Probestart per GitHub Actions, Dependabot für Abhängigkeiten.
 - MIT-Lizenz, `SECURITY.md`, Issue-Vorlagen und `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.2...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.2...v1.8.0
 [1.7.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0

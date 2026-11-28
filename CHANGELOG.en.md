@@ -6,6 +6,16 @@ All notable changes to PleasePrintit. Versions follow [Semantic Versioning](http
 
 ## [Unreleased]
 
+## [1.8.0] – 2026-11-28
+
+### Added
+- **Your own look:** Under Settings → Workshop → Appearance you give your workshop its **own name** (up to 40 characters, shown in the header, browser tab and sign-in page) and pick one of nine **designs**, each with its own layout and in light and dark: **Workshop** (orange, as before), **Forest** (green, serif headings, soft corners), **Blueprint** (blue, sharp-edged, sidebar), **Glass** (frosted-glass bar, segmented tabs), **Aurora** (purple, tinted surfaces, navigation bar, at the bottom on phones), **Panel** (side menu with accent bar), **Terminal** (monospace, green, square), **Newspaper** (serifs, masthead, rules) and **Pop** (thick borders, hard shadows). Pure CSS, no new dependency.
+
+- **Emails in your workshop’s look:** Status emails, emails about questions and the password email carry the **workshop name** in the header, in the footer (“You’re getting this email because you added an email address in *name*.”) and as the **sender name**. They also pick up the accent colour, font, corner radius and a logo in the colour of the chosen design. The **plain-text version** of every email contains the name and the footer too. Without a name of your own the emails look as before.
+
+### Fixed
+- **Order page with little room:** The right-hand column could grow to the edge of the screen, for example next to a sidebar. The columns now keep to their space.
+
 ## [1.7.2] – 2026-11-28
 
 ### Added
@@ -144,7 +154,8 @@ First self-hosting release.
 - Tests, compose validation and a Docker test run via GitHub Actions, Dependabot for dependencies.
 - MIT license, `SECURITY.md`, issue templates and `AGENTS.md`.
 
-[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.2...HEAD
+[Unreleased]: https://github.com/neodk2004/pleaseprintit/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.2...v1.8.0
 [1.7.2]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/neodk2004/pleaseprintit/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/neodk2004/pleaseprintit/compare/v1.6.2...v1.7.0

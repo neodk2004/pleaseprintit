@@ -142,6 +142,7 @@ flowchart LR
 - 💶 **„Für dich gedruckt“:** Jeder Freund sieht im Profil, wie viele Teile du für ihn gedruckt hast und was das Material ungefähr gekostet hat. Du siehst die Summe pro Person in der Freundesliste. Nur damit niemand raten muss.
 - ☕ **Trinkgeld-Knopf:** Trag deinen PayPal.me- oder Ko-fi-Link ein, dann sehen Freunde einen Knopf bei gedruckten Aufträgen. Die App selbst verarbeitet kein Geld.
 - 🤝 **Preis aushandeln:** Du schickst ein Angebot, der Freund nimmt an oder macht einen Gegenvorschlag, du nimmst an oder bietest neu. Bis der Preis abgemacht ist, wird nicht gedruckt oder abgebucht. Praktisch bei großen Bestellungen.
+- 🎨 **Eigenes Aussehen:** eigener Werkstattname (auch in den Mails) und neun Designs mit eigenem Layout (Werkstatt, Wald, Blueprint, Glas, Aurora, Panel, Terminal, Zeitung, Pop), hell und dunkel.
 - 💱 **Währung wählbar:** Euro, US-Dollar, Pfund, Franken und mehr, mit Kürzel (z. B. USD). Es wird nichts umgerechnet.
 - 🪙 **Vorab zahlen (optional):** Du schaltest es pro Freund ein, wenn Filament-Kosten vor dem Druck beglichen werden sollen. Zwei Wege: ein Haken „bezahlt“ pro Auftrag oder ein Guthaben-Konto, das du aufladest und von dem jeder Auftrag bezahlt wird (abgelehnte werden zurückgebucht). Der Preis ist Filamentkosten plus Aufschlag in Prozent für Strom, Verschleiß und Ausschuss. Ohne Zahlung lässt sich ein Auftrag nicht auf „Geplant“ setzen. Das Geld läuft außerhalb der App (bar, PayPal), sie rechnet und merkt sich nur den Stand.
 

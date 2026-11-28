@@ -1,4 +1,4 @@
-PleasePrintit – {{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}
+{{ mail_look.shop }} – {{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}
 
 {{ headline }}
 
@@ -12,5 +12,6 @@ PleasePrintit – {{ _('Auftrag') }} #{{ '%04d'|format(e.id) }}
 {% endif %}{% endif %}
 {{ _('Auftrag ansehen') }}: {{ url }}
 {% if profile_url %}
+{{ _('Du bekommst diese Mail, weil du in {shop} eine E-Mail-Adresse hinterlegt hast.', shop=mail_look.shop) }}
 {{ _('Keine Mails mehr? Adresse im Profil löschen:') }} {{ profile_url }}
 {% endif %}

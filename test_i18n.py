@@ -41,7 +41,7 @@ assert "Sign in" in c.get("/", headers={"Accept-Language": "en-US,en;q=0.9"}).da
 r = c.post("/lang", data={"lang": "fr", "next": "/"})
 assert r.status_code == 302 and "lang=fr" in r.headers["Set-Cookie"]
 page = c.get("/").data.decode()
-assert "Se connecter" in page and '<html lang="fr">' in page
+assert "Se connecter" in page and '<html lang="fr"' in page
 assert c.post("/lang", data={"lang": "xx", "next": "//boese.example"}).headers["Location"] == "/", "fremdes Ziel"
 
 admin = A.app.test_client()

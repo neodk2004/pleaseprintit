@@ -141,6 +141,7 @@ flowchart LR
 - 💶 **“Printed for you”:** every friend sees on their profile how many parts you printed for them and roughly what the material cost. You see the total per person in the friends list. Just so nobody has to guess.
 - ☕ **Tip button:** add your PayPal.me or Ko-fi link and friends see a button on printed requests. The app itself handles no money.
 - 🤝 **Negotiate the price:** You send an offer, the friend accepts or makes a counteroffer, and you accept or offer again. Nothing is printed or charged until the price is agreed. Handy for big orders.
+- 🎨 **Your own look:** your own workshop name (also in the emails) and nine designs with their own layout (Workshop, Forest, Blueprint, Glass, Aurora, Panel, Terminal, Newspaper, Pop), light and dark.
 - 💱 **Selectable currency:** Euro, US dollar, pound, franc and more, shown with its code (e.g. USD). Nothing is converted.
 - 🪙 **Pay in advance (optional):** switch it on per friend when filament costs should be settled before printing. Two ways: a “paid” tick per request, or a credit account you top up that every request is paid from (rejected ones are refunded). The price is filament cost plus a percentage surcharge for power, wear and failed prints. Without payment a request cannot be set to “planned”. The money changes hands outside the app (cash, PayPal); it only calculates and remembers the status.
 

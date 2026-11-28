@@ -7,7 +7,7 @@ import smtplib
 import ssl
 import threading
 from email.message import EmailMessage
-from email.utils import make_msgid
+from email.utils import formataddr, make_msgid
 
 log = logging.getLogger("mail")
 LOGO = os.path.join(os.path.dirname(__file__), "static", "icon-192.png")
@@ -17,16 +17,20 @@ def configured():
     return bool(os.environ.get("SMTP_HOST"))
 
 
-def build(to, subject, text, html_with_cid):
-    """html_with_cid(cid) → HTML; das Logo hängt als eingebettetes Bild an (Gmail & Co. zeigen kein SVG)."""
+def build(to, subject, text, html_with_cid, logo=None, sender=""):
+    """html_with_cid(cid) → HTML; das Logo (PNG-Bytes, sonst das Standard-Logo) hängt als eingebettetes Bild an
+    (Gmail & Co. zeigen kein SVG). sender = Anzeigename des Absenders, wenn SMTP_FROM nur eine Adresse ist."""
     msg = EmailMessage()
     msg["Subject"], msg["To"] = subject, to
-    msg["From"] = os.environ.get("SMTP_FROM") or os.environ.get("SMTP_USER", "")
+    frm = os.environ.get("SMTP_FROM") or os.environ.get("SMTP_USER", "")
+    msg["From"] = formataddr((sender, frm)) if sender and frm and "<" not in frm else frm
     msg.set_content(text)
     cid = make_msgid("logo")
     msg.add_alternative(html_with_cid(cid[1:-1]), subtype="html")
-    with open(LOGO, "rb") as f:
-        msg.get_payload()[1].add_related(f.read(), "image", "png", cid=cid)
+    if logo is None:
+        with open(LOGO, "rb") as f:
+            logo = f.read()
+    msg.get_payload()[1].add_related(logo, "image", "png", cid=cid)
     return msg
 
 

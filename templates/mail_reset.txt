@@ -1,4 +1,4 @@
-PleasePrintit – {{ _('Passwort vergessen') }}
+{{ mail_look.shop }} – {{ _('Passwort vergessen') }}
 
 {{ _('Hallo {name}!', name=name) }}
 
@@ -7,3 +7,5 @@ PleasePrintit – {{ _('Passwort vergessen') }}
 
 {{ _('Der Link gilt {hours} Stunden und nur einmal.', hours=hours) }}
 {{ _('Du warst das nicht? Dann ignoriere diese Mail einfach – dein Passwort bleibt, wie es ist.') }}
+
+{{ mail_look.shop }} · {{ _('Privat, nur für Freunde') }}

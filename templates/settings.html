@@ -48,6 +48,22 @@
 </section>
 
 <section class="card rise" style="--i:1">
+  <h3>{{ icon('sliders') }} {{ _('Aussehen') }}</h3>
+  <p class="hint" style="margin-bottom:var(--s3)">{{ _('Eigener Name in der Kopfzeile und ein Design für die ganze Seite. Hell und Dunkel gibt es bei jedem Design.') }}</p>
+  <form method="post" action="{{ url_for('save_look') }}">
+    <label>{{ _('Name der Werkstatt') }} <input name="shop_name" maxlength="40" value="{{ shop_name }}" placeholder="PleasePrintit"></label>
+    <div class="picker" role="radiogroup" aria-label="{{ _('Design') }}" style="margin:var(--s3) 0">
+      {% for d, label in [('werkstatt', _('Werkstatt: Orange, Datenblatt')), ('wald', _('Wald: Grün, weich und rund')), ('blueprint', _('Blueprint: Blau, kantig, Seitenleiste')),
+        ('glas', _('Glas: Milchglas, Blau, Segment-Reiter')), ('aurora', _('Aurora: Violett, getönte Flächen, Navigationsleiste')),
+        ('panel', _('Panel: Seitenmenü, Akzent-Balken, Blau')), ('terminal', _('Terminal: Monospace, Grün, eckig')),
+        ('zeitung', _('Zeitung: Serifen, Linien, Rot')), ('pop', _('Pop: dicke Rahmen, harte Schatten, Pink'))] %}
+      <label class="pick"><input type="radio" name="design" value="{{ d }}"{% if d == design %} checked{% endif %}><span>{{ label }}</span></label>{% endfor %}
+    </div>
+    <button class="btn btn-primary">{{ _('Speichern') }}</button>
+  </form>
+</section>
+
+<section class="card rise" style="--i:1">
   <h3>{{ icon('coin') }} {{ _('Währung') }}</h3>
   <p class="hint" style="margin-bottom:var(--s3)">{{ _('Für Preise, Guthaben und Mails. Es wird nichts umgerechnet, nur das Kürzel ändert sich.') }}</p>
   <form class="row" method="post" action="{{ url_for('save_currency') }}">

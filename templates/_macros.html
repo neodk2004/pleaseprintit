@@ -41,6 +41,9 @@
   <rect width="64" height="64" rx="15" fill="var(--brand)"/><g fill="#fff"><rect x="30" y="4" width="4" height="9" rx="2"/>
   <rect x="18" y="12" width="28" height="13" rx="3.5"/><path d="M24.5 25h15l-5 8.5h-5z"/><path class="heart" d="{{ HEART }}"/></g></svg>{% endmacro %}
 
+{# Name in der Kopfzeile: eigener Werkstattname oder PleasePrintit #}
+{% macro brandname() %}{% if shop_name %}{{ shop_name }}{% else %}Please<b>Print</b>it{% endif %}{% endmacro %}
+
 {# Signatur: Drucker druckt das Herz Schicht für Schicht #}
 {% macro printer(w=260) %}<svg class="printing" viewBox="0 0 240 200" width="{{ w }}" role="img" aria-label="{{ _('Ein 3D-Drucker druckt ein Herz') }}" style="--lift:-57px">
   <defs><pattern id="lay" width="4" height="1.15" patternUnits="userSpaceOnUse"><rect width="4" height=".3" fill="rgba(0,0,0,.16)"/></pattern></defs>

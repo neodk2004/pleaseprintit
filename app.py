@@ -1,6 +1,8 @@
 import base64
+import functools
 import hashlib
 import hmac
+import io
 import json
 import os
 import re
@@ -14,6 +16,7 @@ from urllib.parse import quote, urlparse
 
 from cryptography.fernet import Fernet, InvalidToken
 from itsdangerous import BadSignature, URLSafeTimedSerializer
+from PIL import Image
 from flask import Flask, abort, g, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -490,7 +493,7 @@ MAX_VOLUME = 1_000_000   # cm³ = 1 m³; mehr kann kein Hobbydrucker
 PUBLIC = {"index", "login", "static", "invite", "legal", "robots", "forgot", "reset", "set_lang", "slicer_file"}
 PAGES = {"entry", "new", "profile", "users", "settings", "stats_page"}   # ohne Anmeldung → Login, danach zurück
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-ADMIN_ONLY = {"save_previews", "save_currency", "set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
+ADMIN_ONLY = {"save_previews", "save_currency", "save_look", "set_status", "attach_model", "users", "create_invite", "toggle_user", "settings", "save_bed",
               "add_filament", "delete_filament", "add_color", "delete_color", "save_filament_price",
               "save_legal", "create_reset", "archive", "stats_page", "save_tip", "save_slicers", "save_notify", "save_ntfy", "test_ntfy",
               "save_note", "save_photo", "set_price", "set_paid", "toggle_prepay", "add_credit", "save_pay"}
@@ -646,13 +649,71 @@ def security_headers(r):
     return r
 
 
+# Aussehen der Seite: neun Entwürfe (nur CSS, siehe static/style.css), einstellbar unter Einstellungen → Werkstatt
+DESIGNS = ("werkstatt", "wald", "blueprint", "glas", "aurora", "panel", "terminal", "zeitung", "pop")
+SHOP_NAME_MAX = 40
+
+
+def look():
+    with db() as con:
+        d = text_setting(con, "design")
+        return (d if d in DESIGNS else DESIGNS[0]), text_setting(con, "shop_name")
+
+# Optik der Mails je Design (immer hell; die Farben stehen fest im HTML, Mail-Programme laden kein CSS und kennen keine Variablen).
+# acc = Knöpfe, Streifen, Links; logo = Farbe des Logos; dash = gestrichelte Linien und offene Schritte; bw = Rahmenstärke in px.
+_SANS = "'Bahnschrift','Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+_SERIF = "Georgia,'Iowan Old Style','Times New Roman',serif"
+_MONO = "Consolas,'SF Mono',Menlo,monospace"
+_L = dict(ink="#17181a", ink2="#565a61", ink3="#7c8087", card="#ffffff", font=_SANS, head=_SANS, mono=_MONO, r=14, rb=7, bw=1)
+MAIL_LOOK = {k: {**_L, **v} for k, v in {
+    "werkstatt": dict(acc="#c2410c", logo="#e8620f", paper="#f5f3ef", line="#e2ddd4", dash="#cfc8bc", soft="#fdebdd"),
+    "wald": dict(acc="#1f6b3f", logo="#2f7d4f", paper="#f3f4ee", line="#dcdfd0", dash="#c5cab5", soft="#e1f0e6", head=_SERIF, r=20, rb=10),
+    "blueprint": dict(acc="#1d4ed8", logo="#1d5fd1", paper="#eef2f8", line="#d3dbe8", dash="#b9c5d8", soft="#e0e9ff", head=_MONO, r=3, rb=2),
+    "glas": dict(acc="#006ad9", logo="#007aff", paper="#f5f5f7", line="#e3e3e8", dash="#d2d2d7", soft="#eef6ff", ink="#1d1d1f", ink2="#515154", ink3="#6e6e73",
+                 font="-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,Arial,sans-serif", head="-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,Arial,sans-serif", rb=8),
+    "aurora": dict(acc="#6750a4", logo="#6750a4", paper="#fef7ff", card="#f3edf7", line="#f3edf7", dash="#cac4d0", soft="#eaddff", ink="#1d1b20", ink2="#49454f", ink3="#625d69",
+                   font="Roboto,system-ui,'Segoe UI',Arial,sans-serif", head="Roboto,system-ui,'Segoe UI',Arial,sans-serif", r=24, rb=24),
+    "panel": dict(acc="#0067c0", logo="#0067c0", paper="#f3f3f3", card="#fcfcfc", line="#e0e0e0", dash="#c8c8c8", soft="#dbeaf8", ink="#1a1a1a", ink2="#5d5d5d", ink3="#6b6b6b",
+                  font="'Segoe UI Variable Text','Segoe UI',system-ui,Arial,sans-serif", head="'Segoe UI Variable Text','Segoe UI',system-ui,Arial,sans-serif", r=8, rb=4),
+    "terminal": dict(acc="#0f6b2f", logo="#0f6b2f", paper="#f4f4ef", card="#fbfbf7", line="#8da38d", dash="#8da38d", soft="#dcefdc", ink="#1c2b1c", ink2="#476047", ink3="#5f745f",
+                     font=_MONO, head=_MONO, r=0, rb=0),
+    "zeitung": dict(acc="#a31d14", logo="#a31d14", paper="#f6f2e7", card="#fbf9f2", line="#d6cfbb", dash="#bdb6a2", soft="#f3dcd8", ink="#161616", ink2="#4a4640", ink3="#6b655a",
+                    font=_SERIF, head=_SERIF, r=0, rb=0),
+    "pop": dict(acc="#c81e63", logo="#ff4f81", paper="#fff4d6", line="#111111", dash="#cfc6a5", soft="#fff0f5", ink="#111111", ink2="#3a3a3a", ink3="#555555",
+                head="'Arial Black','Segoe UI Black',Arial,sans-serif", bw=2),
+}.items()}
+assert set(MAIL_LOOK) == set(DESIGNS)
+
+
+@functools.lru_cache(maxsize=16)
+def logo_png(color):
+    """Das Logo (orange mit weißem Druckkopf) in einer anderen Farbe: Das Blau der Logofarbe (15) ist der Weißanteil."""
+    im = Image.open(mail.LOGO).convert("RGBA")
+    white = im.getchannel("B").point(lambda b: max(0, min(255, (b - 15) * 255 // 240)))
+    out = Image.composite(Image.new("RGBA", im.size, "#ffffff"), Image.new("RGBA", im.size, color), white)
+    out.putalpha(im.getchannel("A"))
+    buf = io.BytesIO()
+    out.save(buf, "PNG")
+    return buf.getvalue()
+
+
+def build_mail(to, subject, text, html_with_cid):
+    """Mail im Aussehen der Werkstatt: Logo in der Akzentfarbe, Werkstattname als Absendername."""
+    design, shop = look()
+    color = MAIL_LOOK[design]["logo"]
+    return mail.build(to, subject, text, html_with_cid, sender=shop,
+                      logo=None if color == MAIL_LOOK["werkstatt"]["logo"] else logo_png(color))
+
+
 @app.context_processor
 def helpers():
-    return {"domain": domain, "kind": kind, "statuses": STATUSES, "fmt_dims": fmt_dims, "reasons": REASONS,
+    design, shop_name = look()
+    return {"design": design, "shop_name": shop_name, "designs": DESIGNS,
+            "mail_look": {**MAIL_LOOK[design], "shop": shop_name or "PleasePrintit"}, **{"domain": domain, "kind": kind, "statuses": STATUSES, "fmt_dims": fmt_dims, "reasons": REASONS,
             "reason_text": reason_text, "reason_short": reason_short, "_": _, "status_label": status_label,
             "color_name": color_name, "num": num, "dec": dec, "money": money, "PRINTED": PRINTED, "cur": cur, "cur_code": cur_code, "currencies": CURRENCIES, "languages": i18n.LANGS,
             "js_texts": lambda: i18n.js_texts(g.lang),
-            "year": time.localtime().tm_year, "public": public, "max_qty": MAX_QTY}
+            "year": time.localtime().tm_year, "public": public, "max_qty": MAX_QTY}}
 
 
 # ponytail: Fehlversuche im Arbeitsspeicher (ein Prozess); nach Neustart leer. Reicht für einen Freundeskreis.
@@ -1058,7 +1119,7 @@ def status_mail(con, e, to, lang):
     with in_lang(lang):
         ctx = {"e": e, "flow": flow(con, e), "cost": estimate(con, e), "url": public("entry", link_id=e["id"]),
                "profile_url": public("profile")}
-        msg = mail.build(to, f"#{e['id']:04d} {title}: {status_label(e['status'])}",
+        msg = build_mail(to, f"#{e['id']:04d} {title}: {status_label(e['status'])}",
                          render_template("mail_status.txt", **ctx),
                          lambda cid: render_template("mail_status.html", cid=cid, **ctx))
     if e["status"] == "gedruckt" and e["photo"]:   # Foto vom fertigen Druck als Anhang
@@ -1088,7 +1149,7 @@ def info_mail(e, to, lang, headline, comment=None, friend=False):
     with in_lang(lang):
         ctx = {"e": e, "headline": headline(), "comment": comment, "url": public("entry", link_id=e["id"]),
                "profile_url": public("profile") if friend else None}
-        return mail.build(to, f"#{e['id']:04d} {title}: {ctx['headline']}", render_template("mail_info.txt", **ctx),
+        return build_mail(to, f"#{e['id']:04d} {title}: {ctx['headline']}", render_template("mail_info.txt", **ctx),
                           lambda cid: render_template("mail_info.html", cid=cid, **ctx))
 
 
@@ -1579,7 +1640,7 @@ def forgot():
             url = public("reset", token=new_reset(con, u["id"]))
             ctx = {"name": u["name"], "url": url, "hours": RESET_HOURS}
             with in_lang(u["lang"]):   # Mail in der Sprache des Empfängers
-                msg = mail.build(u["email"], "PleasePrintit: " + _("Passwort zurücksetzen"),
+                msg = build_mail(u["email"], (look()[1] or "PleasePrintit") + ": " + _("Passwort zurücksetzen"),
                                  render_template("mail_reset.txt", **ctx),
                                  lambda cid: render_template("mail_reset.html", cid=cid, **ctx))
             mail.send(msg)
@@ -1744,6 +1805,17 @@ def save_currency():
         abort(400)
     with db() as con:
         put_setting(con, "currency", c)
+    return redirect(url_for("settings", tab="werkstatt"))
+
+
+@app.post("/settings/look")
+def save_look():
+    d = request.form.get("design")
+    if d not in DESIGNS:
+        abort(400)
+    with db() as con:
+        put_setting(con, "design", d)
+        put_setting(con, "shop_name", " ".join(request.form.get("shop_name", "").split())[:SHOP_NAME_MAX])
     return redirect(url_for("settings", tab="werkstatt"))
 
 
