@@ -393,6 +393,7 @@ Every push runs the tests, validates the compose files and test-starts the Docke
 ## Contributing
 
 - 🐞 **Found a bug or have an idea?** Just open an [issue](https://github.com/neodk2004/pleaseprintit/issues), in English or German.
+- 💬 **Questions, experiences or just want to say hi?** Share how you use PleasePrintit and chat with others in the [Discussions](https://github.com/neodk2004/pleaseprintit/discussions).
 - 🔐 **Security issue?** Please don’t report it publicly, follow [SECURITY.md](SECURITY.md) instead.
 - 📝 **What's new?** All changes per version are listed in [CHANGELOG.en.md](CHANGELOG.en.md).
 - 🤖 **Working on the code with an AI agent?** Layout, commands and conventions are in [AGENTS.md](AGENTS.md).

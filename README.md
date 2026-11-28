@@ -365,6 +365,7 @@ Bei jedem Push laufen die Tests, die Prüfung der Compose-Dateien und ein Probes
 ## Mitmachen
 
 - 🐞 **Fehler gefunden oder eine Idee?** Einfach ein [Issue](https://github.com/neodk2004/pleaseprintit/issues) aufmachen, gern auf Deutsch oder Englisch.
+- 💬 **Fragen, Erfahrungen oder einfach Hallo sagen?** In den [Discussions](https://github.com/neodk2004/pleaseprintit/discussions) erzählst du, wie du PleasePrintit nutzt, und tauschst dich mit anderen aus.
 - 🔐 **Sicherheitslücke?** Bitte nicht öffentlich, sondern wie in [SECURITY.md](SECURITY.md) beschrieben melden.
 - 📝 **Was ist neu?** Alle Änderungen pro Version stehen in [CHANGELOG.md](CHANGELOG.md).
 - 🤖 **Mit KI-Agenten am Code arbeiten?** Aufbau, Befehle und Regeln stehen in [AGENTS.md](AGENTS.md).
